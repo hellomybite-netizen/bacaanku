@@ -19,17 +19,16 @@ async function* walk(dir) {
 }
 
 const prefix = (path) => (path.startsWith(BASE + '/') || path === BASE ? path : BASE + path);
-const escRe = (s) => s.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 
 function rewriteHtml(s) {
   s = s.replaceAll(PROD, ORIGIN + BASE);
   // href/src/action/poster/data-* = "/..." (bukan "//")
-  s = s.replace(/\b((?:href|src|action|poster|content|data-[\w-]+)=["'])(\/(?!\/)[^"']*)/g, (m, a, p) => a + prefix(p));
+  s = s.replace(/\b((?:href|src|action|poster|content|data-[\w-]+)=["'])(\/(?!\/)[^"']*)/g, (_m, a, p) => a + prefix(p));
   // srcset="/a.webp 400w, /b.webp 800w"
-  s = s.replace(/\bsrcset=(["'])([^"']*)\1/g, (m, q, v) =>
-    `srcset=${q}${v.split(',').map((part) => part.replace(/^(\s*)(\/(?!\/)\S*)/, (mm, sp, p) => sp + prefix(p))).join(',')}${q}`);
+  s = s.replace(/\bsrcset=(["'])([^"']*)\1/g, (_m, q, v) =>
+    `srcset=${q}${v.split(',').map((part) => part.replace(/^(\s*)(\/(?!\/)\S*)/, (_mm, sp, p) => sp + prefix(p))).join(',')}${q}`);
   // url(/...) di CSS inline
-  s = s.replace(/url\((['"]?)(\/(?!\/)[^)'"]*)\1\)/g, (m, q, p) => `url(${q}${prefix(p)}${q})`);
+  s = s.replace(/url\((['"]?)(\/(?!\/)[^)'"]*)\1\)/g, (_m, q, p) => `url(${q}${prefix(p)}${q})`);
   // robots: noindex untuk preview
   s = s.replace(/<meta name="robots" content="[^"]*"\s*\/?>/g, '');
   s = s.replace(/<head>/, '<head><meta name="robots" content="noindex,nofollow">');
@@ -45,7 +44,7 @@ for await (const f of walk(DIST)) {
     let s = (await readFile(f, 'utf8')).replaceAll(PROD, ORIGIN + BASE);
     await writeFile(f, s); n++;
   } else if (f.endsWith('.css')) {
-    const s = (await readFile(f, 'utf8')).replace(/url\((['"]?)(\/(?!\/)[^)'"]*)\1\)/g, (m, q, p) => `url(${q}${prefix(p)}${q})`);
+    const s = (await readFile(f, 'utf8')).replace(/url\((['"]?)(\/(?!\/)[^)'"]*)\1\)/g, (_m, q, p) => `url(${q}${prefix(p)}${q})`);
     await writeFile(f, s);
   }
 }

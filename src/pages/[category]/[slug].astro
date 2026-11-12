@@ -71,7 +71,12 @@ const minutes = readingTime(article.body);
           <Picture src={data.heroImage} alt={data.heroAlt} formats={['avif', 'webp']} widths={[480, 800, 1200, 1560]}
             sizes="(min-width: 1240px) 780px, (min-width: 960px) 64vw, calc(100vw - 2rem)" quality={70}
             loading="eager" fetchpriority="high" decoding="sync" data-pagefind-meta="image[src]" />
-          {data.heroCaption && <figcaption>{data.heroCaption}</figcaption>}
+          {(data.heroCaption || data.heroCredit) && (
+            <figcaption>
+              {data.heroCaption}
+              {data.heroCredit && <span class="credit">{data.heroCreditUrl ? <a href={data.heroCreditUrl} rel="noopener" target="_blank">{data.heroCredit}<span class="visually-hidden"> (tab baru)</span></a> : data.heroCredit}</span>}
+            </figcaption>
+          )}
         </figure>
         <div class="prose"><Content /></div>
         <AdSlot size="inarticle" />

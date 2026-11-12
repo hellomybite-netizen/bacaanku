@@ -60,6 +60,8 @@ collections:
       - { label: Gambar utama, name: heroImage, widget: image, hint: "Min. 1600×900 px. Gunakan foto milik sendiri / berlisensi." }
       - { label: Teks alternatif gambar (alt), name: heroAlt, widget: string, hint: "Jelaskan isi gambar untuk pembaca tunanetra & SEO." }
       - { label: Keterangan foto, name: heroCaption, widget: string, required: false }
+      - { label: Kredit gambar, name: heroCredit, widget: string, required: false, hint: "mis. Foto: Nama/Wikimedia Commons, CC BY-SA 4.0 — atau Ilustrasi: bacaanku.com" }
+      - { label: Tautan sumber gambar, name: heroCreditUrl, widget: string, required: false, hint: "URL halaman sumber/lisensi foto" }
       - { label: Headline utama (featured), name: featured, widget: boolean, default: false }
       - { label: Judul SEO (opsional), name: seoTitle, widget: string, required: false, hint: "Maks. 70 karakter. Kosongkan untuk memakai judul." }
       - { label: URL kanonis (opsional), name: canonical, widget: string, required: false, hint: "Isi hanya jika artikel ini salinan dari URL lain." }

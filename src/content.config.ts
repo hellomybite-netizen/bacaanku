@@ -18,6 +18,8 @@ const articles = defineCollection({
       heroImage: image(),
       heroAlt: z.string().min(5),
       heroCaption: z.string().optional(),
+      heroCredit: z.string().optional(), // mis. 'Foto: Nama/Wikimedia Commons, CC BY-SA 4.0' atau 'Ilustrasi: bacaanku.com'
+      heroCreditUrl: z.url().optional(), // tautan sumber/lisensi gambar
       featured: z.boolean().default(false),
       seoTitle: z.string().max(70).optional(),
       canonical: z.url().optional(),

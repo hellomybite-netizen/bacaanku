@@ -1,0 +1,14 @@
+---
+/** Gambar sisipan di dalam artikel (MDX) dengan keterangan & kredit sumber. */
+import { Picture } from 'astro:assets';
+import type { ImageMetadata } from 'astro';
+interface Props { src: ImageMetadata; alt: string; caption?: string; credit: string; creditUrl?: string }
+const { src, alt, caption, credit, creditUrl } = Astro.props;
+---
+<figure class="inline-figure">
+  <Picture src={src} alt={alt} formats={['avif', 'webp']} widths={[480, 800, 1200]} sizes="(min-width: 960px) 700px, calc(100vw - 2rem)" quality={65} loading="lazy" />
+  <figcaption>
+    {caption}
+    <span class="credit">{creditUrl ? <a href={creditUrl} rel="noopener" target="_blank">{credit}<span class="visually-hidden"> (tab baru)</span></a> : credit}</span>
+  </figcaption>
+</figure>

@@ -316,3 +316,16 @@ main:focus { outline: none; }
   .site-menu a[aria-current], .pagination [aria-current] { outline: 2px solid CanvasText; }
   .section-title::before { background: CanvasText; }
 }
+
+/* Kredit gambar & figure sisipan */
+.article-hero figcaption .credit, .inline-figure .credit { display: block; margin-block-start: 0.15rem; }
+.article-hero figcaption a, .inline-figure figcaption a { color: var(--muted); }
+.inline-figure { margin: 1.75rem 0; }
+.inline-figure img { inline-size: 100%; border-radius: var(--radius); background: var(--ph); }
+.inline-figure figcaption { font-family: var(--font-sans); font-size: 0.82rem; line-height: 1.5; color: var(--muted); margin-block-start: 0.5rem; }
+.prose .sources { font-family: var(--font-sans); font-size: 0.92rem; line-height: 1.6; border-block-start: 1px solid var(--border); margin-block-start: 2rem; padding-block-start: 1rem; }
+.prose .sources ul { padding-inline-start: 1.1rem; }
+.prose .sources a { overflow-wrap: anywhere; }
+.prose table { inline-size: 100%; border-collapse: collapse; font-family: var(--font-sans); font-size: 0.95rem; margin: 0 0 1.5rem; }
+.prose th, .prose td { border: 1px solid var(--border); padding: 0.5rem 0.75rem; text-align: start; }
+.prose th { background: var(--ph); }

@@ -9,7 +9,7 @@ publishDate: 2026-11-12T08:15:00+07:00
 heroImage: ../../assets/articles/kota-fiksi-resmikan-taman-kota-terapung.jpg
 heroAlt: "Ilustrasi contoh (bukan foto asli) untuk artikel: Kota Sukamaju Resmikan Taman Terapung Pertama di Atas Waduk"
 heroCaption: "Ilustrasi placeholder — gambar contoh."
-featured: true
+featured: false
 draft: false
 ---
 
