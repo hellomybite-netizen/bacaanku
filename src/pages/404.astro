@@ -1,0 +1,16 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { getArticles, articleUrl } from '../utils/articles';
+const latest = (await getArticles()).slice(0, 5);
+---
+<BaseLayout title="Halaman tidak ditemukan" description="Halaman yang Anda cari tidak ditemukan di bacaanku.com." noindex>
+  <div class="container narrow">
+    <header class="page-head">
+      <p class="kicker">Error 404</p>
+      <h1 class="page-title">Halaman tidak ditemukan</h1>
+      <p>Mungkin tautannya salah atau beritanya sudah dipindahkan. Coba <a href="/cari/">cari berita</a> atau kembali ke <a href="/">beranda</a>.</p>
+    </header>
+    <h2 class="section-title">Berita terbaru</h2>
+    <ul class="link-list">{latest.map((a) => <li><a href={articleUrl(a)}>{a.data.title}</a></li>)}</ul>
+  </div>
+</BaseLayout>

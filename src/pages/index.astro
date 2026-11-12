@@ -1,0 +1,57 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import ArticleCard from '../components/ArticleCard.astro';
+import AdSlot from '../components/AdSlot.astro';
+import Trending from '../components/Trending.astro';
+import { SITE, categories } from '../config/site';
+import { getArticles } from '../utils/articles';
+import { organizationLd, websiteLd } from '../utils/seo';
+
+const all = await getArticles();
+const headline = all.find((a) => a.data.featured) ?? all[0];
+const rest = all.filter((a) => a !== headline);
+const secondary = rest.slice(0, 3);
+const latest = rest.slice(3, 9);
+const byCategory = categories.map((c) => ({ ...c, items: all.filter((a) => a.data.category === c.slug).slice(0, 4) })).filter((c) => c.items.length);
+---
+<BaseLayout
+  title="bacaanku.com — Berita Terkini Hari Ini yang Jernih dan Ringkas"
+  rawTitle
+  description={SITE.description}
+  jsonLd={[organizationLd(), websiteLd()]}
+>
+  <h1 class="visually-hidden">bacaanku.com — berita terkini hari ini</h1>
+  <div class="container">
+    <section class="top-stories" aria-label="Berita utama">
+      <div class="top-main"><ArticleCard article={headline} variant="hero" headingLevel={2} /></div>
+      <ul class="top-side" role="list">
+        {secondary.map((a) => (
+          <li><ArticleCard article={a} variant="compact" /></li>
+        ))}
+      </ul>
+    </section>
+
+    <AdSlot size="leaderboard" />
+
+    <div class="with-sidebar">
+      <section aria-labelledby="terbaru-title">
+        <h2 id="terbaru-title" class="section-title">Terbaru</h2>
+        <div class="grid">{latest.map((a) => <ArticleCard article={a} showDesc />)}</div>
+      </section>
+      <div class="sidebar">
+        <Trending />
+        <AdSlot size="rectangle" />
+      </div>
+    </div>
+
+    {byCategory.map((c) => (
+      <section class="cat-section deferred" aria-labelledby={`sec-${c.slug}`}>
+        <div class="section-head">
+          <h2 id={`sec-${c.slug}`} class="section-title">{c.name}</h2>
+          <a class="more-link" href={`/kategori/${c.slug}/`}>Lihat semua<span class="visually-hidden"> berita {c.name}</span> →</a>
+        </div>
+        <div class="grid grid--4">{c.items.map((a) => <ArticleCard article={a} />)}</div>
+      </section>
+    ))}
+  </div>
+</BaseLayout>

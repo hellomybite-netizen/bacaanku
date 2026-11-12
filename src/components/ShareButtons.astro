@@ -1,0 +1,28 @@
+---
+interface Props { url: string; title: string }
+const { url, title } = Astro.props;
+const u = encodeURIComponent(url);
+const t = encodeURIComponent(title);
+---
+<div class="share" aria-label="Bagikan artikel" role="group">
+  <span class="share-label">Bagikan:</span>
+  <a class="share-btn" href={`https://wa.me/?text=${t}%20${u}`} rel="noopener noreferrer" target="_blank">WhatsApp<span class="visually-hidden"> (tab baru)</span></a>
+  <a class="share-btn" href={`https://www.facebook.com/sharer/sharer.php?u=${u}`} rel="noopener noreferrer" target="_blank">Facebook<span class="visually-hidden"> (tab baru)</span></a>
+  <a class="share-btn" href={`https://x.com/intent/post?url=${u}&text=${t}`} rel="noopener noreferrer" target="_blank">X<span class="visually-hidden"> (tab baru)</span></a>
+  <a class="share-btn copy-link" href={url} data-url={url}>Salin tautan</a>
+  <span class="copy-status visually-hidden" role="status"></span>
+</div>
+<script>
+  // Tautan biasa; dengan JS, klik menyalin URL ke clipboard.
+  for (const a of document.querySelectorAll<HTMLAnchorElement>('.copy-link')) {
+    a.addEventListener('click', async (e) => {
+      if (!navigator.clipboard) return;
+      e.preventDefault();
+      await navigator.clipboard.writeText(a.dataset.url!);
+      const status = a.parentElement!.querySelector('.copy-status')!;
+      a.textContent = 'Tautan disalin ✓';
+      status.textContent = 'Tautan artikel disalin ke clipboard';
+      setTimeout(() => { a.textContent = 'Salin tautan'; status.textContent = ''; }, 2500);
+    });
+  }
+</script>

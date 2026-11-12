@@ -1,0 +1,23 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+<BaseLayout title="Cari Berita" description="Cari berita dan artikel di bacaanku.com berdasarkan kata kunci." noindex>
+  <link slot="head" rel="stylesheet" href="/pagefind/pagefind-ui.css" />
+  <div class="container narrow">
+    <header class="page-head"><h1 class="page-title">Cari berita</h1></header>
+    <div id="search" class="search-box">
+      <noscript><p>Pencarian membutuhkan JavaScript. Silakan telusuri melalui menu kategori.</p></noscript>
+    </div>
+    <p class="muted small">Pencarian berjalan langsung di peramban (Pagefind) — tanpa server dan tanpa pelacakan.</p>
+  </div>
+  <script is:inline src="/pagefind/pagefind-ui.js"></script>
+  <script is:inline>
+    addEventListener('DOMContentLoaded', () => {
+      if (!window.PagefindUI) { document.getElementById('search').textContent = 'Indeks pencarian belum tersedia (jalankan npm run build).'; return; }
+      const ui = new PagefindUI({ element: '#search', showSubResults: false, showImages: false, resetStyles: false,
+        translations: { placeholder: 'Ketik kata kunci, mis. mobil listrik', zero_results: 'Tidak ada hasil untuk [SEARCH_TERM]' } });
+      const q = new URLSearchParams(location.search).get('q');
+      if (q) ui.triggerSearch(q);
+    });
+  </script>
+</BaseLayout>

@@ -1,0 +1,13 @@
+---
+import { trending } from '../config/site';
+import { articleUrl, getArticles } from '../utils/articles';
+const all = await getArticles();
+let list = trending.map((s) => all.find((a) => a.id === s)).filter((a) => a !== undefined);
+if (list.length < 5) list = [...list, ...all.filter((a) => !list.includes(a))].slice(0, 5);
+---
+<section class="trending" aria-labelledby="trending-title">
+  <h2 id="trending-title" class="section-title">Terpopuler</h2>
+  <ol class="trending-list">
+    {list.map((a) => <li><a href={articleUrl(a)}>{a.data.title}</a></li>)}
+  </ol>
+</section>

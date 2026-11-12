@@ -1,0 +1,15 @@
+---
+/**
+ * PLACEHOLDER IKLAN — ukuran tetap supaya tidak terjadi layout shift (CLS).
+ * Ganti isi <div class="ad-inner"> dengan kode iklan (mis. Google Ad Manager / AdSense) saat live.
+ */
+interface Props { size: 'leaderboard' | 'rectangle' | 'inarticle'; label?: string }
+const { size } = Astro.props;
+const dims = { leaderboard: 'Responsif: 728×90 (desktop) / 320×100 (mobile)', rectangle: '300×250', inarticle: '300×250 / 336×280' }[size];
+---
+<aside class:list={['ad-slot', `ad-slot--${size}`]} aria-label="Ruang iklan">
+  <div class="ad-inner">
+    <span class="ad-label">Ruang Iklan (placeholder)</span>
+    <span class="ad-dims">{dims}</span>
+  </div>
+</aside>

@@ -1,0 +1,93 @@
+---
+import type { GetStaticPaths } from 'astro';
+import { getEntry, render } from 'astro:content';
+import { Picture, getImage } from 'astro:assets';
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ArticleCard from '../../components/ArticleCard.astro';
+import AdSlot from '../../components/AdSlot.astro';
+import Breadcrumb from '../../components/Breadcrumb.astro';
+import ShareButtons from '../../components/ShareButtons.astro';
+import Trending from '../../components/Trending.astro';
+import { getCategory } from '../../config/site';
+import { getArticles, readingTime, related, formatDateTime, absUrl, slugify, articleUrl, type Article } from '../../utils/articles';
+import { breadcrumbLd, newsArticleLd } from '../../utils/seo';
+
+export const getStaticPaths = (async () => {
+  const all = await getArticles();
+  return all.map((a) => ({ params: { category: a.data.category, slug: a.id }, props: { article: a } }));
+}) satisfies GetStaticPaths;
+
+const { article } = Astro.props as { article: Article };
+const { data } = article;
+const { Content } = await render(article);
+const cat = getCategory(data.category)!;
+const author = await getEntry(data.author);
+const all = await getArticles();
+let rel = related(all, article, 4);
+if (rel.length < 4) rel = [...rel, ...all.filter((a) => a.id !== article.id && !rel.includes(a))].slice(0, 4);
+const url = absUrl(articleUrl(article));
+const modified = data.updatedDate ?? data.publishDate;
+const og = await getImage({ src: data.heroImage, width: 1200, height: 675, format: 'jpg', quality: 75 });
+const ogUrl = absUrl(og.src);
+const crumbs = [
+  { name: 'Beranda', href: '/' },
+  { name: cat.name, href: `/kategori/${cat.slug}/` },
+  { name: data.title, href: articleUrl(article) },
+];
+const authorUrl = `/penulis/${author.id}/`;
+const minutes = readingTime(article.body);
+---
+<BaseLayout
+  title={data.seoTitle ?? data.title}
+  description={data.description}
+  canonical={data.canonical ?? articleUrl(article)}
+  image={ogUrl}
+  imageAlt={data.heroAlt}
+  type="article"
+  currentCategory={cat.slug}
+  article={{ publishedTime: data.publishDate.toISOString(), modifiedTime: modified.toISOString(), section: cat.name, tags: data.tags, author: author.data.name }}
+  jsonLd={[
+    newsArticleLd({ url, headline: data.title, description: data.description, image: ogUrl, datePublished: data.publishDate, dateModified: modified, authorName: author.data.name, authorUrl: absUrl(authorUrl), section: cat.name, keywords: data.tags }),
+    breadcrumbLd(crumbs),
+  ]}
+>
+  <div class="container">
+    <Breadcrumb items={crumbs} />
+    <div class="with-sidebar">
+      <article class="article" data-pagefind-body>
+        <header class="article-head">
+          <a class="kicker" href={`/kategori/${cat.slug}/`} data-pagefind-filter="kategori">{cat.name}</a>
+          <h1 class="article-title">{data.title}</h1>
+          <p class="article-dek">{data.description}</p>
+          <p class="article-meta">
+            <span>Oleh <a href={authorUrl} rel="author">{author.data.name}</a></span>
+            <span><time datetime={data.publishDate.toISOString()}>{formatDateTime(data.publishDate)}</time></span>
+            {data.updatedDate && <span>Diperbarui <time datetime={data.updatedDate.toISOString()}>{formatDateTime(data.updatedDate)}</time></span>}
+            <span>{minutes} menit baca</span>
+          </p>
+          <ShareButtons url={url} title={data.title} />
+        </header>
+        <figure class="article-hero">
+          <Picture src={data.heroImage} alt={data.heroAlt} formats={['avif', 'webp']} widths={[480, 800, 1200, 1560]}
+            sizes="(min-width: 1240px) 780px, (min-width: 960px) 64vw, calc(100vw - 2rem)" quality={70}
+            loading="eager" fetchpriority="high" decoding="sync" data-pagefind-meta="image[src]" />
+          {data.heroCaption && <figcaption>{data.heroCaption}</figcaption>}
+        </figure>
+        <div class="prose"><Content /></div>
+        <AdSlot size="inarticle" />
+        {data.tags.length > 0 && (
+          <ul class="tags" aria-label="Tag">{data.tags.map((t) => <li><a href={`/tag/${slugify(t)}/`}>#{t}</a></li>)}</ul>
+        )}
+        <aside class="author-box" aria-label="Tentang penulis">
+          <p class="author-name"><a href={authorUrl}>{author.data.name}</a> <span class="muted small">· {author.data.role}</span></p>
+          <p class="muted small">{author.data.bio}</p>
+        </aside>
+      </article>
+      <div class="sidebar"><Trending /><AdSlot size="rectangle" /></div>
+    </div>
+    <section class="deferred related" aria-labelledby="terkait-title" data-pagefind-ignore>
+      <h2 id="terkait-title" class="section-title">Artikel Terkait</h2>
+      <div class="grid grid--4">{rel.map((a) => <ArticleCard article={a} />)}</div>
+    </section>
+  </div>
+</BaseLayout>

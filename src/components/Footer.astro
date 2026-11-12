@@ -1,0 +1,29 @@
+---
+import { SITE, categories, footerLinks } from '../config/site';
+const year = new Date().getFullYear();
+---
+<footer class="site-footer">
+  <div class="container footer-grid">
+    <div>
+      <p class="site-logo footer-logo">baca<span class="logo-em">anku</span><span class="logo-dot" aria-hidden="true">.</span></p>
+      <p class="muted">{SITE.tagline}</p>
+      <p class="muted small">Prototipe — seluruh artikel di situs ini adalah <strong>contoh fiktif</strong>.</p>
+    </div>
+    <nav aria-label="Kategori (footer)">
+      <h2 class="footer-title">Kategori</h2>
+      <ul class="footer-list">{categories.map((c) => <li><a href={`/kategori/${c.slug}/`}>{c.name}</a></li>)}</ul>
+    </nav>
+    <nav aria-label="Informasi">
+      <h2 class="footer-title">Informasi</h2>
+      <ul class="footer-list">{footerLinks.map((l) => <li><a href={l.href}>{l.label}</a></li>)}</ul>
+    </nav>
+    <div>
+      <h2 class="footer-title">Ikuti</h2>
+      <ul class="footer-list">
+        <li><a href="/rss.xml">RSS semua berita</a></li>
+        <li><a href="/sitemap-index.xml">Sitemap</a></li>
+      </ul>
+    </div>
+  </div>
+  <div class="container footer-bottom small muted">© {year} {SITE.domain}. Hak cipta dilindungi.</div>
+</footer>

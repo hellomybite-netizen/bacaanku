@@ -1,0 +1,38 @@
+---
+import { Picture } from 'astro:assets';
+import { getCategory } from '../config/site';
+import { articleUrl, formatDate, type Article } from '../utils/articles';
+interface Props { article: Article; variant?: 'default' | 'compact' | 'hero'; headingLevel?: 2 | 3; showDesc?: boolean }
+const { article, variant = 'default', headingLevel = 3, showDesc = false } = Astro.props;
+const { data } = article;
+const cat = getCategory(data.category)!;
+const H = `h${headingLevel}` as 'h2' | 'h3';
+const isHero = variant === 'hero';
+const sizes = isHero
+  ? '(min-width: 1240px) 780px, (min-width: 960px) 64vw, calc(100vw - 2rem)'
+  : variant === 'compact'
+    ? '112px'
+    : '(min-width: 1240px) 280px, (min-width: 640px) 45vw, calc(100vw - 2rem)';
+const widths = isHero ? [480, 800, 1200, 1560] : variant === 'compact' ? [112, 224] : [320, 480, 640];
+---
+<article class:list={['card', `card--${variant}`]}>
+  <div class="card-media">
+    <Picture
+      src={data.heroImage}
+      alt={data.heroAlt}
+      formats={['avif', 'webp']}
+      widths={widths}
+      sizes={sizes}
+      quality={isHero ? 70 : 60}
+      loading={isHero ? 'eager' : 'lazy'}
+      fetchpriority={isHero ? 'high' : undefined}
+      decoding={isHero ? 'sync' : 'async'}
+    />
+  </div>
+  <div class="card-body">
+    <a class="kicker" href={`/kategori/${cat.slug}/`}>{cat.name}</a>
+    <H class="card-title"><a href={articleUrl(article)}>{data.title}</a></H>
+    {(showDesc || isHero) && <p class="card-desc">{data.description}</p>}
+    <p class="card-meta"><time datetime={data.publishDate.toISOString()}>{formatDate(data.publishDate)}</time></p>
+  </div>
+</article>

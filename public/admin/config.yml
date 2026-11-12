@@ -1,0 +1,83 @@
+# Decap CMS — dashboard penulis bacaanku.com
+# Lihat README bagian "Menghubungkan Decap CMS" untuk langkah aktivasi.
+backend:
+  name: github
+  repo: GANTI-USERNAME/bacaanku   # TODO: ganti dengan repo GitHub Anda
+  branch: main
+  # base_url: https://auth.bacaanku.com   # TODO: URL OAuth proxy (mis. Cloudflare Worker) — lihat README
+
+# Alur editorial: Draf → Ditinjau → Siap terbit (membuat Pull Request)
+publish_mode: editorial_workflow
+locale: id
+
+site_url: https://bacaanku.com
+display_url: https://bacaanku.com
+logo_url: https://bacaanku.com/logo-512.png
+
+media_folder: src/assets/articles
+public_folder: ../../assets/articles
+
+# Untuk mencoba lokal tanpa GitHub: jalankan `npx decap-server` lalu buka http://localhost:4321/admin/
+local_backend: true
+
+collections:
+  - name: articles
+    label: Artikel
+    label_singular: Artikel
+    folder: src/content/articles
+    create: true
+    extension: md
+    format: frontmatter
+    slug: "{{fields.slug}}"
+    identifier_field: title
+    summary: "{{title}} — {{category}} ({{publishDate | date('YYYY-MM-DD')}})"
+    sortable_fields: [publishDate, title, category]
+    view_filters:
+      - { label: Draf, field: draft, pattern: true }
+      - { label: Headline utama, field: featured, pattern: true }
+    view_groups:
+      - { label: Kategori, field: category }
+    fields:
+      - { label: Judul, name: title, widget: string, hint: "Maks. 120 karakter. Jelas, tanpa umpan klik." }
+      - { label: Slug (URL), name: slug, widget: string, pattern: ['^[a-z0-9-]+$', 'Hanya huruf kecil, angka, dan tanda hubung'], hint: "mis. harga-cabai-turun-panen-raya" }
+      - { label: Deskripsi (meta description SEO), name: description, widget: text, pattern: ['^[\s\S]{50,170}$', 'Panjang 50–170 karakter'], hint: "Ringkasan 1–2 kalimat; tampil di Google & saat dibagikan." }
+      - label: Kategori
+        name: category
+        widget: select
+        # Tambahkan kategori baru di sini DAN di src/config/site.ts
+        options:
+          - { label: News, value: news }
+          - { label: Teknologi, value: teknologi }
+          - { label: Otomotif, value: otomotif }
+          - { label: Sains, value: sains }
+          - { label: Ekonomi, value: ekonomi }
+          - { label: Olahraga, value: olahraga }
+          - { label: Hiburan, value: hiburan }
+      - { label: Tag, name: tags, widget: list, default: [], hint: "Pisahkan dengan koma" }
+      - { label: Penulis, name: author, widget: relation, collection: authors, search_fields: [name], value_field: slug, display_fields: [name] }
+      - { label: Tanggal terbit, name: publishDate, widget: datetime, format: "YYYY-MM-DDTHH:mm:ssZ" }
+      - { label: Tanggal diperbarui, name: updatedDate, widget: datetime, format: "YYYY-MM-DDTHH:mm:ssZ", required: false }
+      - { label: Gambar utama, name: heroImage, widget: image, hint: "Min. 1600×900 px. Gunakan foto milik sendiri / berlisensi." }
+      - { label: Teks alternatif gambar (alt), name: heroAlt, widget: string, hint: "Jelaskan isi gambar untuk pembaca tunanetra & SEO." }
+      - { label: Keterangan foto, name: heroCaption, widget: string, required: false }
+      - { label: Headline utama (featured), name: featured, widget: boolean, default: false }
+      - { label: Judul SEO (opsional), name: seoTitle, widget: string, required: false, hint: "Maks. 70 karakter. Kosongkan untuk memakai judul." }
+      - { label: URL kanonis (opsional), name: canonical, widget: string, required: false, hint: "Isi hanya jika artikel ini salinan dari URL lain." }
+      - { label: Draf (jangan terbitkan), name: draft, widget: boolean, default: false }
+      - { label: Isi artikel, name: body, widget: markdown }
+
+  - name: authors
+    label: Penulis
+    label_singular: Penulis
+    folder: src/content/authors
+    create: true
+    extension: json
+    format: json
+    slug: "{{fields.slug}}"
+    identifier_field: name
+    fields:
+      - { label: Nama, name: name, widget: string }
+      - { label: Slug, name: slug, widget: string, pattern: ['^[a-z0-9-]+$', 'Huruf kecil, angka, tanda hubung'] }
+      - { label: Jabatan, name: role, widget: string }
+      - { label: Bio singkat, name: bio, widget: text }
+      - { label: Akun X (opsional), name: x, widget: string, required: false }

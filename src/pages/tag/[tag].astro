@@ -1,0 +1,26 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ArticleCard from '../../components/ArticleCard.astro';
+import Breadcrumb from '../../components/Breadcrumb.astro';
+import { getArticles, slugify } from '../../utils/articles';
+import { breadcrumbLd } from '../../utils/seo';
+
+export async function getStaticPaths() {
+  const all = await getArticles();
+  const tags = new Map<string, string>();
+  all.forEach((a) => a.data.tags.forEach((t) => tags.set(slugify(t), t)));
+  return [...tags].map(([slug, name]) => ({
+    params: { tag: slug },
+    props: { name, items: all.filter((a) => a.data.tags.some((t) => slugify(t) === slug)) },
+  }));
+}
+const { name, items } = Astro.props;
+const crumbs = [{ name: 'Beranda', href: '/' }, { name: `Tag: ${name}`, href: `/tag/${slugify(name)}/` }];
+---
+<BaseLayout title={`Berita tentang ${name}`} description={`Kumpulan berita dan artikel dengan tag "${name}" di bacaanku.com.`} jsonLd={[breadcrumbLd(crumbs)]}>
+  <div class="container">
+    <Breadcrumb items={crumbs} />
+    <header class="page-head"><h1 class="page-title">#{name}</h1><p class="muted">{items.length} artikel</p></header>
+    <div class="grid">{items.map((a) => <ArticleCard article={a} headingLevel={2} showDesc />)}</div>
+  </div>
+</BaseLayout>

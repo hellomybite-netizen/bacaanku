@@ -1,0 +1,13 @@
+---
+import { getCollection } from 'astro:content';
+import PageLayout from '../layouts/PageLayout.astro';
+const authors = await getCollection('authors');
+---
+<PageLayout title="Redaksi" path="/redaksi/" description="Susunan redaksi bacaanku.com: pemimpin redaksi, redaktur, dan reporter yang bertanggung jawab atas isi pemberitaan.">
+  <p>Susunan redaksi di bawah ini adalah <strong>contoh fiktif</strong> untuk prototipe. Ganti dengan data asli (sesuai ketentuan Dewan Pers) sebelum live.</p>
+  <dl class="redaksi">
+    <dt>Pemimpin Redaksi</dt><dd>(nama contoh)</dd>
+    <dt>Penanggung Jawab</dt><dd>(nama contoh)</dd>
+    {authors.map((a) => (<><dt>{a.data.role}</dt><dd><a href={`/penulis/${a.id}/`}>{a.data.name}</a></dd></>))}
+  </dl>
+</PageLayout>

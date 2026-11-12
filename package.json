@@ -1,0 +1,26 @@
+{
+  "name": "bacaanku",
+  "type": "module",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "astro dev",
+    "build": "astro build && pagefind --site dist",
+    "preview": "astro preview",
+    "images": "node scripts/generate-placeholders.mjs",
+    "check": "astro check",
+    "build:preview": "astro build && node scripts/preview-rewrite.mjs && pagefind --site dist"
+  },
+  "dependencies": {
+    "@astrojs/mdx": "^8.1.5",
+    "@astrojs/rss": "^4.0.19",
+    "@astrojs/sitemap": "^3.7.4",
+    "astro": "^7.4.11",
+    "sharp": "^0.35.5"
+  },
+  "devDependencies": {
+    "@astrojs/check": "^0.9.12",
+    "pagefind": "^1.6.0",
+    "typescript": "^6.0.3"
+  }
+}
