@@ -13,7 +13,7 @@ featured: false
 draft: false
 ---
 
-> **Artikel contoh.** Tokoh, tempat, dan angka dalam tulisan ini fiktif dan hanya untuk prototipe bacaanku.com.
+> **Artikel contoh.** Tokoh, tempat, dan angka dalam tulisan ini fiktif dan hanya untuk prototipe bacaankunetwork.com.
 
 Startup rintisan bernama Lontara Labs (fiktif) tengah mengembangkan aplikasi penerjemah suara untuk 12 bahasa daerah, mulai dari Jawa, Sunda, Bugis, hingga Sasak.
 

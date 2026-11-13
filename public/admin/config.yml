@@ -1,18 +1,18 @@
-# Decap CMS — dashboard penulis bacaanku.com
+# Decap CMS — dashboard penulis bacaankunetwork.com
 # Lihat README bagian "Menghubungkan Decap CMS" untuk langkah aktivasi.
 backend:
   name: github
   repo: GANTI-USERNAME/bacaanku   # TODO: ganti dengan repo GitHub Anda
   branch: main
-  # base_url: https://auth.bacaanku.com   # TODO: URL OAuth proxy (mis. Cloudflare Worker) — lihat README
+  # base_url: https://auth.bacaankunetwork.com   # TODO: URL OAuth proxy (mis. Cloudflare Worker) — lihat README
 
 # Alur editorial: Draf → Ditinjau → Siap terbit (membuat Pull Request)
 publish_mode: editorial_workflow
 locale: id
 
-site_url: https://bacaanku.com
-display_url: https://bacaanku.com
-logo_url: https://bacaanku.com/logo-512.png
+site_url: https://bacaankunetwork.com
+display_url: https://bacaankunetwork.com
+logo_url: https://bacaankunetwork.com/logo-512.png
 
 media_folder: src/assets/articles
 public_folder: ../../assets/articles
@@ -60,7 +60,7 @@ collections:
       - { label: Gambar utama, name: heroImage, widget: image, hint: "Min. 1600×900 px. Gunakan foto milik sendiri / berlisensi." }
       - { label: Teks alternatif gambar (alt), name: heroAlt, widget: string, hint: "Jelaskan isi gambar untuk pembaca tunanetra & SEO." }
       - { label: Keterangan foto, name: heroCaption, widget: string, required: false }
-      - { label: Kredit gambar, name: heroCredit, widget: string, required: false, hint: "mis. Foto: Nama/Wikimedia Commons, CC BY-SA 4.0 — atau Ilustrasi: bacaanku.com" }
+      - { label: Kredit gambar, name: heroCredit, widget: string, required: false, hint: "mis. Foto: Nama/Wikimedia Commons, CC BY-SA 4.0 — atau Ilustrasi: bacaankunetwork.com" }
       - { label: Tautan sumber gambar, name: heroCreditUrl, widget: string, required: false, hint: "URL halaman sumber/lisensi foto" }
       - { label: Headline utama (featured), name: featured, widget: boolean, default: false }
       - { label: Judul SEO (opsional), name: seoTitle, widget: string, required: false, hint: "Maks. 70 karakter. Kosongkan untuk memakai judul." }

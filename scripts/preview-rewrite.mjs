@@ -1,7 +1,7 @@
 // Pasca-build KHUSUS preview GitHub Pages (npm run build:preview).
-// Build normal untuk bacaanku.com TIDAK memakai skrip ini.
+// Build normal untuk bacaankunetwork.com TIDAK memakai skrip ini.
 // - Menambahkan prefix base path (mis. /bacaanku) ke semua tautan internal
-// - Mengganti URL absolut https://bacaanku.com -> URL preview
+// - Mengganti URL absolut https://bacaankunetwork.com -> URL preview
 // - Memaksa noindex,nofollow + robots.txt Disallow: / agar Google tidak mengindeks situs contoh
 import { readdir, readFile, writeFile, rm } from 'node:fs/promises';
 import { join } from 'node:path';
@@ -9,7 +9,7 @@ import { join } from 'node:path';
 const DIST = new URL('../dist/', import.meta.url).pathname;
 const BASE = (process.env.PREVIEW_BASE || '/bacaanku').replace(/\/$/, '');
 const ORIGIN = process.env.PREVIEW_ORIGIN || 'https://hellomybite-netizen.github.io';
-const PROD = 'https://bacaanku.com';
+const PROD = 'https://bacaankunetwork.com';
 
 async function* walk(dir) {
   for (const e of await readdir(dir, { withFileTypes: true })) {

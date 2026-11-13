@@ -13,7 +13,7 @@ featured: false
 draft: false
 ---
 
-> **Artikel contoh.** Tokoh, tempat, dan angka dalam tulisan ini fiktif dan hanya untuk prototipe bacaanku.com.
+> **Artikel contoh.** Tokoh, tempat, dan angka dalam tulisan ini fiktif dan hanya untuk prototipe bacaankunetwork.com.
 
 Musim hujan sudah tiba di banyak daerah. Air dan lumpur bisa mempercepat karat serta menurunkan performa rem. Berikut tujuh tips sederhana (artikel contoh).
 

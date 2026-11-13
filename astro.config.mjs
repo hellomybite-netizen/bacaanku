@@ -4,7 +4,7 @@ import sitemap from '@astrojs/sitemap';
 import mdx from '@astrojs/mdx';
 
 export default defineConfig({
-  site: 'https://bacaanku.com',
+  site: 'https://bacaankunetwork.com',
   trailingSlash: 'always',
   build: { format: 'directory', inlineStylesheets: 'always' },
   integrations: [

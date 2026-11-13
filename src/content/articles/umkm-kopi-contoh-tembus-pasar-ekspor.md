@@ -13,7 +13,7 @@ featured: false
 draft: false
 ---
 
-> **Artikel contoh.** Tokoh, tempat, dan angka dalam tulisan ini fiktif dan hanya untuk prototipe bacaanku.com.
+> **Artikel contoh.** Tokoh, tempat, dan angka dalam tulisan ini fiktif dan hanya untuk prototipe bacaankunetwork.com.
 
 Kopi Lereng Sejuk, UMKM fiktif yang dikelola kelompok tani, berhasil mengirim kontainer pertamanya ke pasar ekspor. Pencapaian ini diraih setelah tiga tahun membenahi proses panen dan pascapanen.
 

@@ -15,12 +15,12 @@ const latest = rest.slice(3, 10);
 const byCategory = categories.map((c) => ({ ...c, items: all.filter((a) => a.data.category === c.slug).slice(0, 4) })).filter((c) => c.items.length);
 ---
 <BaseLayout
-  title="bacaanku.com — Berita Terkini Hari Ini yang Jernih dan Ringkas"
+  title="bacaankunetwork.com — Berita Terkini Hari Ini yang Jernih dan Ringkas"
   rawTitle
   description={SITE.description}
   jsonLd={[organizationLd(), websiteLd()]}
 >
-  <h1 class="visually-hidden">bacaanku.com — berita terkini hari ini</h1>
+  <h1 class="visually-hidden">bacaankunetwork.com — berita terkini hari ini</h1>
   <div class="container">
     <nav class="topic-strip" aria-label="Topik pilihan">
       <strong>Topik Pilihan</strong>

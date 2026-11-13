@@ -20,7 +20,7 @@ const personLd = {
   mainEntity: { '@type': 'Person', name: au.data.name, jobTitle: au.data.role, description: au.data.bio, url: absUrl(href), worksFor: { '@id': `${SITE.url}/#organization` } },
 };
 ---
-<BaseLayout title={`${au.data.name} — ${au.data.role}`} description={`${au.data.bio} Baca semua tulisan ${au.data.name} di bacaanku.com.`} jsonLd={[personLd, breadcrumbLd(crumbs)]}>
+<BaseLayout title={`${au.data.name} — ${au.data.role}`} description={`${au.data.bio} Baca semua tulisan ${au.data.name} di bacaankunetwork.com.`} jsonLd={[personLd, breadcrumbLd(crumbs)]}>
   <div class="container">
     <Breadcrumb items={crumbs} />
     <header class="page-head">

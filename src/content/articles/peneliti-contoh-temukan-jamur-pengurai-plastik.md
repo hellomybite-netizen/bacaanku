@@ -13,7 +13,7 @@ featured: false
 draft: false
 ---
 
-> **Artikel contoh.** Tokoh, tempat, dan angka dalam tulisan ini fiktif dan hanya untuk prototipe bacaanku.com.
+> **Artikel contoh.** Tokoh, tempat, dan angka dalam tulisan ini fiktif dan hanya untuk prototipe bacaankunetwork.com.
 
 Tim peneliti dari sebuah universitas (fiktif) melaporkan hasil awal uji laboratorium terhadap jamur lokal yang dapat mengurai plastik tipis jenis polietilena dalam waktu sekitar enam minggu.
 

@@ -17,7 +17,7 @@ export async function getStaticPaths() {
 const { name, items } = Astro.props;
 const crumbs = [{ name: 'Beranda', href: '/' }, { name: `Tag: ${name}`, href: `/tag/${slugify(name)}/` }];
 ---
-<BaseLayout title={`Berita tentang ${name}`} description={`Kumpulan berita dan artikel dengan tag "${name}" di bacaanku.com.`} jsonLd={[breadcrumbLd(crumbs)]}>
+<BaseLayout title={`Berita tentang ${name}`} description={`Kumpulan berita dan artikel dengan tag "${name}" di bacaankunetwork.com.`} jsonLd={[breadcrumbLd(crumbs)]}>
   <div class="container">
     <Breadcrumb items={crumbs} />
     <header class="page-head"><h1 class="page-title">#{name}</h1><p class="muted">{items.length} artikel</p></header>

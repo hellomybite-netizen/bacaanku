@@ -13,7 +13,7 @@ featured: false
 draft: false
 ---
 
-> **Artikel contoh.** Tokoh, tempat, dan angka dalam tulisan ini fiktif dan hanya untuk prototipe bacaanku.com.
+> **Artikel contoh.** Tokoh, tempat, dan angka dalam tulisan ini fiktif dan hanya untuk prototipe bacaankunetwork.com.
 
 Jalur sepeda terproteksi sepanjang 12 kilometer resmi beroperasi di Kota Sukamaju (fiktif). Jalur ini menghubungkan stasiun kereta, pasar tradisional, dan dua kampus, sehingga mahasiswa dan pekerja punya pilihan transportasi yang lebih sehat.
 

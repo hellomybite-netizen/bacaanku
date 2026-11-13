@@ -1,5 +1,5 @@
 /* =========================================================
-   bacaanku.com — newsroom design system
+   bacaankunetwork.com — newsroom design system
    Modern, dense, and easy to scan without sacrificing reading comfort.
    ========================================================= */
 :root {
@@ -126,7 +126,7 @@ main:focus { outline: none; }
   box-shadow: 0 7px 18px color-mix(in srgb, var(--accent) 26%, transparent);
 }
 .logo-type { font-size: 1.55rem; font-weight: 900; letter-spacing: -0.055em; }
-.logo-type span { color: var(--accent); font-size: 0.63em; letter-spacing: -0.02em; }
+.logo-type span { color: var(--accent); font-size: 0.8em; letter-spacing: -0.02em; }
 .brand-statement {
   margin: 0; padding-inline-start: 1.5rem; border-inline-start: 1px solid var(--border);
   display: grid; gap: 0.05rem; font-size: 0.8rem; color: var(--muted);

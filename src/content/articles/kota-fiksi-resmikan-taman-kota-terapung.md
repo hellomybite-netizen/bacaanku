@@ -13,7 +13,7 @@ featured: false
 draft: false
 ---
 
-> **Artikel contoh.** Tokoh, tempat, dan angka dalam tulisan ini fiktif dan hanya untuk prototipe bacaanku.com.
+> **Artikel contoh.** Tokoh, tempat, dan angka dalam tulisan ini fiktif dan hanya untuk prototipe bacaankunetwork.com.
 
 Pemerintah Kota Sukamaju — kota fiktif yang kami gunakan sebagai contoh — meresmikan taman terapung pertama di atas Waduk Cimanis pada Kamis pagi. Taman seluas sekitar dua hektare itu dibangun di atas ponton modular yang dapat naik-turun mengikuti permukaan air.
 

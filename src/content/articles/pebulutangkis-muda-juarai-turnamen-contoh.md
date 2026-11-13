@@ -13,7 +13,7 @@ featured: false
 draft: false
 ---
 
-> **Artikel contoh.** Tokoh, tempat, dan angka dalam tulisan ini fiktif dan hanya untuk prototipe bacaanku.com.
+> **Artikel contoh.** Tokoh, tempat, dan angka dalam tulisan ini fiktif dan hanya untuk prototipe bacaankunetwork.com.
 
 Pebulu tangkis putri berusia 17 tahun, Sekar Wulan (tokoh fiktif), menjuarai turnamen junior regional. Di final, ia mengalahkan unggulan pertama lewat rubber game 21-19, 18-21, 21-17.
 

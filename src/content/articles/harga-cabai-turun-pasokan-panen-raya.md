@@ -13,7 +13,7 @@ featured: false
 draft: false
 ---
 
-> **Artikel contoh.** Tokoh, tempat, dan angka dalam tulisan ini fiktif dan hanya untuk prototipe bacaanku.com.
+> **Artikel contoh.** Tokoh, tempat, dan angka dalam tulisan ini fiktif dan hanya untuk prototipe bacaankunetwork.com.
 
 Harga cabai rawit di beberapa pasar tradisional di Kota Sukamaju (fiktif) turun sekitar 30 persen dalam sepekan terakhir. Pedagang menyebut pasokan dari sentra produksi melimpah karena panen raya.
 

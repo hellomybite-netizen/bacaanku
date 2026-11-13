@@ -1,21 +1,21 @@
 /**
- * Konfigurasi utama situs bacaanku.com.
+ * Konfigurasi utama situs bacaankunetwork.com.
  * Untuk menambah kategori: cukup tambahkan satu objek di array `categories` di bawah
  * (lalu tambahkan juga opsinya di public/admin/config.yml agar muncul di CMS).
  */
 export const SITE = {
-  name: 'bacaanku',
-  domain: 'bacaanku.com',
-  url: 'https://bacaanku.com',
+  name: 'Bacaanku Network',
+  domain: 'bacaankunetwork.com',
+  url: 'https://bacaankunetwork.com',
   tagline: 'Bacaan jernih, setiap hari.',
   description:
-    'bacaanku.com — portal berita Indonesia yang ringkas dan jernih: news, teknologi, otomotif, sains, ekonomi, olahraga, dan hiburan.',
+    'bacaankunetwork.com — portal berita Indonesia yang ringkas dan jernih: news, teknologi, otomotif, sains, ekonomi, olahraga, dan hiburan.',
   locale: 'id_ID',
   lang: 'id',
   hreflang: 'id-ID',
   timezone: 'Asia/Jakarta',
-  twitter: '@bacaanku',
-  email: 'redaksi@bacaanku.com',
+  twitter: '@bacaankunetwork', // TODO: ganti dengan akun X asli
+  email: 'redaksi@bacaankunetwork.com',
   // Logo untuk JSON-LD Organization/publisher (file di /public)
   logo: '/logo-512.png',
   defaultOgImage: '/og-default.png',

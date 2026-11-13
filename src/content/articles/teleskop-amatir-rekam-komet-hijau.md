@@ -13,7 +13,7 @@ featured: false
 draft: false
 ---
 
-> **Artikel contoh.** Tokoh, tempat, dan angka dalam tulisan ini fiktif dan hanya untuk prototipe bacaanku.com.
+> **Artikel contoh.** Tokoh, tempat, dan angka dalam tulisan ini fiktif dan hanya untuk prototipe bacaankunetwork.com.
 
 Komunitas astronomi amatir Langit Kita (fiktif) berhasil merekam komet berwarna kehijauan dari atap sebuah sekolah menengah. Mereka menggunakan teleskop berdiameter 20 cm dan kamera biasa.
 

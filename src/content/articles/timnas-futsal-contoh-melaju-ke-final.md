@@ -13,7 +13,7 @@ featured: false
 draft: false
 ---
 
-> **Artikel contoh.** Tokoh, tempat, dan angka dalam tulisan ini fiktif dan hanya untuk prototipe bacaanku.com.
+> **Artikel contoh.** Tokoh, tempat, dan angka dalam tulisan ini fiktif dan hanya untuk prototipe bacaankunetwork.com.
 
 Tim futsal Sukamaju FC (fiktif) memastikan tempat di partai final turnamen regional setelah menang adu penalti 4-3. Pertandingan semifinal berakhir imbang 2-2 di waktu normal.
 

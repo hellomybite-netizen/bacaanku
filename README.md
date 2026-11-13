@@ -1,4 +1,4 @@
-# bacaanku.com — Prototipe Portal Berita (Astro)
+# bacaankunetwork.com — Prototipe Portal Berita (Astro)
 
 Portal berita berbahasa Indonesia yang **ringan, cepat, mudah dikelola, dan kuat SEO-nya**.
 Dibangun dengan [Astro](https://astro.build) (situs statis), konten berupa file Markdown, pencarian statis
@@ -92,7 +92,7 @@ Menu, halaman `/kategori/kesehatan/`, RSS `/rss/kesehatan.xml`, sitemap, dan sec
    - Build command: `npm run build`
    - Output directory: `dist`
    - Environment variable: `NODE_VERSION=22` (atau lebih baru)
-4. Setelah deploy pertama berhasil: **Custom domains → Set up a domain → bacaanku.com** (dan `www.bacaanku.com`
+4. Setelah deploy pertama berhasil: **Custom domains → Set up a domain → bacaankunetwork.com** (dan `www.bacaankunetwork.com`
    sebagai redirect). Paling mudah jika DNS domain dipindah ke Cloudflare (ganti nameserver di registrar).
 5. `public/_headers` otomatis dipakai Cloudflare Pages. CSP masih **Report-Only** — pantau dulu, baru ubah ke
    `Content-Security-Policy` setelah memastikan tidak ada yang terblokir (terutama jika memasang iklan/analitik).
@@ -101,7 +101,7 @@ Menu, halaman `/kategori/kesehatan/`, RSS `/rss/kesehatan.xml`, sitemap, dan sec
 
 ## Menghubungkan Decap CMS (dashboard penulis)
 
-Dashboard ada di `https://bacaanku.com/admin/`. Setiap artikel yang diterbitkan lewat dashboard menjadi commit
+Dashboard ada di `https://bacaankunetwork.com/admin/`. Setiap artikel yang diterbitkan lewat dashboard menjadi commit
 di GitHub → Cloudflare Pages build ulang otomatis.
 
 **Coba di lokal (tanpa GitHub):**
@@ -133,13 +133,13 @@ Ganti isi `src/components/AdSlot.astro` dengan kode iklan saat live, lalu perbar
 - Teks lengkap Pedoman Pemberitaan Media Siber (dari Dewan Pers) dan Kebijakan Privasi (tinjau hukum)
 - Logo (`public/logo-512.png`, `favicon.svg`, `og-default.png`) — saat ini logo teks sederhana
 - Daftar "Terpopuler" di `src/config/site.ts` masih manual (bisa diotomatiskan dari analitik)
-- Akun X `@bacaanku` di `src/config/site.ts`
+- Akun X `@bacaankunetwork` di `src/config/site.ts`
 
 ## Preview sementara (GitHub Pages)
 
 `npm run build:preview` membuat build khusus preview di sub-path `/bacaanku/`
 (skrip `scripts/preview-rewrite.mjs`): semua tautan diberi prefix base path, URL
-`https://bacaanku.com` diganti URL preview, dan seluruh halaman diberi `noindex,nofollow`
+`https://bacaankunetwork.com` diganti URL preview, dan seluruh halaman diberi `noindex,nofollow`
 + `robots.txt` `Disallow: /` agar situs contoh tidak diindeks Google.
 Build produksi (`npm run build`) tidak terpengaruh.
 

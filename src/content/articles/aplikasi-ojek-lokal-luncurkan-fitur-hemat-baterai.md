@@ -13,7 +13,7 @@ featured: false
 draft: false
 ---
 
-> **Artikel contoh.** Tokoh, tempat, dan angka dalam tulisan ini fiktif dan hanya untuk prototipe bacaanku.com.
+> **Artikel contoh.** Tokoh, tempat, dan angka dalam tulisan ini fiktif dan hanya untuk prototipe bacaankunetwork.com.
 
 Aplikasi ojek daring lokal bernama JalanYuk — nama fiktif untuk contoh — merilis "Mode Hemat" bagi para pengemudinya. Fitur ini diklaim mampu memperpanjang daya tahan baterai ponsel hingga tiga jam dalam sehari kerja.
 

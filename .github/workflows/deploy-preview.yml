@@ -1,4 +1,4 @@
-# Preview sementara di GitHub Pages: https://hellomybite-netizen.github.io/bacaanku/
+# Preview sementara di GitHub Pages: https://hellomybite-netizen.github.io/bacaanku/  (brand: bacaankunetwork.com)
 # Otomatis jalan setiap push ke main (bisa juga manual dari tab Actions).
 # Syarat sekali saja: Settings → Pages → Build and deployment → Source: "GitHub Actions".
 name: Deploy preview ke GitHub Pages

@@ -13,9 +13,9 @@ featured: false
 draft: false
 ---
 
-> **Artikel contoh.** Tokoh, tempat, dan angka dalam tulisan ini fiktif dan hanya untuk prototipe bacaanku.com.
+> **Artikel contoh.** Tokoh, tempat, dan angka dalam tulisan ini fiktif dan hanya untuk prototipe bacaankunetwork.com.
 
-Tim bacaanku menjajal mobil listrik mungil bernama Kancil EV — model fiktif untuk contoh — di rute tanjakan pegunungan selama dua hari. Hasilnya cukup menarik untuk kendaraan seukuran ini.
+Tim Bacaanku Network menjajal mobil listrik mungil bernama Kancil EV — model fiktif untuk contoh — di rute tanjakan pegunungan selama dua hari. Hasilnya cukup menarik untuk kendaraan seukuran ini.
 
 ## Tenaga cukup untuk tanjakan
 
