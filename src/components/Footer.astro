@@ -4,10 +4,10 @@ const year = new Date().getFullYear();
 ---
 <footer class="site-footer">
   <div class="container footer-grid">
-    <div>
-      <p class="site-logo footer-logo">baca<span class="logo-em">anku</span><span class="logo-dot" aria-hidden="true">.</span></p>
-      <p class="muted">{SITE.tagline}</p>
-      <p class="muted small">Prototipe — seluruh artikel di situs ini adalah <strong>contoh fiktif</strong>.</p>
+    <div class="footer-brand">
+      <p class="site-logo footer-logo"><span class="logo-mark" aria-hidden="true">B</span><span class="logo-type">bacaanku<span>.com</span></span></p>
+      <p>{SITE.tagline} Kami merangkum kabar penting agar lebih cepat dipahami.</p>
+      <p class="footer-note">Prototipe — seluruh artikel di situs ini adalah <strong>contoh fiktif</strong>.</p>
     </div>
     <nav aria-label="Kategori (footer)">
       <h2 class="footer-title">Kategori</h2>
@@ -25,5 +25,8 @@ const year = new Date().getFullYear();
       </ul>
     </div>
   </div>
-  <div class="container footer-bottom small muted">© {year} {SITE.domain}. Hak cipta dilindungi.</div>
+  <div class="container footer-bottom">
+    <span>© {year} {SITE.domain}. Hak cipta dilindungi.</span>
+    <span>Jernih · Ringkas · Relevan</span>
+  </div>
 </footer>
