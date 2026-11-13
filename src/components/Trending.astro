@@ -1,13 +1,22 @@
 ---
-import { trending } from '../config/site';
-import { articleUrl, getArticles } from '../utils/articles';
+import { getCategory, trending } from '../config/site';
+import { articleUrl, formatDate, getArticles } from '../utils/articles';
 const all = await getArticles();
 let list = trending.map((s) => all.find((a) => a.id === s)).filter((a) => a !== undefined);
 if (list.length < 5) list = [...list, ...all.filter((a) => !list.includes(a))].slice(0, 5);
 ---
 <section class="trending" aria-labelledby="trending-title">
+  <p class="section-eyebrow">Banyak dibaca</p>
   <h2 id="trending-title" class="section-title">Terpopuler</h2>
   <ol class="trending-list">
-    {list.map((a) => <li><a href={articleUrl(a)}>{a.data.title}</a></li>)}
+    {list.map((a, index) => (
+      <li>
+        <span class="trend-number" aria-hidden="true">{String(index + 1).padStart(2, '0')}</span>
+        <div>
+          <a href={articleUrl(a)}>{a.data.title}</a>
+          <p><span>{getCategory(a.data.category)?.name}</span><time datetime={a.data.publishDate.toISOString()}>{formatDate(a.data.publishDate)}</time></p>
+        </div>
+      </li>
+    ))}
   </ol>
 </section>
