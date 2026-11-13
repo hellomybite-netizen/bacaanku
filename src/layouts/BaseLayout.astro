@@ -3,6 +3,17 @@ import '../styles/global.css';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import { SITE } from '../config/site';
+import { IS_STATIC } from '../lib/mode';
+
+/** GTM produksi. Pratinjau GitHub Pages (`BUILD_MODE=static`) tidak memuat tag ini. */
+const analyticsSnippet = IS_STATIC
+  ? ''
+  : `<script async src="https://www.googletagmanager.com/gtm.js?id=GTM-T62FKJQ9"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+</script>`;
 
 interface Props {
   title: string;
@@ -28,6 +39,7 @@ const ogImage = image ?? new URL(SITE.defaultOgImage, SITE.url).href;
 <!doctype html>
 <html lang={SITE.lang}>
   <head>
+    {analyticsSnippet && <Fragment set:html={analyticsSnippet} />}
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="color-scheme" content="light dark" />
