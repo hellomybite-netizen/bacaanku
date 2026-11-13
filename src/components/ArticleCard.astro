@@ -2,7 +2,7 @@
 import { Picture } from 'astro:assets';
 import { getCategory } from '../config/site';
 import { articleUrl, formatDate, type Article } from '../utils/articles';
-interface Props { article: Article; variant?: 'default' | 'compact' | 'hero'; headingLevel?: 2 | 3; showDesc?: boolean }
+interface Props { article: Article; variant?: 'default' | 'compact' | 'hero' | 'list'; headingLevel?: 2 | 3; showDesc?: boolean }
 const { article, variant = 'default', headingLevel = 3, showDesc = false } = Astro.props;
 const { data } = article;
 const cat = getCategory(data.category)!;
@@ -12,8 +12,10 @@ const sizes = isHero
   ? '(min-width: 1240px) 780px, (min-width: 960px) 64vw, calc(100vw - 2rem)'
   : variant === 'compact'
     ? '112px'
+    : variant === 'list'
+      ? '(min-width: 640px) 260px, 132px'
     : '(min-width: 1240px) 280px, (min-width: 640px) 45vw, calc(100vw - 2rem)';
-const widths = isHero ? [480, 800, 1200, 1560] : variant === 'compact' ? [112, 224] : [320, 480, 640];
+const widths = isHero ? [480, 800, 1200, 1560] : variant === 'compact' ? [112, 224] : variant === 'list' ? [160, 320, 520] : [320, 480, 640];
 ---
 <article class:list={['card', `card--${variant}`]}>
   <div class="card-media">
@@ -33,6 +35,6 @@ const widths = isHero ? [480, 800, 1200, 1560] : variant === 'compact' ? [112, 2
     <a class="kicker" href={`/kategori/${cat.slug}/`}>{cat.name}</a>
     <H class="card-title"><a href={articleUrl(article)}>{data.title}</a></H>
     {(showDesc || isHero) && <p class="card-desc">{data.description}</p>}
-    <p class="card-meta"><time datetime={data.publishDate.toISOString()}>{formatDate(data.publishDate)}</time></p>
+    <p class="card-meta"><span>{cat.name}</span><time datetime={data.publishDate.toISOString()}>{formatDate(data.publishDate)}</time></p>
   </div>
 </article>
