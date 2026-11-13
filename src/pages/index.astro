@@ -3,16 +3,13 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import ArticleCard from '../components/ArticleCard.astro';
 import AdSlot from '../components/AdSlot.astro';
 import Trending from '../components/Trending.astro';
-import { SITE, categories } from '../config/site';
-import { getArticles } from '../utils/articles';
+import { SITE } from '../config/site';
 import { organizationLd, websiteLd } from '../utils/seo';
+import { applyPublicCache } from '../lib/cache-headers';
+import { loadHome } from '../lib/public';
 
-const all = await getArticles();
-const headline = all.find((a) => a.data.featured) ?? all[0];
-const rest = all.filter((a) => a !== headline);
-const secondary = rest.slice(0, 3);
-const latest = rest.slice(3, 10);
-const byCategory = categories.map((c) => ({ ...c, items: all.filter((a) => a.data.category === c.slug).slice(0, 4) })).filter((c) => c.items.length);
+const { headline, secondary, latest, byCategory, trending } = await loadHome();
+applyPublicCache(Astro, 'home', ['home']);
 ---
 <BaseLayout
   title="bacaankunetwork.com — Berita Terkini Hari Ini yang Jernih dan Ringkas"
@@ -25,32 +22,37 @@ const byCategory = categories.map((c) => ({ ...c, items: all.filter((a) => a.dat
     <nav class="topic-strip" aria-label="Topik pilihan">
       <strong>Topik Pilihan</strong>
       <div>
-        <a href="/kategori/news/">Kabar hari ini</a>
-        <a href="/kategori/teknologi/">Dunia digital</a>
-        <a href="/kategori/ekonomi/">Ekonomi rakyat</a>
-        <a href="/kategori/sains/">Sains & lingkungan</a>
+        <a href="/news/">Kabar hari ini</a>
+        <a href="/teknologi/">Dunia digital</a>
+        <a href="/ekonomi/">Ekonomi rakyat</a>
+        <a href="/sains/">Sains & lingkungan</a>
       </div>
     </nav>
 
-    <div class="home-intro">
-      <div>
-        <p class="section-eyebrow">Pilihan redaksi</p>
-        <h2>Kabar utama hari ini</h2>
-      </div>
-      <p>Ringkasan peristiwa penting, disusun agar cepat dipahami dan mudah ditelusuri.</p>
-    </div>
-
-    <section class="top-stories" aria-label="Berita utama">
-      <div class="top-main"><ArticleCard article={headline} variant="hero" headingLevel={2} /></div>
-      <ul class="top-side" role="list">
-        {secondary.map((a, index) => (
-          <li>
-            <span class="story-index" aria-hidden="true">{String(index + 1).padStart(2, '0')}</span>
-            <ArticleCard article={a} variant="compact" />
-          </li>
-        ))}
-      </ul>
-    </section>
+    {headline ? (
+      <>
+        <div class="home-intro">
+          <div>
+            <p class="section-eyebrow">Pilihan redaksi</p>
+            <h2>Kabar utama hari ini</h2>
+          </div>
+          <p>Ringkasan peristiwa penting, disusun agar cepat dipahami dan mudah ditelusuri.</p>
+        </div>
+        <section class="top-stories" aria-label="Berita utama">
+          <div class="top-main"><ArticleCard article={headline} variant="hero" headingLevel={2} /></div>
+          <ul class="top-side" role="list">
+            {secondary.map((article, index) => (
+              <li>
+                <span class="story-index" aria-hidden="true">{String(index + 1).padStart(2, '0')}</span>
+                <ArticleCard article={article} variant="compact" />
+              </li>
+            ))}
+          </ul>
+        </section>
+      </>
+    ) : (
+      <header class="page-head"><h2 class="page-title">Belum ada berita terbit</h2></header>
+    )}
 
     <AdSlot size="leaderboard" />
 
@@ -61,26 +63,26 @@ const byCategory = categories.map((c) => ({ ...c, items: all.filter((a) => a.dat
             <p class="section-eyebrow">Update pilihan redaksi</p>
             <h2 id="terbaru-title" class="section-title">Berita Terbaru</h2>
           </div>
-          <a class="more-link" href="/kategori/news/">Semua berita <span aria-hidden="true">→</span></a>
+          <a class="more-link" href="/news/">Semua berita <span aria-hidden="true">→</span></a>
         </div>
-        <div class="latest-list">{latest.map((a) => <ArticleCard article={a} variant="list" showDesc />)}</div>
+        <div class="latest-list">{latest.map((article) => <ArticleCard article={article} variant="list" showDesc />)}</div>
       </section>
       <div class="sidebar">
-        <Trending />
+        <Trending items={trending} />
         <AdSlot size="rectangle" />
       </div>
     </div>
 
-    {byCategory.map((c) => (
-      <section class="cat-section deferred" aria-labelledby={`sec-${c.slug}`}>
+    {byCategory.map((category) => (
+      <section class="cat-section deferred" aria-labelledby={`sec-${category.slug}`}>
         <div class="section-head">
           <div>
             <p class="section-eyebrow">Jelajahi topik</p>
-            <h2 id={`sec-${c.slug}`} class="section-title">{c.name}</h2>
+            <h2 id={`sec-${category.slug}`} class="section-title">{category.name}</h2>
           </div>
-          <a class="more-link" href={`/kategori/${c.slug}/`}>Lihat semua<span class="visually-hidden"> berita {c.name}</span> <span aria-hidden="true">→</span></a>
+          <a class="more-link" href={`/${category.slug}/`}>Lihat semua<span class="visually-hidden"> berita {category.name}</span> <span aria-hidden="true">→</span></a>
         </div>
-        <div class="grid grid--4 category-grid">{c.items.map((a) => <ArticleCard article={a} />)}</div>
+        <div class="grid grid--4 category-grid">{category.items.map((article) => <ArticleCard article={article} />)}</div>
       </section>
     ))}
   </div>

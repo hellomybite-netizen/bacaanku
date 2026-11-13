@@ -1,6 +1,9 @@
 # Preview sementara di GitHub Pages: https://hellomybite-netizen.github.io/bacaanku/  (brand: bacaankunetwork.com)
 # Otomatis jalan setiap push ke main (bisa juga manual dari tab Actions).
 # Syarat sekali saja: Settings → Pages → Build and deployment → Source: "GitHub Actions".
+# Produksi SSR (Cloudflare Workers) memakai `npm run build` tanpa BUILD_MODE.
+# Workflow ini tetap statis: `npm run build:preview` memaksa BUILD_MODE=static
+# supaya output: 'static', tanpa adapter Workers, plus Pagefind.
 name: Deploy preview ke GitHub Pages
 
 on:
@@ -29,6 +32,7 @@ jobs:
       - run: npm ci
       - run: npm run build:preview
         env:
+          BUILD_MODE: static
           PREVIEW_ORIGIN: https://${{ github.repository_owner }}.github.io
           PREVIEW_BASE: /${{ github.event.repository.name }}
       - uses: actions/upload-pages-artifact@v3

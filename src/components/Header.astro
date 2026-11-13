@@ -39,7 +39,7 @@ const path = Astro.url.pathname;
         <ul id="site-menu" class="site-menu" popover="auto">
           <li><a href="/" aria-current={path === '/' ? 'page' : undefined}>Beranda</a></li>
           {categories.map((c) => (
-            <li><a href={`/kategori/${c.slug}/`} aria-current={currentCategory === c.slug ? (path.startsWith(`/kategori/${c.slug}/`) ? 'page' : 'true') : undefined}>{c.name}</a></li>
+            <li><a href={`/${c.slug}/`} aria-current={currentCategory === c.slug ? (path === `/${c.slug}/` ? 'page' : 'true') : undefined}>{c.name}</a></li>
           ))}
         </ul>
       </nav>

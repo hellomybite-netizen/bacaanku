@@ -1,7 +1,7 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
-import { getArticles, articleUrl } from '../utils/articles';
-const latest = (await getArticles()).slice(0, 5);
+import { categories } from '../config/site';
+export const prerender = true;
 ---
 <BaseLayout title="Halaman tidak ditemukan" description="Halaman yang Anda cari tidak ditemukan di bacaankunetwork.com." noindex>
   <div class="container narrow">
@@ -10,7 +10,7 @@ const latest = (await getArticles()).slice(0, 5);
       <h1 class="page-title">Halaman tidak ditemukan</h1>
       <p>Mungkin tautannya salah atau beritanya sudah dipindahkan. Coba <a href="/cari/">cari berita</a> atau kembali ke <a href="/">beranda</a>.</p>
     </header>
-    <h2 class="section-title">Berita terbaru</h2>
-    <ul class="link-list">{latest.map((a) => <li><a href={articleUrl(a)}>{a.data.title}</a></li>)}</ul>
+    <h2 class="section-title">Kategori</h2>
+    <ul class="link-list">{categories.map((category) => <li><a href={`/${category.slug}/`}>{category.name}</a></li>)}</ul>
   </div>
 </BaseLayout>

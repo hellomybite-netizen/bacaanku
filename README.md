@@ -1,8 +1,9 @@
-# bacaankunetwork.com — Prototipe Portal Berita (Astro)
+# bacaankunetwork.com — Portal Berita (Astro SSR)
 
 Portal berita berbahasa Indonesia yang **ringan, cepat, mudah dikelola, dan kuat SEO-nya**.
-Dibangun dengan [Astro](https://astro.build) (situs statis), konten berupa file Markdown, pencarian statis
-[Pagefind](https://pagefind.app), dan dashboard penulis [Decap CMS](https://decapcms.org) (berbasis git, gratis).
+Produksi berjalan sebagai **Astro SSR di Cloudflare Workers**, konten di **D1**, gambar sementara lewat URL `https://` atau path `/…` (R2 bisa ditambah nanti). Ruang redaksi ada di `/admin/`.
+
+Pratinjau GitHub Pages tetap **build statis** (`BUILD_MODE=static`) dari Markdown di `src/content/`, plus Pagefind.
 
 > ⚠️ **Prototipe.** Semua artikel, tokoh, penulis, angka, dan gambar adalah **contoh fiktif**.
 > Gambar dibuat lokal (`npm run images`) — bukan foto berhak cipta.
@@ -13,11 +14,17 @@ Butuh Node.js 22+ (diuji di Node 24).
 
 ```bash
 npm install
-npm run dev       # http://localhost:4321 (pencarian belum aktif di mode dev)
-npm run build     # build ke dist/ + membuat indeks pencarian Pagefind
-npm run preview   # melihat hasil build (termasuk pencarian)
+cp .dev.vars.example .dev.vars   # kata sandi lokal ruang redaksi
+npm run db:migrate               # skema + artikel contoh ke .data/bacaanku.sqlite
+npx wrangler d1 execute bacaanku-db --local --file=docs/schema.sql
+npm run dev       # http://localhost:4321 (SSR; butuh D1 lokal lewat wrangler)
+npm run build     # build produksi Workers (tanpa Pagefind)
+npm run build:preview   # build statis GitHub Pages (BUILD_MODE=static + Pagefind)
 npm run check     # cek tipe & error
 ```
+
+`BUILD_MODE=static` memaksa `output: 'static'` tanpa adapter Cloudflare, jadi workflow
+`.github/workflows/deploy-preview.yml` tidak ikut mode SSR.
 
 ## Struktur penting
 
@@ -74,16 +81,26 @@ Menu, halaman `/kategori/kesehatan/`, RSS `/rss/kesehatan.xml`, sitemap, dan sec
 - Judul, meta description, canonical, `hreflang="id-ID"` + `x-default`, `<html lang="id">` per halaman
 - Open Graph + Twitter/X card (gambar 1200×675 dari gambar artikel)
 - JSON-LD: `NewsArticle` + `BreadcrumbList` (artikel), `WebSite` + `SearchAction` + `NewsMediaOrganization` (beranda), `ProfilePage` (penulis)
-- `sitemap-index.xml` (@astrojs/sitemap), **`news-sitemap.xml`** (Google News, artikel 48 jam terakhir saat build)
+- `sitemap.xml` (indeks) + arsip bulanan `/sitemap-arsip/YYYY-MM.xml`, **`news-sitemap.xml`** (Google News, 48 jam, dari D1)
 - RSS global `/rss.xml` dan per kategori `/rss/<kategori>.xml`
 - `robots.txt`
 - Gambar via `astro:assets`: AVIF/WebP, `width`/`height`, hero `fetchpriority="high"` (tidak lazy), lainnya `loading="lazy"`
 - Font sistem (tanpa Google Fonts CDN), CSS di-inline, JS ±2 KB (menu, toggle tema, salin tautan)
 
-> Catatan: `news-sitemap.xml` dihitung saat build. Karena situs statis, lakukan build ulang setiap ada artikel baru
-> (otomatis bila memakai Cloudflare Pages + Decap CMS, karena setiap publikasi = commit baru) atau pasang build terjadwal.
+> Catatan: sitemap berita dan RSS di mode SSR dibaca dari D1 dan di-cache di edge. Pratinjau statis menghitungnya saat build.
 
-## Deploy ke Cloudflare Pages
+## Deploy ke Cloudflare Workers
+
+1. `npx wrangler d1 create bacaanku-db` lalu tempel `database_id` ke `wrangler.jsonc`.
+2. `npx wrangler d1 execute bacaanku-db --remote --file=docs/schema.sql`
+3. `npx wrangler secret put ADMIN_PASSWORD` dan `npx wrangler secret put ADMIN_TOKEN`
+4. `npm run build` lalu deploy dengan Wrangler. Cron `*/5` menerbitkan artikel `scheduled`.
+5. Gambar: isi URL `https://` atau unggah berkas ke `public/` dan pakai path `/…`. R2 belum diikat.
+6. Nanti, kalau R2 siap: tambah `r2_buckets` binding `MEDIA`, set `MEDIA_BASE`, kunci tanpa URL ikut terselesaikan.
+
+Rencana lengkap: `docs/migration-ssr-d1-r2.md`.
+
+## Deploy ke Cloudflare Pages (lama, tidak dipakai produksi)
 
 1. Push folder ini ke repo GitHub (privat juga boleh).
 2. Cloudflare Dashboard → **Workers & Pages → Create → Pages → Connect to Git** → pilih repo.
@@ -99,10 +116,13 @@ Menu, halaman `/kategori/kesehatan/`, RSS `/rss/kesehatan.xml`, sitemap, dan sec
 6. Daftarkan situs di **Google Search Console** dan kirim `sitemap-index.xml` + `news-sitemap.xml`.
    Untuk Google News, daftarkan juga di **Google Publisher Center**.
 
-## Menghubungkan Decap CMS (dashboard penulis)
+## Ruang redaksi (`/admin/`)
 
-Dashboard ada di `https://bacaankunetwork.com/admin/`. Setiap artikel yang diterbitkan lewat dashboard menjadi commit
-di GitHub → Cloudflare Pages build ulang otomatis.
+Dashboard penulis yang dipakai sekarang adalah panel SSR di `/admin/` (login kata sandi `ADMIN_PASSWORD`, atau Cloudflare Access jika `CF_ACCESS_TEAM_DOMAIN` dan `CF_ACCESS_AUD` diisi). Decap CMS lama dipindah ke `legacy/decap-cms/` dan tidak lagi dilayani di `/admin/`.
+
+## Menghubungkan Decap CMS (tidak dipakai)
+
+Konfigurasi lama ada di `legacy/decap-cms/`. Dulu dashboard ada di `/admin/` dan setiap terbitan menjadi commit.
 
 **Coba di lokal (tanpa GitHub):**
 

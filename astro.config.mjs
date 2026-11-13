@@ -1,18 +1,36 @@
 // @ts-check
 import { defineConfig } from 'astro/config';
-import sitemap from '@astrojs/sitemap';
+import cloudflare from '@astrojs/cloudflare';
+import { cacheCloudflare } from '@astrojs/cloudflare/cache';
 import mdx from '@astrojs/mdx';
+import { fileURLToPath } from 'node:url';
 
-export default defineConfig({
+const isStatic = process.env.BUILD_MODE === 'static';
+
+/** @type {import('astro').AstroUserConfig} */
+const config = {
   site: 'https://bacaankunetwork.com',
   trailingSlash: 'always',
+  output: isStatic ? 'static' : 'server',
+  session: false,
   build: { format: 'directory', inlineStylesheets: 'always' },
-  integrations: [
-    mdx(),
-    sitemap({
-      filter: (page) => !/\/(cari|admin)\//.test(page) && !page.includes('/404'),
-      i18n: { defaultLocale: 'id', locales: { id: 'id-ID' } },
-    }),
-  ],
+  adapter: isStatic
+    ? undefined
+    : cloudflare({
+        imageService: 'compile',
+        prerenderEnvironment: 'node',
+      }),
+  cache: isStatic ? undefined : { provider: cacheCloudflare() },
+  integrations: [mdx()],
   prefetch: false,
-});
+  vite: {
+    define: {
+      __BUILD_MODE__: JSON.stringify(isStatic ? 'static' : 'server'),
+    },
+    resolve: isStatic
+      ? { alias: { 'cloudflare:workers': fileURLToPath(new URL('./src/lib/cloudflare-stub.ts', import.meta.url)) } }
+      : undefined,
+  },
+};
+
+export default defineConfig(config);

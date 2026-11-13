@@ -1,0 +1,35 @@
+---
+import '../styles/global.css';
+import '../styles/admin.css';
+import { SITE } from '../config/site';
+interface Props { title: string; name?: string }
+const { title, name } = Astro.props;
+---
+<!doctype html>
+<html lang="id">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="robots" content="noindex, nofollow" />
+    <meta name="color-scheme" content="light dark" />
+    <title>{title} · Ruang redaksi</title>
+    <link rel="icon" href="/favicon.ico" sizes="48x48" />
+  </head>
+  <body class="admin-body">
+    <header class="admin-top">
+      <a href="/admin/">{SITE.name}</a>
+      <span class="visually-hidden">Ruang redaksi</span>
+      <div class="grow">
+        {name && <span>{name}</span>}
+        {name && (
+          <form method="post" action="/api/admin/logout">
+            <button class="btn-ghost" type="submit">Keluar</button>
+          </form>
+        )}
+      </div>
+    </header>
+    <main class="admin-main">
+      <slot />
+    </main>
+  </body>
+</html>

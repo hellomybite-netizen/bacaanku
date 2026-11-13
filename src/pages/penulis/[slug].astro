@@ -1,0 +1,50 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ArticleCard from '../../components/ArticleCard.astro';
+import Breadcrumb from '../../components/Breadcrumb.astro';
+import { absUrl } from '../../utils/articles';
+import { breadcrumbLd } from '../../utils/seo';
+import { SITE } from '../../config/site';
+import { applyPublicCache } from '../../lib/cache-headers';
+import { loadAuthor } from '../../lib/public';
+
+export const prerender = __BUILD_MODE__ === 'static';
+
+export async function getStaticPaths() {
+  if (__BUILD_MODE__ !== 'static') return [];
+  const { authorPaths } = await import('../../lib/static-data');
+  return authorPaths();
+}
+
+const slug = Astro.params.slug ?? '';
+const page = await loadAuthor(slug);
+if (!page) return new Response(null, { status: 404, statusText: 'Not Found' });
+const { author, items } = page;
+applyPublicCache(Astro, 'list', [`author-${author.slug}`]);
+const href = `/penulis/${author.slug}/`;
+const crumbs = [{ name: 'Beranda', href: '/' }, { name: 'Redaksi', href: '/redaksi/' }, { name: author.name, href }];
+const personLd = {
+  '@context': 'https://schema.org',
+  '@type': 'ProfilePage',
+  mainEntity: {
+    '@type': 'Person',
+    name: author.name,
+    jobTitle: author.role,
+    description: author.bio,
+    url: absUrl(href),
+    worksFor: { '@id': `${SITE.url}/#organization` },
+  },
+};
+---
+<BaseLayout title={`${author.name} — ${author.role}`} description={`${author.bio} Baca semua tulisan ${author.name} di bacaankunetwork.com.`} jsonLd={[personLd, breadcrumbLd(crumbs)]}>
+  <div class="container">
+    <Breadcrumb items={crumbs} />
+    <header class="page-head">
+      <h1 class="page-title">{author.name}</h1>
+      <p class="muted">{author.role}</p>
+      <p>{author.bio}</p>
+    </header>
+    <h2 class="section-title">Tulisan terbaru</h2>
+    {items.length === 0 ? <p class="muted">Belum ada tulisan terbit.</p> : <div class="grid">{items.map((article) => <ArticleCard article={article} showDesc />)}</div>}
+  </div>
+</BaseLayout>

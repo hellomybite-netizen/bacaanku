@@ -1,0 +1,75 @@
+---
+import AdminLayout from '../../layouts/AdminLayout.astro';
+import { IS_STATIC } from '../../lib/mode';
+import { categories } from '../../config/site';
+import { formatDateTime } from '../../utils/articles';
+import type { AdminRow } from '../../lib/repo';
+
+const labels: Record<string, string> = {
+  draft: 'Draf',
+  review: 'Review',
+  scheduled: 'Terjadwal',
+  published: 'Terbit',
+  archived: 'Arsip',
+};
+const statuses = ['', 'draft', 'review', 'scheduled', 'published', 'archived'];
+let name = '';
+let rows: AdminRow[] = [];
+const status = Astro.url.searchParams.get('status') || '';
+const category = Astro.url.searchParams.get('kategori') || '';
+const q = Astro.url.searchParams.get('q') || '';
+if (!IS_STATIC) {
+  const { getEnv } = await import('../../lib/db');
+  const { readSession } = await import('../../lib/auth');
+  const { adminList } = await import('../../lib/repo');
+  const env = getEnv();
+  const session = await readSession(Astro.request, env);
+  if (!session) return Astro.redirect('/admin/login/');
+  name = session.name;
+  rows = await adminList(getEnv().DB, { status, category, q });
+}
+---
+<AdminLayout title="Artikel" name={name}>
+  {IS_STATIC ? (
+    <p>Daftar artikel ada di server produksi. Pratinjau GitHub Pages tetap statis.</p>
+  ) : (
+    <>
+      <p class="admin-kicker">Ruang redaksi</p>
+      <div class="section-head">
+        <h1 class="admin-title">Artikel</h1>
+        <a class="btn btn-primary" href="/admin/artikel/baru/">Artikel baru</a>
+      </div>
+      <form class="filters" method="get" action="/admin/">
+        <label class="field">
+          <span>Cari judul</span>
+          <input type="search" name="q" value={q} />
+        </label>
+        <label class="field">
+          <span>Kategori</span>
+          <select name="kategori">
+            <option value="">Semua</option>
+            {categories.map((item) => <option value={item.slug} selected={item.slug === category}>{item.name}</option>)}
+          </select>
+        </label>
+        <button type="submit">Terapkan</button>
+      </form>
+      <div class="filters" style="grid-template-columns: repeat(auto-fit, minmax(6rem, 1fr));">
+        {statuses.map((item) => (
+          <a class:list={['btn', item === status && 'btn-primary']} href={item ? `/admin/?status=${item}` : '/admin/'}>{item ? labels[item] : 'Semua'}</a>
+        ))}
+      </div>
+      {rows.length === 0 ? <p>Tidak ada artikel untuk filter ini.</p> : (
+        <div class="row-list">
+          {rows.map((row) => (
+            <a class="admin-row" href={`/admin/artikel/${row.id}/`}>
+              <span class:list={['pill', `pill-${row.status}`]}>{labels[row.status] || row.status}</span>
+              <strong>{row.title}</strong>
+              <small>{row.category_name} · {row.author_name}</small>
+              <small>{row.published_at ? formatDateTime(row.published_at) : 'Belum dijadwalkan'}</small>
+            </a>
+          ))}
+        </div>
+      )}
+    </>
+  )}
+</AdminLayout>

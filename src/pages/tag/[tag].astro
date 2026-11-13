@@ -2,25 +2,28 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import ArticleCard from '../../components/ArticleCard.astro';
 import Breadcrumb from '../../components/Breadcrumb.astro';
-import { getArticles, slugify } from '../../utils/articles';
 import { breadcrumbLd } from '../../utils/seo';
+import { applyPublicCache } from '../../lib/cache-headers';
+import { loadTag } from '../../lib/public';
+
+export const prerender = __BUILD_MODE__ === 'static';
 
 export async function getStaticPaths() {
-  const all = await getArticles();
-  const tags = new Map<string, string>();
-  all.forEach((a) => a.data.tags.forEach((t) => tags.set(slugify(t), t)));
-  return [...tags].map(([slug, name]) => ({
-    params: { tag: slug },
-    props: { name, items: all.filter((a) => a.data.tags.some((t) => slugify(t) === slug)) },
-  }));
+  if (__BUILD_MODE__ !== 'static') return [];
+  const { tagPaths } = await import('../../lib/static-data');
+  return tagPaths();
 }
-const { name, items } = Astro.props;
-const crumbs = [{ name: 'Beranda', href: '/' }, { name: `Tag: ${name}`, href: `/tag/${slugify(name)}/` }];
+
+const slug = Astro.params.tag ?? '';
+const page = await loadTag(slug);
+if (!page) return new Response(null, { status: 404, statusText: 'Not Found' });
+applyPublicCache(Astro, 'list', [`tag-${page.tag.slug}`]);
+const crumbs = [{ name: 'Beranda', href: '/' }, { name: `Tag: ${page.tag.name}`, href: `/tag/${page.tag.slug}/` }];
 ---
-<BaseLayout title={`Berita tentang ${name}`} description={`Kumpulan berita dan artikel dengan tag "${name}" di bacaankunetwork.com.`} jsonLd={[breadcrumbLd(crumbs)]}>
+<BaseLayout title={`Berita tentang ${page.tag.name}`} description={`Kumpulan berita dan artikel dengan tag "${page.tag.name}" di bacaankunetwork.com.`} jsonLd={[breadcrumbLd(crumbs)]}>
   <div class="container">
     <Breadcrumb items={crumbs} />
-    <header class="page-head"><h1 class="page-title">#{name}</h1><p class="muted">{items.length} artikel</p></header>
-    <div class="grid">{items.map((a) => <ArticleCard article={a} headingLevel={2} showDesc />)}</div>
+    <header class="page-head"><h1 class="page-title">#{page.tag.name}</h1><p class="muted">{page.items.length} artikel ditampilkan</p></header>
+    <div class="grid">{page.items.map((article) => <ArticleCard article={article} headingLevel={2} showDesc />)}</div>
   </div>
 </BaseLayout>

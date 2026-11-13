@@ -1,11 +1,15 @@
 ---
 import { Picture } from 'astro:assets';
-import { getCategory } from '../config/site';
-import { articleUrl, formatDate, type Article } from '../utils/articles';
-interface Props { article: Article; variant?: 'default' | 'compact' | 'hero' | 'list'; headingLevel?: 2 | 3; showDesc?: boolean }
+import { articlePath, formatDate } from '../utils/articles';
+import type { ArticleCard as Card } from '../lib/content-types';
+
+interface Props {
+  article: Card;
+  variant?: 'default' | 'compact' | 'hero' | 'list';
+  headingLevel?: 2 | 3;
+  showDesc?: boolean;
+}
 const { article, variant = 'default', headingLevel = 3, showDesc = false } = Astro.props;
-const { data } = article;
-const cat = getCategory(data.category)!;
 const H = `h${headingLevel}` as 'h2' | 'h3';
 const isHero = variant === 'hero';
 const sizes = isHero
@@ -14,27 +18,44 @@ const sizes = isHero
     ? '112px'
     : variant === 'list'
       ? '(min-width: 640px) 260px, 132px'
-    : '(min-width: 1240px) 280px, (min-width: 640px) 45vw, calc(100vw - 2rem)';
+      : '(min-width: 1240px) 280px, (min-width: 640px) 45vw, calc(100vw - 2rem)';
 const widths = isHero ? [480, 800, 1200, 1560] : variant === 'compact' ? [112, 224] : variant === 'list' ? [160, 320, 520] : [320, 480, 640];
+const href = articlePath(article.categorySlug, article.slug);
 ---
 <article class:list={['card', `card--${variant}`]}>
   <div class="card-media">
-    <Picture
-      src={data.heroImage}
-      alt={data.heroAlt}
-      formats={['avif', 'webp']}
-      widths={widths}
-      sizes={sizes}
-      quality={isHero ? 70 : 60}
-      loading={isHero ? 'eager' : 'lazy'}
-      fetchpriority={isHero ? 'high' : undefined}
-      decoding={isHero ? 'sync' : 'async'}
-    />
+    {article.heroImage ? (
+      <Picture
+        src={article.heroImage}
+        alt={article.heroAlt}
+        formats={['avif', 'webp']}
+        widths={widths}
+        sizes={sizes}
+        quality={isHero ? 70 : 60}
+        loading={isHero ? 'eager' : 'lazy'}
+        fetchpriority={isHero ? 'high' : undefined}
+        decoding={isHero ? 'sync' : 'async'}
+      />
+    ) : article.heroSrc ? (
+      <img
+        src={article.heroSrc}
+        srcset={article.heroSrcset}
+        sizes={article.heroSrcset ? sizes : undefined}
+        alt={article.heroAlt}
+        width={article.heroWidth ?? undefined}
+        height={article.heroHeight ?? undefined}
+        loading={isHero ? 'eager' : 'lazy'}
+        fetchpriority={isHero ? 'high' : undefined}
+        decoding={isHero ? 'sync' : 'async'}
+      />
+    ) : (
+      <div class="card-fallback" role="img" aria-label={article.heroAlt}></div>
+    )}
   </div>
   <div class="card-body">
-    <a class="kicker" href={`/kategori/${cat.slug}/`}>{cat.name}</a>
-    <H class="card-title"><a href={articleUrl(article)}>{data.title}</a></H>
-    {(showDesc || isHero) && <p class="card-desc">{data.description}</p>}
-    <p class="card-meta"><span>{cat.name}</span><time datetime={data.publishDate.toISOString()}>{formatDate(data.publishDate)}</time></p>
+    <a class="kicker" href={`/${article.categorySlug}/`}>{article.categoryName}</a>
+    <H class="card-title"><a href={href}>{article.title}</a></H>
+    {(showDesc || isHero) && <p class="card-desc">{article.excerpt}</p>}
+    <p class="card-meta"><span>{article.categoryName}</span><time datetime={new Date(article.publishedAt * 1000).toISOString()}>{formatDate(article.publishedAt)}</time></p>
   </div>
 </article>

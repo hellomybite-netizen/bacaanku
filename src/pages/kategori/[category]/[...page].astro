@@ -1,43 +1,14 @@
 ---
-import type { GetStaticPaths } from 'astro';
-import BaseLayout from '../../../layouts/BaseLayout.astro';
-import ArticleCard from '../../../components/ArticleCard.astro';
-import AdSlot from '../../../components/AdSlot.astro';
-import Breadcrumb from '../../../components/Breadcrumb.astro';
-import Pagination from '../../../components/Pagination.astro';
-import Trending from '../../../components/Trending.astro';
-import { SITE, categories } from '../../../config/site';
-import { getArticles } from '../../../utils/articles';
-import { breadcrumbLd } from '../../../utils/seo';
+import { categories } from '../../../config/site';
 
-export const getStaticPaths = (async ({ paginate }) => {
-  const all = await getArticles();
-  return categories.flatMap((c) =>
-    paginate(all.filter((a) => a.data.category === c.slug), { params: { category: c.slug }, props: { cat: c }, pageSize: SITE.postsPerPage }),
-  );
-}) satisfies GetStaticPaths;
+export const prerender = __BUILD_MODE__ === 'static';
 
-const { page, cat } = Astro.props;
-const base = `/kategori/${cat.slug}/`;
-const crumbs = [{ name: 'Beranda', href: '/' }, { name: cat.name, href: base }];
-const title = page.currentPage > 1 ? `Berita ${cat.name} — Halaman ${page.currentPage}` : cat.slug === 'news' ? 'News — Berita Terkini Hari Ini' : `Berita ${cat.name} Terkini`;
+export function getStaticPaths() {
+  if (__BUILD_MODE__ !== 'static') return [];
+  return categories.map((category) => ({ params: { category: category.slug, page: undefined } }));
+}
+
+const category = Astro.params.category ?? '';
+if (!categories.some((item) => item.slug === category)) return new Response(null, { status: 404 });
+return Astro.redirect(`/${category}/`, 301);
 ---
-<BaseLayout title={title} description={`${cat.description} Kumpulan berita ${cat.name} terbaru di ${SITE.domain}.`} jsonLd={[breadcrumbLd(crumbs)]} currentCategory={cat.slug}>
-  <div class="container">
-    <Breadcrumb items={crumbs} />
-    <header class="page-head">
-      <h1 class="page-title">{cat.name}</h1>
-      <p class="muted">{cat.description}</p>
-      <p class="small"><a href={`/rss/${cat.slug}.xml`}>RSS {cat.name}</a></p>
-    </header>
-    <div class="with-sidebar">
-      <div>
-        {page.data.length === 0 ? <p>Belum ada berita di kategori ini.</p> : (
-          <div class="grid">{page.data.map((a, i) => <ArticleCard article={a} variant={i === 0 && page.currentPage === 1 ? 'hero' : 'default'} headingLevel={2} showDesc />)}</div>
-        )}
-        <Pagination current={page.currentPage} last={page.lastPage} prev={page.url.prev} next={page.url.next} base={base} />
-      </div>
-      <div class="sidebar"><Trending /><AdSlot size="rectangle" /></div>
-    </div>
-  </div>
-</BaseLayout>

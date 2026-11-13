@@ -1,0 +1,29 @@
+{
+  "$schema": "node_modules/wrangler/config-schema.json",
+  "name": "bacaankunetwork",
+  // Entrypoint kustom: fetch Astro + cron penjadwal artikel.
+  "main": "src/worker.ts",
+  "compatibility_date": "2026-11-12",
+  "compatibility_flags": ["nodejs_compat"],
+  "routes": [{ "pattern": "bacaankunetwork.com", "custom_domain": true }],
+  "d1_databases": [
+    {
+      "binding": "DB",
+      "database_name": "bacaanku-db",
+      // Ganti setelah `npx wrangler d1 create bacaanku-db`.
+      "database_id": "00000000-0000-4000-8000-000000000001"
+    }
+  ],
+  // R2 sengaja belum diikat supaya situs bisa tayang tanpa verifikasi kartu.
+  // Nanti tambahkan:
+  // "r2_buckets": [{ "binding": "MEDIA", "bucket_name": "bacaanku-media" }],
+  // lalu secret/var: MEDIA_BASE = "https://media.bacaankunetwork.com"
+  "triggers": { "crons": ["*/5 * * * *"] },
+  // Secrets (jangan di file ini):
+  //   npx wrangler secret put ADMIN_PASSWORD
+  //   npx wrangler secret put ADMIN_TOKEN
+  //   npx wrangler secret put CF_PURGE_TOKEN
+  // Vars opsional saat Zero Trust / R2 siap:
+  //   CF_ACCESS_TEAM_DOMAIN, CF_ACCESS_AUD, CF_ZONE_ID, MEDIA_BASE
+  "observability": { "enabled": false }
+}

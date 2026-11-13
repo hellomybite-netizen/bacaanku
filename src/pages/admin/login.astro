@@ -1,0 +1,53 @@
+---
+import AdminLayout from '../../layouts/AdminLayout.astro';
+import { IS_STATIC } from '../../lib/mode';
+import { EDITORS } from '../../lib/auth';
+
+let mode = { access: false, password: false };
+let salah = false;
+if (!IS_STATIC) {
+  const { getEnv } = await import('../../lib/db');
+  const { authConfig, readSession } = await import('../../lib/auth');
+  const env = getEnv();
+  mode = authConfig(env);
+  const session = await readSession(Astro.request, env);
+  if (session) return Astro.redirect('/admin/');
+  salah = Astro.url.searchParams.get('salah') === '1';
+}
+---
+<AdminLayout title="Masuk">
+  {IS_STATIC ? (
+    <p>Ruang redaksi berjalan di server produksi (SSR), bukan di pratinjau statis.</p>
+  ) : (
+    <form class="login-card" method="post" action="/api/admin/login">
+      <p class="admin-kicker">Bacaanku Network</p>
+      <h1 class="admin-title">Masuk ruang redaksi</h1>
+      {salah && <p class="admin-error">Nama atau kata sandi tidak cocok.</p>}
+      {!mode.password && !mode.access && (
+        <p>Admin belum dikunci. Isi <code>ADMIN_PASSWORD</code> dan <code>ADMIN_TOKEN</code> lewat <code>wrangler secret</code> atau <code>.dev.vars</code>.</p>
+      )}
+      {mode.access && !mode.password && <p>Masuk lewat Cloudflare Access. Header masuk tidak terdeteksi di permintaan ini.</p>}
+      {mode.password && (
+        <>
+          <fieldset>
+            <legend class="field-label">Siapa yang menulis?</legend>
+            <div class="people">
+              {EDITORS.map((editor, index) => (
+                <label>
+                  <input type="radio" name="slug" value={editor.slug} required checked={index === 0} />
+                  {editor.name}
+                </label>
+              ))}
+            </div>
+          </fieldset>
+          <label class="field">
+            <span>Kata sandi redaksi</span>
+            <input type="password" name="password" autocomplete="current-password" required />
+          </label>
+          <button class="btn-primary" type="submit">Masuk</button>
+          <p class="hint">Satu kata sandi untuk Rizal, Jenny, dan Rere. Cloudflare Access tetap bisa dipakai bersamaan.</p>
+        </>
+      )}
+    </form>
+  )}
+</AdminLayout>
