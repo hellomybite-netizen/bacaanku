@@ -3,11 +3,15 @@
    Modern, dense, and easy to scan without sacrificing reading comfort.
    ========================================================= */
 :root {
-  --accent-light: #c63d25;
-  --accent-dark: #ff785f;
-  --accent-strong-light: #a92f1d;
-  --accent-strong-dark: #ff917d;
-  --navy-light: #0b2942;
+  /* Warna dari logo resmi: merah #df292b, navy #0b2239 (disesuaikan untuk kontras WCAG AA) */
+  --brand-red: #d42022;          /* teks putih di atasnya 5.2:1 */
+  --brand-red-strong: #b51c1e;   /* 6.7:1 */
+  --brand-navy: #0b2239;
+  --accent-light: #d42022;
+  --accent-dark: #ff7a7a;
+  --accent-strong-light: #b51c1e;
+  --accent-strong-dark: #ff9a9a;
+  --navy-light: #0b2239;
   --navy-dark: #071827;
   --bg-light: #f4f7fa;
   --bg-dark: #08131f;
@@ -98,7 +102,7 @@ main:focus { outline: none; }
 }
 .skip-link {
   position: absolute; inset-inline-start: 1rem; inset-block-start: -10rem; z-index: 100;
-  background: var(--accent-strong); color: #fff; padding: 0.75rem 1rem; border-radius: var(--radius-sm); font-weight: 800;
+  background: var(--brand-red-strong); color: #fff; padding: 0.75rem 1rem; border-radius: var(--radius-sm); font-weight: 800;
 }
 .skip-link:focus { inset-block-start: 0.75rem; color: #fff; }
 .container { inline-size: min(100% - 2rem, 74rem); margin-inline: auto; }
@@ -119,14 +123,12 @@ main:focus { outline: none; }
   color: var(--text); text-decoration: none; line-height: 1; flex: 0 0 auto;
 }
 .site-logo:hover { color: var(--text); }
-.logo-mark {
-  display: grid; place-items: center; inline-size: 2.55rem; block-size: 2.55rem;
-  background: var(--accent); color: #fff; border-radius: 0.3rem 0.8rem 0.8rem 0.8rem;
-  font-size: 1.35rem; font-weight: 950; letter-spacing: -0.08em;
-  box-shadow: 0 7px 18px color-mix(in srgb, var(--accent) 26%, transparent);
+.logo-img { display: block; block-size: 3rem; inline-size: auto; aspect-ratio: 3.537; }
+.logo-img--dark { display: none; }
+@media (prefers-color-scheme: dark) {
+  :root:not(:has(> head > meta[name="color-scheme"][content="light"])) .site-header { .logo-img--light { display: none; } .logo-img--dark { display: block; } }
 }
-.logo-type { font-size: 1.55rem; font-weight: 900; letter-spacing: -0.055em; }
-.logo-type span { color: var(--accent); font-size: 0.8em; letter-spacing: -0.02em; }
+:root:has(> head > meta[name="color-scheme"][content="dark"]) .site-header { .logo-img--light { display: none; } .logo-img--dark { display: block; } }
 .brand-statement {
   margin: 0; padding-inline-start: 1.5rem; border-inline-start: 1px solid var(--border);
   display: grid; gap: 0.05rem; font-size: 0.8rem; color: var(--muted);
@@ -196,7 +198,7 @@ main:focus { outline: none; }
 }
 .topic-strip strong {
   align-self: stretch; display: flex; align-items: center; padding: 0.7rem 1rem;
-  background: var(--accent); color: #fff; font-size: 0.76rem; text-transform: uppercase; letter-spacing: 0.06em; white-space: nowrap;
+  background: var(--brand-red); color: #fff; font-size: 0.76rem; text-transform: uppercase; letter-spacing: 0.06em; white-space: nowrap;
 }
 .topic-strip div { display: flex; gap: 0.35rem; overflow: auto; padding-inline-end: 0.8rem; scrollbar-width: none; }
 .topic-strip div::-webkit-scrollbar { display: none; }
@@ -231,7 +233,7 @@ main:focus { outline: none; }
 .card--hero .card-media { position: absolute; inset: 0; border-radius: 0; aspect-ratio: auto; }
 .card--hero .card-media::after { content: ""; position: absolute; inset: 0; background: linear-gradient(180deg, transparent 32%, rgb(2 17 30 / 0.9) 100%); }
 .card--hero .card-body { position: relative; z-index: 1; margin-block-start: auto; padding: clamp(1.25rem, 3vw, 2.25rem); align-items: flex-start; color: #fff; }
-.card--hero .kicker { padding: 0.38rem 0.65rem; border-radius: 999px; color: #fff; background: var(--accent); }
+.card--hero .kicker { padding: 0.38rem 0.65rem; border-radius: 999px; color: #fff; background: var(--brand-red); }
 .card--hero .card-title { max-inline-size: 21ch; font-size: clamp(1.75rem, 1.2rem + 2vw, 2.8rem); line-height: 1.07; }
 .card--hero .card-title a:hover { color: #fff; text-decoration: underline; }
 .card--hero .card-desc { max-inline-size: 68ch; color: rgb(255 255 255 / 0.8); font-size: 0.95rem; }
@@ -346,7 +348,7 @@ main:focus { outline: none; }
 .pagination { display: flex; flex-wrap: wrap; align-items: center; gap: 0.5rem; margin-block: 2rem; }
 .pagination ol { list-style: none; display: flex; gap: 0.35rem; margin: 0; padding: 0; }
 .pagination a, .pagination span { display: inline-flex; align-items: center; justify-content: center; min-inline-size: 2.5rem; min-block-size: 2.5rem; padding-inline: 0.75rem; border: 1px solid var(--border); border-radius: var(--radius-sm); text-decoration: none; }
-.pagination [aria-current] { background: var(--accent-strong); color: #fff; border-color: var(--accent-strong); }
+.pagination [aria-current] { background: var(--brand-red-strong); color: #fff; border-color: var(--brand-red-strong); }
 .pagination [aria-disabled] { color: var(--muted); }
 .link-list { padding-inline-start: 1.25rem; display: grid; gap: 0.6rem; }
 .link-list a { font-weight: 750; }
@@ -369,8 +371,8 @@ main:focus { outline: none; }
 .footer-brand > p { max-inline-size: 36ch; color: rgb(255 255 255 / 0.68); font-size: 0.88rem; }
 .footer-brand .footer-note { margin-block-start: 1rem; font-size: 0.76rem; }
 .footer-logo { margin-block-end: 1rem; color: #fff; }
+.footer-logo .logo-img { block-size: 3.4rem; }
 .footer-logo:hover { color: #fff; }
-.footer-logo .logo-mark { box-shadow: none; }
 .footer-title { margin-block-end: 0.8rem; color: rgb(255 255 255 / 0.48); font-size: 0.7rem; font-weight: 900; text-transform: uppercase; letter-spacing: 0.12em; }
 .footer-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.18rem; }
 .footer-list a { display: inline-block; padding-block: 0.3rem; color: rgb(255 255 255 / 0.82); font-size: 0.86rem; text-decoration: none; }
@@ -394,8 +396,7 @@ main:focus { outline: none; }
   :root { --header-h: 7rem; }
   .masthead { min-block-size: 4rem; }
   .brand-statement { display: none; }
-  .logo-mark { inline-size: 2.2rem; block-size: 2.2rem; }
-  .logo-type { font-size: 1.3rem; }
+  .logo-img { block-size: 2.6rem; }
   .nav-shell { min-block-size: 3rem; }
   .top-stories { grid-template-columns: 1fr; }
   .top-side { grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1rem; }
@@ -443,7 +444,7 @@ main:focus { outline: none; }
   .footer-bottom { display: grid; }
 }
 @media (max-width: 24rem) {
-  .logo-type { font-size: 1.08rem; }
+  .logo-img { block-size: 2.25rem; }
   .grid--4 { grid-template-columns: 1fr; }
   .card--list { grid-template-columns: 7rem minmax(0, 1fr); }
 }

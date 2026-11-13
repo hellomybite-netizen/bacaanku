@@ -49,15 +49,5 @@ for (const [slug, label, hue] of items) {
   await sharp(Buffer.from(art(1600, 900, hue, label, (s += 13)))).jpeg({ quality: 82, mozjpeg: true }).toFile(`src/assets/articles/${slug}.jpg`);
 }
 
-// OG default, logo, favicon
-const og = `<svg xmlns="http://www.w3.org/2000/svg" width="1200" height="630"><rect width="100%" height="100%" fill="#17130f"/>
-<circle cx="1050" cy="120" r="260" fill="#c2410c" opacity="0.35"/><circle cx="980" cy="560" r="180" fill="#fb923c" opacity="0.18"/>
-<text x="90" y="320" font-family="DejaVu Serif, serif" font-weight="700" font-size="96" fill="#fff">bacaanku<tspan fill="#fb923c">network</tspan></text>
-<text x="94" y="410" font-family="DejaVu Sans, sans-serif" font-size="40" fill="#e7e2dc">bacaankunetwork.com · Bacaan jernih, setiap hari.</text></svg>`;
-await sharp(Buffer.from(og)).png().toFile('public/og-default.png');
-const logo = (n) => `<svg xmlns="http://www.w3.org/2000/svg" width="${n}" height="${n}" viewBox="0 0 64 64"><rect width="64" height="64" rx="14" fill="#c2410c"/><text x="32" y="47" text-anchor="middle" font-family="DejaVu Serif, serif" font-weight="700" font-size="44" fill="#fff">b</text></svg>`;
-await sharp(Buffer.from(logo(512))).png().toFile('public/logo-512.png');
-await sharp(Buffer.from(logo(180))).png().toFile('public/apple-touch-icon.png');
-const { writeFileSync } = await import('node:fs');
-writeFileSync('public/favicon.svg', logo(64));
+// Logo, favicon, ikon app & og-default.png dibuat dari logo resmi: node scripts/build-logo.mjs
 console.log('Placeholder images generated.');

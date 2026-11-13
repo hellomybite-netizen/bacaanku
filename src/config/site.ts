@@ -17,7 +17,9 @@ export const SITE = {
   twitter: '@bacaankunetwork', // TODO: ganti dengan akun X asli
   email: 'redaksi@bacaankunetwork.com',
   // Logo untuk JSON-LD Organization/publisher (file di /public)
-  logo: '/logo-512.png',
+  logo: '/brand/logo-organization-1200x400.png',
+  logoWidth: 1200,
+  logoHeight: 400,
   defaultOgImage: '/og-default.png',
   postsPerPage: 6,
 } as const;
