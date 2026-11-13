@@ -10,5 +10,5 @@ export function getStaticPaths() {
 export const GET: APIRoute = async ({ props }) => {
   const { cat } = props as { cat: (typeof categories)[number] };
   const items = (await getArticles()).filter((a) => a.data.category === cat.slug);
-  return feed(items, `${SITE.domain} — ${cat.name}`, cat.description);
+  return feed(items, `${SITE.name} — ${cat.name}`, cat.description);
 };

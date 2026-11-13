@@ -18,7 +18,7 @@ ${items
     (a) => `  <url>
     <loc>${absUrl(articleUrl(a))}</loc>
     <news:news>
-      <news:publication><news:name>${esc(SITE.domain)}</news:name><news:language>id</news:language></news:publication>
+      <news:publication><news:name>${esc(SITE.name)}</news:name><news:language>id</news:language></news:publication>
       <news:publication_date>${a.data.publishDate.toISOString()}</news:publication_date>
       <news:title>${esc(a.data.title)}</news:title>
     </news:news>
