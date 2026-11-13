@@ -1,31 +1,30 @@
 import type { APIRoute } from 'astro';
 import { SITE } from '../config/site';
-import { getArticles, articleUrl, absUrl } from '../utils/articles';
+import { articlePath, absUrl } from '../utils/articles';
+import { xmlEscape } from '../utils/xml';
+import { applyResponseCache } from '../lib/cache-headers';
+import { loadNewsEntries } from '../lib/public';
 
-/**
- * Google News sitemap: hanya artikel 48 jam terakhir (dihitung saat build).
- * Karena situs statis, lakukan build ulang berkala (mis. tiap publikasi / cron) agar daftar ini segar.
- */
-const esc = (s: string) => s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+export const prerender = __BUILD_MODE__ === 'static';
 
-export const GET: APIRoute = async () => {
-  const cutoff = Date.now() - 48 * 60 * 60 * 1000;
-  const items = (await getArticles()).filter((a) => a.data.publishDate.valueOf() >= cutoff).slice(0, 1000);
+export const GET: APIRoute = async (context) => {
+  const items = await loadNewsEntries();
   const body = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9" xmlns:news="http://www.google.com/schemas/sitemap-news/0.9">
 ${items
   .map(
-    (a) => `  <url>
-    <loc>${absUrl(articleUrl(a))}</loc>
+    (article) => `  <url>
+    <loc>${xmlEscape(absUrl(articlePath(article.category_slug, article.slug)))}</loc>
     <news:news>
-      <news:publication><news:name>${esc(SITE.name)}</news:name><news:language>id</news:language></news:publication>
-      <news:publication_date>${a.data.publishDate.toISOString()}</news:publication_date>
-      <news:title>${esc(a.data.title)}</news:title>
+      <news:publication><news:name>${xmlEscape(SITE.name)}</news:name><news:language>id</news:language></news:publication>
+      <news:publication_date>${new Date(article.published_at * 1000).toISOString()}</news:publication_date>
+      <news:title>${xmlEscape(article.title)}</news:title>
     </news:news>
   </url>`,
   )
   .join('\n')}
 </urlset>
 `;
-  return new Response(body, { headers: { 'Content-Type': 'application/xml; charset=utf-8' } });
+  const response = new Response(body, { headers: { 'Content-Type': 'application/xml; charset=utf-8' } });
+  return applyResponseCache(response, context.cache, 'feed', ['sitemap', 'feed']);
 };

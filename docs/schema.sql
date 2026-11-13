@@ -61,8 +61,11 @@ CREATE TABLE IF NOT EXISTS articles (
   author_id        INTEGER NOT NULL REFERENCES authors(id)    ON UPDATE CASCADE ON DELETE RESTRICT,
   status           TEXT    NOT NULL DEFAULT 'draft'
                            CHECK (status IN ('draft', 'review', 'scheduled', 'published', 'archived')),
-  -- Gambar utama di R2 (bucket bacaanku-media). Key tanpa ekstensi ukuran, mis. '2026/11/leonid-2026'
-  -- File nyata: {key}-480.webp, {key}-960.webp, {key}-1600.webp (dibuat saat upload)
+  -- Gambar utama. Satu kolom untuk tiga bentuk (R2 menyusul, belum wajib):
+  --   * URL absolut  https://...
+  --   * path situs   /media/articles/foto.jpg  atau /...
+  --   * kunci R2     '2026/11/leonid' bila MEDIA_BASE dipasang nanti
+  --     File R2: {key}-480.webp, {key}-960.webp, {key}-1600.webp
   hero_r2_key      TEXT,
   hero_width       INTEGER,                      -- dimensi asli → atribut width/height (anti-CLS)
   hero_height      INTEGER,
@@ -175,9 +178,23 @@ INSERT OR IGNORE INTO categories (slug, name, description, sort_order) VALUES
   ('olahraga',  'Olahraga',  'Sepak bola, bulu tangkis, MotoGP, dan olahraga lainnya.',   6),
   ('hiburan',   'Hiburan',   'Film, musik, selebritas, dan budaya pop.',                  7);
 
-INSERT OR IGNORE INTO authors (slug, name, role, bio) VALUES
+INSERT OR IGNORE INTO authors (slug, name, role, bio, email) VALUES
   ('redaksi', 'Redaksi Bacaanku Network', 'Tim Redaksi',
-   'Tulisan tim redaksi bacaankunetwork.com, disusun dari sumber-sumber terbuka yang dicantumkan di setiap artikel.');
+   'Tulisan tim redaksi bacaankunetwork.com, disusun dari sumber-sumber terbuka yang dicantumkan di setiap artikel.',
+   'redaksi@bacaankunetwork.com'),
+  ('rizal', 'Rizal', 'Editor',
+   'Editor bacaankunetwork.com.',
+   'rizal@bacaankunetwork.com'),
+  ('jenny', 'Jenny', 'Editor',
+   'Editor bacaankunetwork.com.',
+   'jenny@bacaankunetwork.com'),
+  ('rere', 'Rere', 'Editor',
+   'Editor bacaankunetwork.com.',
+   'rere@bacaankunetwork.com');
+
+-- Database yang sudah pernah di-seed tanpa email/editor tetap dapat baris yang sama.
+UPDATE authors SET email = 'redaksi@bacaankunetwork.com'
+  WHERE slug = 'redaksi' AND (email IS NULL OR email = '');
 
 -- ---------------------------------------------------------------------
 -- Contoh query publik (semua memakai index di atas)

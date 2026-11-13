@@ -1,0 +1,14 @@
+# Salin ke .dev.vars (tidak di-commit) untuk `astro dev` / `wrangler dev`.
+# Kata sandi bersama tim redaksi. Ganti sebelum produksi.
+ADMIN_PASSWORD=ganti-kata-sandi-redaksi
+# Kunci HMAC cookie sesi. Bedakan dari kata sandi.
+ADMIN_TOKEN=ganti-token-acak-panjang
+
+# Opsional, setelah Cloudflare Access dipasang:
+# CF_ACCESS_TEAM_DOMAIN=namatim
+# CF_ACCESS_AUD=aud-dari-aplikasi-access
+# CF_ZONE_ID=
+# CF_PURGE_TOKEN=
+
+# Opsional, setelah R2 + domain media siap:
+# MEDIA_BASE=https://media.bacaankunetwork.com

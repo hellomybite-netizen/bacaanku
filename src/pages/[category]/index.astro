@@ -1,0 +1,56 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import ArticleCard from '../../components/ArticleCard.astro';
+import AdSlot from '../../components/AdSlot.astro';
+import Breadcrumb from '../../components/Breadcrumb.astro';
+import Trending from '../../components/Trending.astro';
+import { SITE } from '../../config/site';
+import { breadcrumbLd } from '../../utils/seo';
+import { applyPublicCache } from '../../lib/cache-headers';
+import { loadCategory } from '../../lib/public';
+
+export const prerender = __BUILD_MODE__ === 'static';
+
+export async function getStaticPaths() {
+  if (__BUILD_MODE__ !== 'static') return [];
+  const { categoryPaths } = await import('../../lib/static-data');
+  return categoryPaths();
+}
+
+const slug = Astro.params.category ?? '';
+const before = Number(Astro.url.searchParams.get('before'));
+const cursorId = Number(Astro.url.searchParams.get('id'));
+const cursor = Number.isFinite(before) && before > 0 && Number.isFinite(cursorId) ? { publishedAt: before, id: cursorId } : null;
+const page = await loadCategory(slug, cursor);
+if (!page) {
+  Astro.response.status = 404;
+  return new Response(null, { status: 404, statusText: 'Not Found' });
+}
+const { category, items, next, trending } = page;
+applyPublicCache(Astro, 'list', [`cat-${category.slug}`]);
+const base = `/${category.slug}/`;
+const crumbs = [{ name: 'Beranda', href: '/' }, { name: category.name, href: base }];
+const title = cursor ? `Berita ${category.name} — sebelumnya` : category.slug === 'news' ? 'News — Berita Terkini Hari Ini' : `Berita ${category.name} Terkini`;
+---
+<BaseLayout title={title} description={`${category.description} Kumpulan berita ${category.name} terbaru di ${SITE.domain}.`} jsonLd={[breadcrumbLd(crumbs)]} currentCategory={category.slug}>
+  <div class="container">
+    <Breadcrumb items={crumbs} />
+    <header class="page-head">
+      <h1 class="page-title">{category.name}</h1>
+      <p class="muted">{category.description}</p>
+      <p class="small"><a href={`/rss/${category.slug}.xml`}>RSS {category.name}</a></p>
+    </header>
+    <div class="with-sidebar">
+      <div>
+        {items.length === 0 ? <p>Belum ada berita di kategori ini.</p> : (
+          <div class="grid">{items.map((article, index) => <ArticleCard article={article} variant={index === 0 && !cursor ? 'hero' : 'default'} headingLevel={2} showDesc />)}</div>
+        )}
+        <nav class="pagination" aria-label="Halaman">
+          {cursor ? <a href={base}>‹ Terbaru</a> : <span aria-disabled="true">‹ Terbaru</span>}
+          {next ? <a href={`${base}?before=${next.publishedAt}&id=${next.id}`} rel="next">Berikutnya ›</a> : <span aria-disabled="true">Berikutnya ›</span>}
+        </nav>
+      </div>
+      <div class="sidebar"><Trending items={trending} /><AdSlot size="rectangle" /></div>
+    </div>
+  </div>
+</BaseLayout>

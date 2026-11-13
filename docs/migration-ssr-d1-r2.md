@@ -3,6 +3,8 @@
 > Proyek: **Bacaanku Network** — `bacaankunetwork.com`
 > Dokumen ini hanya rencana teknis (tidak ikut build Astro; folder `docs/` di luar `src/` dan `public/`).
 > Angka limit dicek dari dokumentasi resmi Cloudflare per 12 Nov 2026 — cek ulang sebelum eksekusi.
+>
+> **Penyesuaian saat implementasi:** Cloudflare R2 ditunda supaya situs bisa tayang tanpa verifikasi kartu/tagihan. `wrangler.jsonc` belum memasang `r2_buckets`. Gambar artikel memakai URL `https://…` atau path situs `/…` yang disimpan di kolom `hero_r2_key`. Jika nanti `MEDIA_BASE` (dan binding `MEDIA`) diisi, kunci R2 seperti `2026/11/slug` ikut terselesaikan. Pratinjau GitHub Pages tetap build statis lewat `BUILD_MODE=static` (`npm run build:preview`).
 
 ## 0. Target & ringkasan keputusan
 

@@ -5,21 +5,30 @@
   "private": true,
   "scripts": {
     "dev": "astro dev",
-    "build": "astro build && pagefind --site dist",
+    "build": "astro build",
     "preview": "astro preview",
     "images": "node scripts/generate-placeholders.mjs",
     "check": "astro check",
-    "build:preview": "astro build && node scripts/preview-rewrite.mjs && pagefind --site dist"
+    "build:preview": "BUILD_MODE=static astro build && node scripts/preview-rewrite.mjs && pagefind --site dist",
+    "db:migrate": "node scripts/migrate-content.mjs",
+    "db:migrate:dry": "node scripts/migrate-content.mjs --dry-run",
+    "db:explain": "node scripts/explain-queries.mjs",
+    "db:verify-markdown": "node scripts/verify-markdown.mjs"
   },
   "dependencies": {
+    "@astrojs/cloudflare": "^14.4.7",
     "@astrojs/mdx": "^8.1.5",
     "@astrojs/rss": "^4.0.19",
-    "@astrojs/sitemap": "^3.7.4",
     "astro": "^7.4.11",
-    "sharp": "^0.35.5"
+    "marked": "^16.4.2",
+    "sanitize-html": "^2.18.2",
+    "sharp": "^0.35.5",
+    "wrangler": "^4.161.0"
   },
   "devDependencies": {
     "@astrojs/check": "^0.9.12",
+    "@cloudflare/workers-types": "^5.20261113.1",
+    "@types/sanitize-html": "^2.16.2",
     "pagefind": "^1.6.0",
     "typescript": "^6.0.3"
   }

@@ -1,5 +1,6 @@
 ---
 import { SITE, categories, footerLinks } from '../config/site';
+import { SHOW_PROTOTYPE_NOTE } from '../lib/mode';
 const year = new Date().getFullYear();
 ---
 <footer class="site-footer">
@@ -7,7 +8,7 @@ const year = new Date().getFullYear();
     <div class="footer-brand">
       <p class="site-logo footer-logo"><img class="logo-img" src="/brand/logo-dark-h96.webp" srcset="/brand/logo-dark-h48.webp 1x, /brand/logo-dark-h96.webp 2x, /brand/logo-dark-h144.webp 3x" width="340" height="96" alt="Bacaanku Network" decoding="async" loading="lazy" /></p>
       <p>{SITE.tagline} Kami merangkum kabar penting agar lebih cepat dipahami.</p>
-      <p class="footer-note">Prototipe — seluruh artikel di situs ini adalah <strong>contoh fiktif</strong>.</p>
+      {SHOW_PROTOTYPE_NOTE && <p class="footer-note">Pratinjau — artikel contoh di build statis ini fiktif. Situs tayang memakai ruang redaksi.</p>}
     </div>
     <nav aria-label="Kategori (footer)">
       <h2 class="footer-title">Kategori</h2>
@@ -21,7 +22,7 @@ const year = new Date().getFullYear();
       <h2 class="footer-title">Ikuti</h2>
       <ul class="footer-list">
         <li><a href="/rss.xml">RSS semua berita</a></li>
-        <li><a href="/sitemap-index.xml">Sitemap</a></li>
+        <li><a href="/sitemap.xml">Sitemap</a></li>
       </ul>
     </div>
   </div>

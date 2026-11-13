@@ -3,4 +3,7 @@ dist/
 .astro/
 .DS_Store
 .env*
+.dev.vars
+.data/
+.wrangler/
 screenshots/

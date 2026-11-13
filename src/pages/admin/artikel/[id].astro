@@ -1,0 +1,68 @@
+---
+import AdminLayout from '../../../layouts/AdminLayout.astro';
+import EditorForm from '../../../components/admin/EditorForm.astro';
+import { IS_STATIC } from '../../../lib/mode';
+import { emptyValues, valuesFromRecord, type ArticleValues } from '../../../lib/editorial';
+
+export function getStaticPaths() {
+  return [];
+}
+
+const id = Number(Astro.params.id);
+let name = '';
+let csrf = '';
+let values: ArticleValues = emptyValues();
+let errors: Record<string, string> = {};
+let categories: { slug: string; name: string }[] = [];
+let authors: { slug: string; name: string; role: string }[] = [];
+let missing = false;
+let status = '';
+if (!IS_STATIC) {
+  if (!Number.isInteger(id) || id < 1) missing = true;
+  else {
+    const { getDb, getEnv } = await import('../../../lib/db');
+    const { readSession } = await import('../../../lib/auth');
+    const { listAuthors, listCategories } = await import('../../../lib/repo');
+    const { handleArticlePost, loadEditor } = await import('../../../lib/admin-save');
+    const env = getEnv();
+    const session = await readSession(Astro.request, env);
+    if (!session) return Astro.redirect('/admin/login/');
+    name = session.name;
+    csrf = session.csrf;
+    const db = getDb();
+    categories = await listCategories(db);
+    authors = await listAuthors(db);
+    const record = await loadEditor(id);
+    if (!record) missing = true;
+    else {
+      status = record.status;
+      values = valuesFromRecord(record);
+      if (Astro.request.method === 'POST') {
+        const result = await handleArticlePost(Astro.request, {
+          id,
+          session,
+          waitUntil: (promise) => Astro.locals.cfContext.waitUntil(promise),
+        });
+        if (result.ok) return Astro.redirect(result.redirect, 303);
+        errors = result.errors;
+        values = result.values;
+      }
+    }
+  }
+}
+const saved = Astro.url.searchParams.get('tersimpan') === '1';
+---
+<AdminLayout title={values.title || 'Edit artikel'} name={name}>
+  {IS_STATIC ? <p>Editor hanya tersedia di server produksi.</p> : missing ? (
+    <>
+      <h1 class="admin-title">Artikel tidak ditemukan</h1>
+      <p><a href="/admin/">Kembali ke daftar</a></p>
+    </>
+  ) : (
+    <>
+      <p class="admin-kicker"><a href="/admin/">Artikel</a></p>
+      <h1 class="admin-title">Edit artikel</h1>
+      <EditorForm values={values} errors={errors} categories={categories} authors={authors} csrf={csrf} saved={saved && !Object.keys(errors).length} status={status} />
+    </>
+  )}
+</AdminLayout>

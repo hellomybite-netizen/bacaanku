@@ -1,14 +1,20 @@
 import type { APIRoute } from 'astro';
 import { SITE, categories } from '../../config/site';
-import { getArticles } from '../../utils/articles';
 import { feed } from '../../utils/feed';
+import { applyResponseCache } from '../../lib/cache-headers';
+import { loadFeed } from '../../lib/public';
+
+export const prerender = __BUILD_MODE__ === 'static';
 
 export function getStaticPaths() {
-  return categories.map((c) => ({ params: { category: c.slug }, props: { cat: c } }));
+  if (__BUILD_MODE__ !== 'static') return [];
+  return categories.map((category) => ({ params: { category: category.slug } }));
 }
 
-export const GET: APIRoute = async ({ props }) => {
-  const { cat } = props as { cat: (typeof categories)[number] };
-  const items = (await getArticles()).filter((a) => a.data.category === cat.slug);
-  return feed(items, `${SITE.name} — ${cat.name}`, cat.description);
+export const GET: APIRoute = async (context) => {
+  const slug = context.params.category ?? '';
+  const data = await loadFeed(slug);
+  if (!data) return new Response('Kategori tidak ditemukan', { status: 404 });
+  const response = await feed(data.items, `${SITE.name} — ${data.titleSuffix}`, data.description);
+  return applyResponseCache(response, context.cache, 'feed', ['feed', `cat-${slug}`]);
 };

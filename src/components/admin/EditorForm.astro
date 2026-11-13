@@ -1,0 +1,165 @@
+---
+import type { ArticleValues } from '../../lib/editorial';
+interface Author { slug: string; name: string; role: string }
+interface Category { slug: string; name: string }
+interface Props {
+  values: ArticleValues;
+  errors: Record<string, string>;
+  categories: Category[];
+  authors: Author[];
+  csrf: string;
+  saved?: boolean;
+  status?: string;
+}
+const { values, errors, categories, authors, csrf, saved = false, status } = Astro.props;
+const errorList = Object.values(errors);
+---
+{saved && <p class="admin-ok" role="status">Tersimpan.</p>}
+{errorList.length > 0 && (
+  <div class="admin-error" role="alert">
+    <strong>Periksa isian berikut.</strong>
+    <ul>{errorList.map((message) => <li>{message}</li>)}</ul>
+  </div>
+)}
+<form method="post" class="editor-grid">
+  <input type="hidden" name="csrf" value={csrf} />
+  <div class="panel">
+    <label class="field">
+      <span>Judul</span>
+      <input name="title" required maxlength="120" value={values.title} />
+      {errors.title && <small class="field-error">{errors.title}</small>}
+    </label>
+    <label class="field">
+      <span>Slug URL</span>
+      <input name="slug" pattern="[a-z0-9-]+" value={values.slug} data-slug />
+      <small class="hint">/{values.category || 'kategori'}/{values.slug || 'slug'}/</small>
+    </label>
+    <label class="field">
+      <span>Ringkasan <small class="counter" data-count-for="excerpt" data-min="50" data-max="170">0</small></span>
+      <textarea name="excerpt" id="excerpt" maxlength="170" rows="3">{values.excerpt}</textarea>
+    </label>
+    <div class="split split-2">
+      <label class="field">
+        <span>Kategori</span>
+        <select name="category" required>
+          {categories.map((category) => <option value={category.slug} selected={category.slug === values.category}>{category.name}</option>)}
+        </select>
+      </label>
+      <label class="field">
+        <span>Penulis</span>
+        <select name="author" required>
+          {authors.map((author) => <option value={author.slug} selected={author.slug === values.author}>{author.name} · {author.role}</option>)}
+        </select>
+      </label>
+    </div>
+    <label class="field">
+      <span>Tag, dipisah koma</span>
+      <input name="tags" value={values.tags} placeholder="hujan meteor, astronomi" />
+    </label>
+    <label class="field">
+      <span>Isi (Markdown)</span>
+      <textarea name="body" id="body-md">{values.body}</textarea>
+    </label>
+    <div class="preview-pane panel">
+      <p class="hint">Pratinjau</p>
+      <div id="preview" class="prose"><p class="hint">Pratinjau muncul setelah Anda mengetik.</p></div>
+    </div>
+  </div>
+  <div class="panel">
+    <p class="admin-kicker">Gambar</p>
+    <p class="hint">Tempel URL https:// atau path situs /… R2 bisa menyusul tanpa mengubah formulir ini.</p>
+    <label class="field"><span>URL gambar utama</span><input name="hero_url" type="url" value={values.heroUrl} placeholder="https:// atau /media/…" /></label>
+    <label class="field"><span>Teks alternatif</span><input name="hero_alt" value={values.heroAlt} /></label>
+    <label class="field"><span>Keterangan</span><input name="hero_caption" value={values.heroCaption} /></label>
+    <label class="field"><span>Kredit</span><input name="hero_credit" value={values.heroCredit} placeholder="Foto: Nama, CC BY 4.0" /></label>
+    <label class="field"><span>URL kredit</span><input name="hero_credit_url" type="url" value={values.heroCreditUrl} /></label>
+    <div class="split split-2">
+      <label class="field"><span>Lebar (px)</span><input name="hero_width" inputmode="numeric" value={values.heroWidth} /></label>
+      <label class="field"><span>Tinggi (px)</span><input name="hero_height" inputmode="numeric" value={values.heroHeight} /></label>
+    </div>
+    <p class="admin-kicker">Sumber (minimal 3 saat tayang)</p>
+    <div id="sources">
+      {values.sources.map((source) => (
+        <div class="source-row">
+          <input name="source_name" value={source.name} placeholder="Nama media" aria-label="Nama sumber" />
+          <input name="source_title" value={source.title} placeholder="Judul rujukan" aria-label="Judul sumber" />
+          <input name="source_url" type="url" value={source.url} placeholder="https://" aria-label="URL sumber" />
+        </div>
+      ))}
+    </div>
+    <button type="button" id="add-source">Tambah sumber</button>
+    <p class="admin-kicker">SEO</p>
+    <label class="field">
+      <span>Judul SEO <small class="counter" data-count-for="seo_title" data-max="70">0</small></span>
+      <input name="seo_title" id="seo_title" maxlength="70" value={values.seoTitle} />
+    </label>
+    <label class="field">
+      <span>Deskripsi SEO <small class="counter" data-count-for="seo_description" data-min="50" data-max="170">0</small></span>
+      <textarea name="seo_description" id="seo_description" maxlength="170" rows="3">{values.seoDescription}</textarea>
+    </label>
+    <label class="field"><span>URL kanonis (opsional)</span><input name="canonical_url" type="url" value={values.canonicalUrl} /></label>
+    <label class="people"><input type="checkbox" name="is_headline" value="1" checked={values.isHeadline} /> Headline beranda</label>
+    <label class="field">
+      <span>Waktu tayang (WIB)</span>
+      <input name="publish_wib" type="datetime-local" value={values.publishWib} />
+      {status && <small class="hint">Status sekarang: {status}</small>}
+    </label>
+    <div class="editor-actions">
+      <button type="submit" name="action" value="draft" formnovalidate>Simpan draf</button>
+      <button type="submit" name="action" value="review">Ke review</button>
+      <button type="submit" name="action" value="schedule">Jadwalkan</button>
+      <button class="btn-primary" type="submit" name="action" value="publish">Terbitkan</button>
+      <button type="submit" name="action" value="archive" formnovalidate>Arsipkan</button>
+    </div>
+  </div>
+</form>
+<script>
+  const form = document.querySelector('form');
+  const title = form?.querySelector<HTMLInputElement>('[name="title"]');
+  const slug = form?.querySelector<HTMLInputElement>('[data-slug]');
+  let slugTouched = Boolean(slug?.value);
+  slug?.addEventListener('input', () => { slugTouched = true; });
+  const slugify = (value: string) => value.toLowerCase().normalize('NFKD').replace(/[\u0300-\u036f]/g, '').replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+  title?.addEventListener('input', () => { if (!slugTouched && slug) slug.value = slugify(title.value); });
+
+  document.querySelectorAll<HTMLElement>('[data-count-for]').forEach((counter) => {
+    const field = document.getElementById(counter.dataset.countFor || '');
+    const max = Number(counter.dataset.max || 0);
+    const min = Number(counter.dataset.min || 0);
+    const paint = () => {
+      const length = (field as HTMLInputElement | HTMLTextAreaElement | null)?.value.length ?? 0;
+      counter.textContent = max ? `${length}/${max}` : String(length);
+      counter.classList.toggle('warn', (max > 0 && length > max) || (min > 0 && length > 0 && length < min));
+    };
+    field?.addEventListener('input', paint);
+    paint();
+  });
+
+  document.getElementById('add-source')?.addEventListener('click', () => {
+    const row = document.createElement('div');
+    row.className = 'source-row';
+    row.innerHTML = '<input name="source_name" placeholder="Nama media" aria-label="Nama sumber"><input name="source_title" placeholder="Judul rujukan" aria-label="Judul sumber"><input name="source_url" type="url" placeholder="https://" aria-label="URL sumber">';
+    document.getElementById('sources')?.appendChild(row);
+  });
+
+  const body = document.getElementById('body-md') as HTMLTextAreaElement | null;
+  const preview = document.getElementById('preview');
+  const csrf = form?.querySelector<HTMLInputElement>('[name="csrf"]')?.value || '';
+  let timer = 0;
+  const render = async () => {
+    if (!body || !preview) return;
+    const response = await fetch('/api/admin/preview', {
+      method: 'POST',
+      headers: { 'content-type': 'application/json' },
+      body: JSON.stringify({ csrf, markdown: body.value }),
+    });
+    if (!response.ok) return;
+    const data = await response.json() as { html?: string };
+    preview.innerHTML = data.html || '<p class="hint">Kosong.</p>';
+  };
+  body?.addEventListener('input', () => {
+    window.clearTimeout(timer);
+    timer = window.setTimeout(() => { void render(); }, 280);
+  });
+  if (body?.value) void render();
+</script>
