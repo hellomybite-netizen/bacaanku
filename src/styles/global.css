@@ -371,7 +371,7 @@ main:focus { outline: none; }
 .footer-brand > p { max-inline-size: 36ch; color: rgb(255 255 255 / 0.68); font-size: 0.88rem; }
 .footer-brand .footer-note { margin-block-start: 1rem; font-size: 0.76rem; }
 .footer-logo { margin-block-end: 1rem; color: #fff; }
-.footer-logo .logo-img { block-size: 3.4rem; }
+.footer-logo .logo-img { block-size: 3rem; }
 .footer-logo:hover { color: #fff; }
 .footer-title { margin-block-end: 0.8rem; color: rgb(255 255 255 / 0.48); font-size: 0.7rem; font-weight: 900; text-transform: uppercase; letter-spacing: 0.12em; }
 .footer-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 0.18rem; }
