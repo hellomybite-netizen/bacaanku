@@ -4,7 +4,7 @@ import EditorForm from '../../../components/admin/EditorForm.astro';
 import { IS_STATIC } from '../../../lib/mode';
 import { emptyValues, valuesFromRecord, type ArticleValues } from '../../../lib/editorial';
 
-export function getStaticPaths() {
+export function getStaticPaths(): { params: { id: string } }[] {
   return [];
 }
 

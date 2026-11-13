@@ -5,13 +5,15 @@
   "main": "src/worker.ts",
   "compatibility_date": "2026-11-12",
   "compatibility_flags": ["nodejs_compat"],
-  "routes": [{ "pattern": "bacaankunetwork.com", "custom_domain": true }],
+  "routes": [
+    { "pattern": "bacaankunetwork.com", "custom_domain": true },
+    { "pattern": "www.bacaankunetwork.com", "custom_domain": true }
+  ],
   "d1_databases": [
     {
       "binding": "DB",
       "database_name": "bacaanku-db",
-      // Ganti setelah `npx wrangler d1 create bacaanku-db`.
-      "database_id": "00000000-0000-4000-8000-000000000001"
+      "database_id": "a214341b-4997-4f9a-95d5-a129d484b99e"
     }
   ],
   // R2 sengaja belum diikat supaya situs bisa tayang tanpa verifikasi kartu.
@@ -24,6 +26,8 @@
   //   npx wrangler secret put ADMIN_TOKEN
   //   npx wrangler secret put CF_PURGE_TOKEN
   // Vars opsional saat Zero Trust / R2 siap:
-  //   CF_ACCESS_TEAM_DOMAIN, CF_ACCESS_AUD, CF_ZONE_ID, MEDIA_BASE
+  //   CF_ACCESS_TEAM_DOMAIN, CF_ACCESS_AUD, MEDIA_BASE
+  // Zona produksi untuk purge cache (bukan secret).
+  "vars": { "CF_ZONE_ID": "59edbd70449f300ca5f906d8649603ad" },
   "observability": { "enabled": false }
 }
