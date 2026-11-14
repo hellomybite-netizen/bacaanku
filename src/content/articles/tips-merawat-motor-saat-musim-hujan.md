@@ -6,9 +6,11 @@ category: otomotif
 tags: ["sepeda motor", "perawatan", "tips"]
 author: dimas-saputra
 publishDate: 2026-11-06T07:30:00+07:00
-heroImage: ../../assets/articles/tips-merawat-motor-saat-musim-hujan.jpg
-heroAlt: "Ilustrasi contoh (bukan foto asli) untuk artikel: Tujuh Tips Merawat Sepeda Motor Saat Musim Hujan"
-heroCaption: "Ilustrasi placeholder — gambar contoh."
+heroImage: ../../assets/articles/tips-merawat-motor-saat-musim-hujan-foto.jpg
+heroAlt: "Pengendara sepeda motor berteduh di bawah flyover Kampung Melayu, Jakarta Timur, saat hujan deras"
+heroCreditUrl: https://commons.wikimedia.org/wiki/File:Berhenti_untuk_berteduh.jpg
+heroCredit: "Foto: Zakifath/Wikimedia Commons, CC BY-SA 4.0"
+heroCaption: "Ilustrasi: pengendara motor berteduh saat hujan deras di Jakarta Timur (foto arsip, bukan dokumentasi tips perawatan pada artikel ini)."
 featured: false
 draft: false
 ---

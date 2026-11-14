@@ -6,9 +6,11 @@ category: sains
 tags: ["riset", "lingkungan", "plastik"]
 author: rina-pratiwi
 publishDate: 2026-11-07T11:20:00+07:00
-heroImage: ../../assets/articles/peneliti-contoh-temukan-jamur-pengurai-plastik.jpg
-heroAlt: "Ilustrasi contoh (bukan foto asli) untuk artikel: Peneliti Uji Jamur Lokal yang Mampu Mengurai Plastik Tipis"
-heroCaption: "Ilustrasi placeholder — gambar contoh."
+heroImage: ../../assets/articles/peneliti-contoh-temukan-jamur-pengurai-plastik-foto.jpg
+heroAlt: "Jamur tiram (Pleurotus ostreatus) tumbuh bergerombol pada media tanam"
+heroCreditUrl: https://commons.wikimedia.org/wiki/File:20210718_Pleurotus_ostreatus_116-138.jpg
+heroCredit: "Foto: Zinnmann/Wikimedia Commons, CC BY-SA 3.0"
+heroCaption: "Ilustrasi: jamur tiram, spesies yang kerap diteliti karena potensinya mengurai bahan organik, termasuk plastik (bukan dokumentasi laboratorium pada artikel ini)."
 featured: false
 draft: false
 ---

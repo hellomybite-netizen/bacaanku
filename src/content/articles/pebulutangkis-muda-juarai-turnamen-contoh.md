@@ -6,9 +6,11 @@ category: olahraga
 tags: ["bulu tangkis", "junior", "prestasi"]
 author: dimas-saputra
 publishDate: 2026-11-05T19:00:00+07:00
-heroImage: ../../assets/articles/pebulutangkis-muda-juarai-turnamen-contoh.jpg
-heroAlt: "Ilustrasi contoh (bukan foto asli) untuk artikel: Pebulu Tangkis Usia 17 Tahun Juarai Turnamen Junior Contoh"
-heroCaption: "Ilustrasi placeholder — gambar contoh."
+heroImage: ../../assets/articles/pebulutangkis-muda-juarai-turnamen-contoh-foto.jpg
+heroAlt: "Pebulu tangkis memukul kok dalam pertandingan di lapangan dalam ruangan"
+heroCreditUrl: https://commons.wikimedia.org/wiki/File:Terrace_Open_Badminton_Tournament%E2%80%A6Henry_(16127862326).jpg
+heroCredit: "Foto: Murray Foubister/Wikimedia Commons, CC BY-SA 2.0"
+heroCaption: "Ilustrasi: laga bulu tangkis (bukan dokumentasi turnamen junior pada artikel ini)."
 featured: false
 draft: false
 ---

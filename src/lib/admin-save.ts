@@ -1,6 +1,6 @@
 import { getDb, getEnv } from './db';
 import { csrfMatches, type Session } from './auth';
-import { parseArticleForm, type ArticleValues } from './editorial';
+import { parseArticleForm, validateRemoteHeroSize, type ArticleValues } from './editorial';
 import { purgeContent, purgeForArticle } from './purge';
 import { adminArticle, saveArticle } from './repo';
 import { sqlArticleTags } from './sql.mjs';
@@ -21,6 +21,7 @@ export async function handleArticlePost(
     return { ok: false, errors: { form: 'Sesi kedaluwarsa. Muat ulang halaman, lalu simpan lagi.' }, values: prepared.values };
   }
   const prepared = parseArticleForm(form, env.MEDIA_BASE);
+  await validateRemoteHeroSize(prepared.values, prepared.errors);
   if (Object.keys(prepared.errors).length) return { ok: false, errors: prepared.errors, values: prepared.values };
   const db = getDb();
   const saved = await saveArticle(db, prepared, opts.id);

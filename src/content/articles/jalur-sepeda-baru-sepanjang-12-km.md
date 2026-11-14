@@ -6,9 +6,11 @@ category: news
 tags: ["transportasi", "sepeda", "tata kota"]
 author: ayu-lestari
 publishDate: 2026-11-10T14:00:00+07:00
-heroImage: ../../assets/articles/jalur-sepeda-baru-sepanjang-12-km.jpg
-heroAlt: "Ilustrasi contoh (bukan foto asli) untuk artikel: Jalur Sepeda Terproteksi 12 Km Hubungkan Stasiun dan Kampus"
-heroCaption: "Ilustrasi placeholder — gambar contoh."
+heroImage: ../../assets/articles/jalur-sepeda-baru-sepanjang-12-km-foto.jpg
+heroAlt: "Jalur sepeda terpisah di Jalan Dunsmuir, pusat kota Vancouver"
+heroCreditUrl: https://commons.wikimedia.org/wiki/File:Dunsmuir_Separated_Bike_Lanes_107.jpg
+heroCredit: "Foto: Paul Krueger/Wikimedia Commons, CC BY 2.0"
+heroCaption: "Ilustrasi: jalur sepeda terproteksi di kawasan perkotaan (bukan dokumentasi jalur 12 km pada artikel ini)."
 featured: false
 draft: false
 ---

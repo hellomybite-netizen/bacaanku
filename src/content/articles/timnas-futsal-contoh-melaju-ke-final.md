@@ -6,9 +6,11 @@ category: olahraga
 tags: ["futsal", "turnamen", "semifinal"]
 author: dimas-saputra
 publishDate: 2026-11-12T00:30:00+07:00
-heroImage: ../../assets/articles/timnas-futsal-contoh-melaju-ke-final.jpg
-heroAlt: "Ilustrasi contoh (bukan foto asli) untuk artikel: Tim Futsal Contoh Melaju ke Final Usai Menang Adu Penalti"
-heroCaption: "Ilustrasi placeholder — gambar contoh."
+heroImage: ../../assets/articles/timnas-futsal-contoh-melaju-ke-final-foto.jpg
+heroAlt: "Pemain futsal berebut bola dalam laga Piala Asia Futsal 2026"
+heroCreditUrl: https://commons.wikimedia.org/wiki/File:2026_AFC_Futsal_Asian_Cup,_Japan_v_Uzbekistan_07.jpg
+heroCredit: "Foto: Medelam/Wikimedia Commons, CC BY-SA 4.0"
+heroCaption: "Ilustrasi: pertandingan futsal Piala Asia 2026 (bukan dokumentasi laga tim pada artikel ini)."
 featured: false
 draft: false
 ---

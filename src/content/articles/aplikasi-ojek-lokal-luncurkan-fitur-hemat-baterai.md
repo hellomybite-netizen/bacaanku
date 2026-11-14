@@ -6,9 +6,11 @@ category: teknologi
 tags: ["aplikasi", "ponsel", "transportasi daring"]
 author: rina-pratiwi
 publishDate: 2026-11-12T10:30:00+07:00
-heroImage: ../../assets/articles/aplikasi-ojek-lokal-luncurkan-fitur-hemat-baterai.jpg
-heroAlt: "Ilustrasi contoh (bukan foto asli) untuk artikel: Aplikasi Ojek Lokal Luncurkan Mode Hemat Baterai untuk Pengemudi"
-heroCaption: "Ilustrasi placeholder — gambar contoh."
+heroImage: ../../assets/articles/aplikasi-ojek-lokal-luncurkan-fitur-hemat-baterai-foto.jpg
+heroAlt: "Pengemudi ojek menunggu di tepi jalan di Jakarta"
+heroCreditUrl: https://commons.wikimedia.org/wiki/File:Mall_culture_jakarta61.jpg
+heroCredit: "Foto: Jonathan McIntosh/Wikimedia Commons, CC BY 2.0"
+heroCaption: "Ilustrasi: pengemudi ojek di Jakarta (foto arsip, bukan dokumentasi peluncuran fitur aplikasi)."
 featured: false
 draft: false
 ---

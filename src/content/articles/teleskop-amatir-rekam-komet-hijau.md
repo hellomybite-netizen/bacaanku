@@ -6,9 +6,11 @@ category: sains
 tags: ["astronomi", "komet", "komunitas"]
 author: rina-pratiwi
 publishDate: 2026-11-11T21:10:00+07:00
-heroImage: ../../assets/articles/teleskop-amatir-rekam-komet-hijau.jpg
-heroAlt: "Ilustrasi contoh (bukan foto asli) untuk artikel: Komunitas Astronomi Amatir Rekam Komet Kehijauan dari Atap Sekolah"
-heroCaption: "Ilustrasi placeholder — gambar contoh."
+heroImage: ../../assets/articles/teleskop-amatir-rekam-komet-hijau-foto.jpg
+heroAlt: "Deretan teleskop amatir di malam hari pada acara pengamatan bintang"
+heroCreditUrl: https://commons.wikimedia.org/wiki/File:Grand_Canyon_Star_Party_-_Telescope_Lot_1611_(52962138746).jpg
+heroCredit: "Foto: Grand Canyon NPS/Wikimedia Commons, domain publik"
+heroCaption: "Ilustrasi: teleskop amatir pada acara pengamatan langit malam (bukan dokumentasi rekaman komet dari atap sekolah pada artikel ini)."
 featured: false
 draft: false
 ---
