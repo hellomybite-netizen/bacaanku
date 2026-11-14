@@ -6,9 +6,11 @@ category: otomotif
 tags: ["mobil listrik", "uji jalan", "kendaraan listrik"]
 author: dimas-saputra
 publishDate: 2026-11-11T16:45:00+07:00
-heroImage: ../../assets/articles/mobil-listrik-mungil-uji-jalan-tanjakan-bandung.jpg
-heroAlt: "Ilustrasi contoh (bukan foto asli) untuk artikel: Uji Jalan Mobil Listrik Mungil di Tanjakan: Kuat, tapi Perhatikan Jarak Tempuh"
-heroCaption: "Ilustrasi placeholder — gambar contoh."
+heroImage: ../../assets/articles/mobil-listrik-mungil-uji-jalan-tanjakan-bandung-foto.jpg
+heroAlt: "Mobil listrik kompak Seres E1 dipamerkan di IIMS 2025, Indonesia"
+heroCreditUrl: https://commons.wikimedia.org/wiki/File:Seres_E1_at_IIMS_2025_in_Indonesia.jpg
+heroCredit: "Foto: Sulthan Naufal/Wikimedia Commons, CC BY-SA 4.0"
+heroCaption: "Ilustrasi: mobil listrik kompak Seres E1 di IIMS 2025 (bukan dokumentasi uji jalan di Bandung pada artikel ini)."
 featured: false
 draft: false
 ---

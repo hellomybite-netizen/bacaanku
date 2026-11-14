@@ -275,7 +275,7 @@ main:focus { outline: none; }
 }
 .more-link:hover { border-color: var(--accent); color: var(--accent-strong); }
 .cat-section { padding-block: 2.3rem 0.5rem; border-block-start: 1px solid var(--border); margin-block-start: 2.3rem; }
-.deferred { content-visibility: auto; contain-intrinsic-size: auto none auto 30rem; }
+/* .deferred no longer uses content-visibility: it delayed card images on mobile. */
 .with-sidebar { display: grid; grid-template-columns: minmax(0, 1fr) 19rem; gap: 2.75rem; padding-block: 2rem; }
 .sidebar { display: grid; gap: 2rem; align-content: start; }
 @media (min-width: 60rem) { .sidebar { position: sticky; inset-block-start: calc(var(--header-h) + 1rem); } }

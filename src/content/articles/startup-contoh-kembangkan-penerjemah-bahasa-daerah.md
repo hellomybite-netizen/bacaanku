@@ -6,9 +6,11 @@ category: teknologi
 tags: ["startup", "kecerdasan buatan", "bahasa daerah"]
 author: rina-pratiwi
 publishDate: 2026-11-08T09:00:00+07:00
-heroImage: ../../assets/articles/startup-contoh-kembangkan-penerjemah-bahasa-daerah.jpg
-heroAlt: "Ilustrasi contoh (bukan foto asli) untuk artikel: Startup Rintisan Kembangkan Penerjemah Suara untuk 12 Bahasa Daerah"
-heroCaption: "Ilustrasi placeholder — gambar contoh."
+heroImage: ../../assets/articles/startup-contoh-kembangkan-penerjemah-bahasa-daerah-foto.jpg
+heroAlt: "Sesi rekaman dokumentasi bahasa dan budaya lisan di sebuah workshop"
+heroCreditUrl: https://commons.wikimedia.org/wiki/File:Session_recording_at_Oral_Culture_and_Language_Documentation_workshops_in_2022.jpg
+heroCredit: "Foto: Sangram Keshari Senapati/Wikimedia Commons, CC BY-SA 4.0"
+heroCaption: "Ilustrasi: sesi rekaman dokumentasi bahasa (bukan dokumentasi startup penerjemah pada artikel ini)."
 featured: false
 draft: false
 ---

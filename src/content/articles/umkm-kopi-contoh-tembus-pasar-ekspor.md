@@ -6,9 +6,11 @@ category: ekonomi
 tags: ["umkm", "kopi", "ekspor"]
 author: ayu-lestari
 publishDate: 2026-11-09T13:00:00+07:00
-heroImage: ../../assets/articles/umkm-kopi-contoh-tembus-pasar-ekspor.jpg
-heroAlt: "Ilustrasi contoh (bukan foto asli) untuk artikel: UMKM Kopi dari Lereng Gunung Tembus Pasar Ekspor Pertama"
-heroCaption: "Ilustrasi placeholder — gambar contoh."
+heroImage: ../../assets/articles/umkm-kopi-contoh-tembus-pasar-ekspor-foto.jpg
+heroAlt: "Petani menunjukkan kopi robusta yang siap panen di Banjarnegara"
+heroCreditUrl: https://commons.wikimedia.org/wiki/File:Kopi_Robusta_Banjarnegara.jpg
+heroCredit: "Foto: Haridi123/Wikimedia Commons, CC BY-SA 4.0"
+heroCaption: "Ilustrasi: petani kopi robusta di Banjarnegara (foto arsip, bukan dokumentasi UMKM pada artikel ini)."
 featured: false
 draft: false
 ---

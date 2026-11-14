@@ -6,9 +6,11 @@ category: news
 tags: ["tata kota", "ruang publik", "lingkungan"]
 author: ayu-lestari
 publishDate: 2026-11-12T08:15:00+07:00
-heroImage: ../../assets/articles/kota-fiksi-resmikan-taman-kota-terapung.jpg
-heroAlt: "Ilustrasi contoh (bukan foto asli) untuk artikel: Kota Sukamaju Resmikan Taman Terapung Pertama di Atas Waduk"
-heroCaption: "Ilustrasi placeholder — gambar contoh."
+heroImage: ../../assets/articles/kota-fiksi-resmikan-taman-kota-terapung-foto.jpg
+heroAlt: "Senja di Taman Kota Waduk Pluit, Jakarta, dengan pepohonan di tepi waduk"
+heroCreditUrl: https://commons.wikimedia.org/wiki/File:Sunset_at_Taman_Waduk_Pluit,_Jakarta,_Indonesia_(137210367).jpg
+heroCredit: "Foto: Seika N/Wikimedia Commons, CC BY 3.0"
+heroCaption: "Ilustrasi: Taman Kota Waduk Pluit di Jakarta (foto arsip, bukan dokumentasi peresmian taman terapung pada artikel ini)."
 featured: false
 draft: false
 ---

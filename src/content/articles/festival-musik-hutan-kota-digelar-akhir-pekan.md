@@ -6,9 +6,11 @@ category: hiburan
 tags: ["musik", "festival", "acara"]
 author: ayu-lestari
 publishDate: 2026-11-06T18:30:00+07:00
-heroImage: ../../assets/articles/festival-musik-hutan-kota-digelar-akhir-pekan.jpg
-heroAlt: "Ilustrasi contoh (bukan foto asli) untuk artikel: Festival Musik di Hutan Kota Digelar Akhir Pekan, Usung Konsep Nol Sampah"
-heroCaption: "Ilustrasi placeholder — gambar contoh."
+heroImage: ../../assets/articles/festival-musik-hutan-kota-digelar-akhir-pekan-foto.jpg
+heroAlt: "Band Barasuara tampil di panggung Synchronize Fest pada Oktober 2025"
+heroCreditUrl: https://commons.wikimedia.org/wiki/File:Barasuara_at_Synchronize_Fest,_October_2025.jpg
+heroCredit: "Foto: David Wadie Fisher-Freberg/Wikimedia Commons, CC BY-SA 4.0"
+heroCaption: "Ilustrasi: penampilan band di Synchronize Fest, Jakarta (bukan dokumentasi festival hutan kota pada artikel ini)."
 featured: false
 draft: false
 ---

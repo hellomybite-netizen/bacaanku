@@ -1,5 +1,5 @@
 import { slugify } from '../utils/articles';
-import { isResolvableHero } from './media';
+import { isResolvableHero, rewriteWikimediaOriginal } from './media';
 import { renderMarkdown } from './markdown.mjs';
 
 export type Source = { name: string; title: string; url: string };
@@ -175,7 +175,7 @@ export function parseArticleForm(form: FormData, mediaBase?: string | null): Pre
     category: field(form, 'category'),
     author: field(form, 'author'),
     tags: field(form, 'tags'),
-    heroUrl: field(form, 'hero_url'),
+    heroUrl: rewriteWikimediaOriginal(field(form, 'hero_url')),
     heroAlt: field(form, 'hero_alt'),
     heroCaption: field(form, 'hero_caption'),
     heroCredit: field(form, 'hero_credit'),
@@ -286,4 +286,63 @@ function splitTags(value: string): { slug: string; name: string }[] {
     tags.push({ slug, name });
   }
   return tags;
+}
+
+const REMOTE_HERO_MAX_WIDTH = 2400;
+const REMOTE_HERO_MAX_BYTES = Math.floor(1.5 * 1024 * 1024);
+const REMOTE_PROBE_MS = 4500;
+
+/**
+ * Tolak URL https gambar utama yang jelas-jelas terlalu besar.
+ * Jika probe jaringan gagal, jangan blokir simpan.
+ */
+export async function validateRemoteHeroSize(values: ArticleValues, errors: Record<string, string>): Promise<void> {
+  const url = (values.heroUrl || '').trim();
+  if (!/^https:\/\//i.test(url)) return;
+
+  if (values.heroWidth && /^\d+$/.test(values.heroWidth) && Number(values.heroWidth) > REMOTE_HERO_MAX_WIDTH) {
+    errors.heroUrl =
+      'Gambar terlalu besar: lebar tertera lebih dari 2.400 piksel. Pakai versi ≤1.600 px atau tautan thumbnail Wikimedia, bukan file aslinya.';
+  }
+
+  try {
+    const size = await probeRemoteImageBytes(url);
+    if (size != null && size > REMOTE_HERO_MAX_BYTES) {
+      errors.heroUrl =
+        'Gambar terlalu besar: ukuran berkas lebih dari 1,5 MB. Kompres atau unggah ke /media/articles/, jangan tempel file asli Wikimedia.';
+    }
+  } catch {
+    // Jangan blokir jika HEAD/Range gagal.
+  }
+}
+
+async function probeRemoteImageBytes(url: string): Promise<number | null> {
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), REMOTE_PROBE_MS);
+  const headers = {
+    'User-Agent': 'BacaankuNetworkBot/1.0 (https://bacaankunetwork.com; redaksi@bacaankunetwork.com)',
+  };
+  try {
+    const head = await fetch(url, { method: 'HEAD', redirect: 'follow', signal: controller.signal, headers });
+    const fromHead = parseContentLength(head.headers.get('content-length'));
+    if (fromHead != null) return fromHead;
+
+    const ranged = await fetch(url, {
+      method: 'GET',
+      redirect: 'follow',
+      signal: controller.signal,
+      headers: { ...headers, Range: 'bytes=0-0' },
+    });
+    const range = ranged.headers.get('content-range');
+    const match = range ? /\/(\d+)\s*$/.exec(range) : null;
+    if (match) return Number(match[1]);
+    return null;
+  } finally {
+    clearTimeout(timer);
+  }
+}
+
+function parseContentLength(value: string | null): number | null {
+  if (!value || !/^\d+$/.test(value)) return null;
+  return Number(value);
 }

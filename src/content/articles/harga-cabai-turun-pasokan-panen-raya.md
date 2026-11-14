@@ -6,9 +6,11 @@ category: ekonomi
 tags: ["harga pangan", "pasar", "pertanian"]
 author: ayu-lestari
 publishDate: 2026-11-12T06:45:00+07:00
-heroImage: ../../assets/articles/harga-cabai-turun-pasokan-panen-raya.jpg
-heroAlt: "Ilustrasi contoh (bukan foto asli) untuk artikel: Harga Cabai di Pasar Contoh Turun Seiring Panen Raya"
-heroCaption: "Ilustrasi placeholder — gambar contoh."
+heroImage: ../../assets/articles/harga-cabai-turun-pasokan-panen-raya-foto.jpg
+heroAlt: "Tumpukan cabai merah di kios Pasar Induk Pare, Kediri"
+heroCreditUrl: https://commons.wikimedia.org/wiki/File:Kios_Cabai_di_Pasar_Induk_Pare_Kediri.jpg
+heroCredit: "Foto: Indonesiagood/Wikimedia Commons, CC BY 4.0"
+heroCaption: "Ilustrasi: kios cabai di Pasar Induk Pare, Kediri (foto arsip, bukan dokumentasi pasar pada artikel ini)."
 featured: false
 draft: false
 ---

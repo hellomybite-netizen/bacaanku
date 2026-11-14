@@ -6,9 +6,11 @@ category: hiburan
 tags: ["film", "animasi", "box office"]
 author: ayu-lestari
 publishDate: 2026-11-11T12:00:00+07:00
-heroImage: ../../assets/articles/film-animasi-lokal-contoh-tembus-sejuta-penonton.jpg
-heroAlt: "Ilustrasi contoh (bukan foto asli) untuk artikel: Film Animasi Lokal Contoh Tembus Sejuta Penonton dalam Dua Pekan"
-heroCaption: "Ilustrasi placeholder — gambar contoh."
+heroImage: ../../assets/articles/film-animasi-lokal-contoh-tembus-sejuta-penonton-foto.jpg
+heroAlt: "Layar bioskop di ruang pemutaran Tengis Movie Theater yang sedang menyala"
+heroCreditUrl: https://commons.wikimedia.org/wiki/File:Tengis_Movie_Theater_-_Screen.jpg
+heroCredit: "Foto: Fred Cherrygarden/Wikimedia Commons, CC BY-SA 4.0"
+heroCaption: "Ilustrasi: ruang pemutaran bioskop (bukan dokumentasi film animasi pada artikel ini)."
 featured: false
 draft: false
 ---
