@@ -5,7 +5,7 @@ import Footer from '../components/Footer.astro';
 import { SITE } from '../config/site';
 import { IS_STATIC } from '../lib/mode';
 
-/** GTM produksi. Pratinjau GitHub Pages (`BUILD_MODE=static`) tidak memuat tag ini. */
+/** GTM dan AdSense produksi. Pratinjau GitHub Pages (`BUILD_MODE=static`) tidak memuat tag ini. */
 const analyticsSnippet = IS_STATIC
   ? ''
   : `<script async src="https://www.googletagmanager.com/gtm.js?id=GTM-T62FKJQ9"></script>
@@ -13,7 +13,9 @@ const analyticsSnippet = IS_STATIC
   window.dataLayer = window.dataLayer || [];
   function gtag(){dataLayer.push(arguments);}
   gtag('js', new Date());
-</script>`;
+</script>
+<script async src="https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=ca-pub-1576914221961530"
+     crossorigin="anonymous"></script>`;
 
 interface Props {
   title: string;
