@@ -46,8 +46,6 @@ export const trending: string[] = [
   'hujan-meteor-leonid-2026-puncak-17-18-november',
   'gaikindo-auto-week-2026-ice-bsd-10-kota',
   'lp2b-nasional-87-98-persen-sawah-dilindungi',
-  'mobil-listrik-mungil-uji-jalan-tanjakan-bandung',
-  'timnas-futsal-contoh-melaju-ke-final',
 ];
 
 export const footerLinks = [

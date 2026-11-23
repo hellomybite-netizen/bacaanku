@@ -1,9 +1,11 @@
 ---
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { categories } from '../config/site';
-export const prerender = true;
+import { IS_STATIC } from '../lib/mode';
+export const prerender = IS_STATIC;
+if (!IS_STATIC) Astro.response.status = 404;
 ---
-<BaseLayout title="Halaman tidak ditemukan" description="Halaman yang Anda cari tidak ditemukan di bacaankunetwork.com." noindex>
+<BaseLayout title="Halaman tidak ditemukan" description="Halaman yang Anda cari tidak ditemukan di bacaankunetwork.com." noindex noCanonical>
   <div class="container narrow">
     <header class="page-head">
       <p class="kicker">Error 404</p>
@@ -11,6 +13,6 @@ export const prerender = true;
       <p>Mungkin tautannya salah atau beritanya sudah dipindahkan. Coba <a href="/cari/">cari berita</a> atau kembali ke <a href="/">beranda</a>.</p>
     </header>
     <h2 class="section-title">Kategori</h2>
-    <ul class="link-list">{categories.map((category) => <li><a href={`/${category.slug}/`}>{category.name}</a></li>)}</ul>
+    <ul class="link-list">{categories.map((category) => <li><a href={`/${category.slug}/`} >{category.name}</a></li>)}</ul>
   </div>
 </BaseLayout>

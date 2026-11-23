@@ -3,6 +3,7 @@ import '../styles/global.css';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import { SITE } from '../config/site';
+import { formatPageTitle, truncateAtWord } from '../utils/seo';
 import { IS_STATIC } from '../lib/mode';
 
 /** GTM dan AdSense produksi. Pratinjau GitHub Pages (`BUILD_MODE=static`) tidak memuat tag ini. */
@@ -28,14 +29,17 @@ interface Props {
   article?: { publishedTime: string; modifiedTime: string; section: string; tags: string[]; author: string };
   jsonLd?: Record<string, unknown>[];
   noindex?: boolean;
+  /** Jangan cetak tag canonical / hreflang / og:url (mis. halaman 404/410) */
+  noCanonical?: boolean;
   /** Judul utuh tanpa sufiks " | Bacaanku Network" (mis. beranda) */
   rawTitle?: boolean;
   currentCategory?: string;
 }
 
-const { title, description, canonical, image, imageAlt, type = 'website', article, jsonLd = [], noindex = false, rawTitle = false, currentCategory } = Astro.props;
-const fullTitle = rawTitle ? title : `${title} | ${SITE.name}`;
-const canonicalUrl = canonical ? new URL(canonical, SITE.url).href : new URL(Astro.url.pathname, SITE.url).href;
+const { title, description, canonical, image, imageAlt, type = 'website', article, jsonLd = [], noindex = false, noCanonical = false, rawTitle = false, currentCategory } = Astro.props;
+const fullTitle = formatPageTitle(title, SITE.name, rawTitle);
+const metaDescription = truncateAtWord(description, 155);
+const canonicalUrl = noCanonical ? undefined : (canonical ? new URL(canonical, SITE.url).href : new URL(Astro.url.pathname, SITE.url).href);
 const ogImage = image ?? new URL(SITE.defaultOgImage, SITE.url).href;
 ---
 <!doctype html>
@@ -47,10 +51,14 @@ const ogImage = image ?? new URL(SITE.defaultOgImage, SITE.url).href;
     <meta name="color-scheme" content="light dark" />
     <script is:inline>try{document.querySelector('meta[name="color-scheme"]').content=localStorage.getItem("color-scheme")??"light dark"}catch(e){}</script>
     <title>{fullTitle}</title>
-    <meta name="description" content={description} />
-    <link rel="canonical" href={canonicalUrl} />
-    <link rel="alternate" hreflang={SITE.hreflang} href={canonicalUrl} />
-    <link rel="alternate" hreflang="x-default" href={canonicalUrl} />
+    <meta name="description" content={metaDescription} />
+    {canonicalUrl && (
+      <>
+        <link rel="canonical" href={canonicalUrl} />
+        <link rel="alternate" hreflang={SITE.hreflang} href={canonicalUrl} />
+        <link rel="alternate" hreflang="x-default" href={canonicalUrl} />
+      </>
+    )}
     {noindex ? <meta name="robots" content="noindex, follow" /> : <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />}
     <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
     <meta name="theme-color" content="#071827" media="(prefers-color-scheme: dark)" />
@@ -67,8 +75,8 @@ const ogImage = image ?? new URL(SITE.defaultOgImage, SITE.url).href;
     <meta property="og:locale" content={SITE.locale} />
     <meta property="og:type" content={type} />
     <meta property="og:title" content={title} />
-    <meta property="og:description" content={description} />
-    <meta property="og:url" content={canonicalUrl} />
+    <meta property="og:description" content={metaDescription} />
+    {canonicalUrl && <meta property="og:url" content={canonicalUrl} />}
     <meta property="og:image" content={ogImage} />
     {imageAlt && <meta property="og:image:alt" content={imageAlt} />}
     {article && (
@@ -84,7 +92,7 @@ const ogImage = image ?? new URL(SITE.defaultOgImage, SITE.url).href;
     <meta name="twitter:card" content="summary_large_image" />
     <meta name="twitter:site" content={SITE.twitter} />
     <meta name="twitter:title" content={title} />
-    <meta name="twitter:description" content={description} />
+    <meta name="twitter:description" content={metaDescription} />
     <meta name="twitter:image" content={ogImage} />
     {imageAlt && <meta name="twitter:image:alt" content={imageAlt} />}
 

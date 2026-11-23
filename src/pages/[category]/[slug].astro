@@ -10,6 +10,7 @@ import { absUrl, articlePath, formatDateTime, isoDate } from '../../utils/articl
 import { breadcrumbLd, newsArticleLd } from '../../utils/seo';
 import { applyPublicCache } from '../../lib/cache-headers';
 import { loadArticle } from '../../lib/public';
+import { DELETED_SAMPLE_SLUGS } from '../../lib/gone';
 
 export const prerender = __BUILD_MODE__ === 'static';
 
@@ -21,9 +22,14 @@ export async function getStaticPaths() {
 
 const category = Astro.params.category ?? '';
 const slug = Astro.params.slug ?? '';
-const result = await loadArticle(category, slug);
+const isGone = DELETED_SAMPLE_SLUGS.has(slug);
+const result = isGone ? null : await loadArticle(category, slug);
 if (result && 'redirect' in result) return Astro.redirect(result.redirect, 301);
-if (!result) {
+if (isGone) {
+  Astro.response.status = 410;
+  Astro.response.headers.set('Cache-Control', 'public, max-age=3600, s-maxage=86400');
+  Astro.response.headers.set('X-Robots-Tag', 'noindex');
+} else if (!result) {
   Astro.response.status = 404;
 }
 const payload = result && !('redirect' in result) ? result : null;
@@ -149,8 +155,18 @@ const sizes = '(min-width: 1240px) 780px, (min-width: 960px) 64vw, calc(100vw - 
       )}
     </div>
   </BaseLayout>
+) : isGone ? (
+  <BaseLayout title="Artikel telah dihapus" description="Artikel contoh ini telah dihapus permanen dari bacaankunetwork.com." noindex noCanonical>
+    <div class="container narrow">
+      <header class="page-head">
+        <p class="kicker">Error 410</p>
+        <h1 class="page-title">Artikel telah dihapus</h1>
+        <p>Artikel contoh prototipe ini sudah dihapus permanen. Silakan kunjungi <a href="/">beranda</a> atau <a href="/cari/">cari berita</a> terbaru.</p>
+      </header>
+    </div>
+  </BaseLayout>
 ) : (
-  <BaseLayout title="Halaman tidak ditemukan" description="Halaman yang Anda cari tidak ditemukan di bacaankunetwork.com." noindex>
+  <BaseLayout title="Halaman tidak ditemukan" description="Halaman yang Anda cari tidak ditemukan di bacaankunetwork.com." noindex noCanonical>
     <div class="container narrow">
       <header class="page-head">
         <p class="kicker">Error 404</p>
