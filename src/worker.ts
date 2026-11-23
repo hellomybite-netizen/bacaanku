@@ -35,7 +35,7 @@ export default {
       url.hostname = 'bacaankunetwork.com';
       const headers = new Headers({
         Location: url.toString(),
-        'Cache-Control': 'public, max-age=3600',
+        'Cache-Control': 'private, no-store',
       });
       if (!isHttp) headers.set('Strict-Transport-Security', HSTS_HEADER);
       return new Response(null, { status: 301, headers });
