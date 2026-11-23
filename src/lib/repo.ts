@@ -497,3 +497,22 @@ export async function saveArticle(db: D1Database, prepared: PreparedArticle, sel
   await db.batch(linkWrites);
   return { id, oldPath, newPath };
 }
+
+export async function sitemapPageMeta(db: D1Database) {
+  const stamp = now();
+  const [boundsRes, catRes, authorRes] = await db.batch([
+    db.prepare(`SELECT MAX(COALESCE(updated_at, published_at)) AS last_at FROM articles WHERE status = 'published' AND published_at <= ?`).bind(stamp),
+    db.prepare(`SELECT c.slug, MAX(COALESCE(a.updated_at, a.published_at)) AS last_at FROM categories c LEFT JOIN articles a ON a.category_id = c.id AND a.status = 'published' AND a.published_at <= ? WHERE c.is_active = 1 GROUP BY c.slug`).bind(stamp),
+    db.prepare(`SELECT au.slug, MAX(COALESCE(a.updated_at, a.published_at)) AS last_at, COUNT(a.id) AS cnt FROM authors au JOIN articles a ON a.author_id = au.id AND a.status = 'published' AND a.published_at <= ? WHERE au.is_active = 1 AND au.bio NOT LIKE '%Profil fiktif%' GROUP BY au.slug HAVING cnt > 0 ORDER BY au.slug`).bind(stamp),
+  ]);
+  const latestAt = (boundsRes.results[0] as { last_at: number | null } | undefined)?.last_at ?? null;
+  const categoriesLastMod = new Map<string, number>();
+  for (const row of catRes.results as { slug: string; last_at: number | null }[]) {
+    if (row.last_at) categoriesLastMod.set(row.slug, row.last_at);
+  }
+  const authors = (authorRes.results as { slug: string; last_at: number | null }[]).map((row) => ({
+    slug: row.slug,
+    lastAt: row.last_at ?? latestAt,
+  }));
+  return { latestAt, categoriesLastMod, authors };
+}

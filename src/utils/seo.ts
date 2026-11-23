@@ -60,3 +60,24 @@ export const newsArticleLd = (o: {
   inLanguage: SITE.hreflang,
   isAccessibleForFree: true,
 });
+
+export function truncateAtWord(text: string, maxLen: number): string {
+  const clean = text.replace(/\s+/g, " ").trim();
+  if (clean.length <= maxLen) return clean;
+  const limit = maxLen - 1;
+  const sliced = clean.slice(0, limit);
+  const lastSpace = sliced.lastIndexOf(" ");
+  const cut = lastSpace >= Math.floor(limit * 0.6) ? sliced.slice(0, lastSpace) : sliced;
+  return `${cut.replace(/[,;:\-–—]+$/, "").trim()}…`;
+}
+
+export function formatPageTitle(title: string, siteName: string, rawTitle = false): string {
+  const clean = title.replace(/\s+/g, " ").trim();
+  if (rawTitle) return clean.length <= 70 ? clean : truncateAtWord(clean, 70);
+  const full = `${clean} | ${siteName}`;
+  if (full.length <= 70) return full;
+  const short = `${clean} | Bacaanku`;
+  if (short.length <= 70) return short;
+  if (clean.length <= 70) return clean;
+  return truncateAtWord(clean, 70);
+}

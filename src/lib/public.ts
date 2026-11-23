@@ -75,3 +75,10 @@ export async function loadNewsEntries() {
   const { db } = await serverDb();
   return newsEntries(db);
 }
+
+export async function loadSitemapPageMeta() {
+  if (IS_STATIC) return null;
+  const { sitemapPageMeta } = await import('./repo');
+  const { db } = await serverDb();
+  return sitemapPageMeta(db);
+}

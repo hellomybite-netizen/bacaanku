@@ -12,7 +12,7 @@ const year = new Date().getFullYear();
     </div>
     <nav aria-label="Kategori (footer)">
       <h2 class="footer-title">Kategori</h2>
-      <ul class="footer-list">{categories.map((c) => <li><a href={`/kategori/${c.slug}/`}>{c.name}</a></li>)}</ul>
+      <ul class="footer-list">{categories.map((c) => <li><a href={`/${c.slug}/`}>{c.name}</a></li>)}</ul>
     </nav>
     <nav aria-label="Informasi">
       <h2 class="footer-title">Informasi</h2>
