@@ -53,6 +53,22 @@ export default {
           },
         });
       }
+      if (
+        url.pathname === '/rss' ||
+        url.pathname === '/rss/' ||
+        url.pathname === '/feed' ||
+        url.pathname === '/feed/'
+      ) {
+        url.pathname = '/rss.xml';
+        return new Response(null, {
+          status: 301,
+          headers: {
+            Location: url.toString(),
+            'Cache-Control': 'private, no-store',
+            ...(!isHttp ? { 'Strict-Transport-Security': HSTS_HEADER } : {}),
+          },
+        });
+      }
       if (url.pathname !== '/' && !url.pathname.endsWith('/') && !url.pathname.startsWith('/api/')) {
         const lastSegment = url.pathname.split('/').pop() || '';
         if (!lastSegment.includes('.')) {
