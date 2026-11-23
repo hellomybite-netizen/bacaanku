@@ -6,9 +6,9 @@
   "compatibility_date": "2026-11-12",
   "compatibility_flags": ["nodejs_compat"],
   "routes": [
-    { "pattern": "bacaankunetwork.com", "custom_domain": true },
-    { "pattern": "www.bacaankunetwork.com", "custom_domain": true }
+    { "pattern": "bacaankunetwork.com", "custom_domain": true }
   ],
+  // www.bacaankunetwork.com uses a proxied AAAA 100:: DNS record + Cloudflare Page Rule (301 -> apex)
   "d1_databases": [
     {
       "binding": "DB",
