@@ -54,12 +54,13 @@ main:focus { outline: none; }
 .site-logo { display: inline-flex; flex: 0 0 auto; align-items: center; color: inherit; text-decoration: none; }
 .site-logo:hover { color: inherit; }
 .logo-img { inline-size: auto; block-size: 3.15rem; }
-.site-nav { margin-inline-start: auto; }
-.site-menu { display: flex; align-items: center; gap: 1.55rem; list-style: none; margin: 0; padding: 0; }
+.site-menu { display: flex; align-items: center; gap: clamp(1.25rem, 3.1vw, 2.75rem); list-style: none; margin: 0; padding: 0; }
 .site-menu > li > a, .site-menu summary { display: flex; align-items: center; min-block-size: 2.7rem; color: var(--teal-deep); font-size: .84rem; font-weight: 800; text-decoration: none; cursor: pointer; }
 .site-menu > li > a { position: relative; }
 .site-menu > li > a::after { content: ""; position: absolute; inset: auto 0 .15rem; block-size: 3px; border-radius: 999px; background: var(--coral); scale: 0 1; transition: scale 180ms ease; }
 .site-menu > li > a:hover::after, .site-menu > li > a[aria-current]::after { scale: 1; }
+.site-menu > li > a.nav-kuliner[aria-current] { padding-inline: .7rem; border-radius: 999px; background: #fff1d6; color: #a43a14; }
+.site-menu > li > a.nav-kuliner[aria-current]::after { inset-inline: .7rem; }
 .site-menu summary { list-style: none; gap: .4rem; }
 .site-menu summary::-webkit-details-marker { display: none; }
 .site-menu summary::after { content: ""; inline-size: .45rem; block-size: .45rem; border-inline-end: 1.8px solid currentColor; border-block-end: 1.8px solid currentColor; rotate: 45deg; translate: 0 -.12rem; }
@@ -276,7 +277,8 @@ main:focus { outline: none; }
 @media (max-width: 58rem) {
   .menu-button { display: grid; }
   .search-button span { display: none; }
-  .search-button { inline-size: 2.65rem; justify-content: center; padding-inline: 0; }
+  .search-button { inline-size: 2.65rem; justify-content: center; padding-inline: 0; background: transparent; color: var(--teal-deep); }
+  .menu-button { border-color: transparent; }
   .site-nav { position: absolute; inset: var(--header-h) 0 auto; display: none; border-block-end: 1px solid var(--border); background: #fff; box-shadow: var(--shadow); }
   .menu-open .site-nav { display: block; }
   .site-menu { inline-size: min(100% - 2rem, 74rem); display: grid; gap: .2rem; margin-inline: auto; padding-block: .65rem .85rem; }

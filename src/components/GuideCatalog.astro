@@ -1,0 +1,118 @@
+---
+import GuideCard from './GuideCard.astro';
+import GuideIcon from './GuideIcon.astro';
+import type { Guide } from '../lib/local-guide';
+import { guideCategories, guideCategory, guideRegions, guideRegion } from '../lib/local-guide';
+
+interface Props { guides: Guide[]; filter?: 'region' | 'category'; search?: boolean }
+const { guides, filter, search = false } = Astro.props;
+---
+<guide-catalog>
+  {search && (
+    <form class="guide-search-form guide-search-page-form" action="/jelajah/" method="get" role="search">
+      <GuideIcon name="search" />
+      <label class="visually-hidden" for="catalog-search">Kata kunci</label>
+      <input id="catalog-search" name="q" type="search" placeholder="Cari hotel, wisata, kuliner, atau kota..." maxlength="80" enterkeyhint="search" />
+      <button type="submit"><span>Cari</span><GuideIcon name="search" /></button>
+    </form>
+  )}
+  <div class="guide-catalog-controls" data-controls hidden>
+    {filter === 'category' && (
+      <div class="guide-tabs" role="group" aria-label="Filter kategori">
+        <button type="button" data-category="" aria-pressed="true">Semua</button>
+        {guideCategories.map((category) => <button type="button" data-category={category.slug} aria-pressed="false">{category.name}</button>)}
+      </div>
+    )}
+    {filter === 'region' && (
+      <label class="guide-select"><span>Filter daerah</span>
+        <select data-region>
+          <option value="">Semua Daerah</option>
+          {guideRegions.filter((region) => guides.some((guide) => guide.region === region.slug)).map((region) => (
+            <option value={region.slug}>{region.name}</option>
+          ))}
+        </select>
+      </label>
+    )}
+    <label class="guide-select guide-sort"><span>Urutkan</span>
+      <select data-sort>
+        <option value="latest">Terbaru</option>
+        <option value="name">Nama A–Z</option>
+      </select>
+    </label>
+  </div>
+  {search && <noscript><p>Semua panduan ditampilkan. Aktifkan JavaScript untuk mencari berdasarkan kata kunci.</p></noscript>}
+  <p class="guide-result-count" data-count aria-live="polite">{guides.length} panduan</p>
+  <p class="guide-empty" data-empty hidden>Belum ada panduan yang cocok. Coba kata kunci atau filter lain.</p>
+  <div class="guide-grid" data-grid>
+    {guides.map((guide) => (
+      <div data-entry data-topic={guide.category} data-area={guide.region} data-name={guide.name}
+        data-search={[guide.name, guide.title, guide.description, guide.location, guideCategory(guide.category)?.name, guideRegion(guide.region)?.name, guideRegion(guide.region)?.province].join(' ')}>
+        <GuideCard guide={guide} headingLevel={2} showBudget />
+      </div>
+    ))}
+  </div>
+</guide-catalog>
+
+<script>
+  class GuideCatalog extends HTMLElement {
+    connectedCallback() {
+      const grid = this.querySelector<HTMLElement>('[data-grid]');
+      const controls = this.querySelector<HTMLElement>('[data-controls]');
+      const count = this.querySelector<HTMLElement>('[data-count]');
+      const empty = this.querySelector<HTMLElement>('[data-empty]');
+      if (!grid || !controls || !count || !empty) return;
+
+      const entries = [...grid.querySelectorAll<HTMLElement>('[data-entry]')];
+      const topicButtons = [...controls.querySelectorAll<HTMLButtonElement>('[data-category]')];
+      const regionField = controls.querySelector('[data-region]');
+      const sortField = controls.querySelector('[data-sort]');
+      const regionSelect = regionField instanceof HTMLSelectElement ? regionField : null;
+      const sortSelect = sortField instanceof HTMLSelectElement ? sortField : null;
+      const search = this.querySelector<HTMLInputElement>('input[name="q"]');
+      const nameOrder = new Intl.Collator('id');
+      let topic = '';
+      let activeSort = 'latest';
+
+      const render = () => {
+        const query = search?.value.trim().toLocaleLowerCase('id') ?? '';
+        const words = query.split(/\s+/).filter(Boolean);
+        const region = regionSelect?.value ?? '';
+        const selectedSort = sortSelect?.value ?? 'latest';
+        if (selectedSort !== activeSort) {
+          const ordered = selectedSort === 'name'
+            ? [...entries].sort((a, b) => nameOrder.compare(a.dataset.name ?? '', b.dataset.name ?? ''))
+            : entries;
+          for (const entry of ordered) grid.appendChild(entry);
+          activeSort = selectedSort;
+        }
+
+        let total = 0;
+        for (const entry of entries) {
+          const text = entry.dataset.search?.toLocaleLowerCase('id') ?? '';
+          const matches = (!topic || topic === entry.dataset.topic) && (!region || region === entry.dataset.area) && words.every((word) => text.includes(word));
+          entry.hidden = !matches;
+          if (matches) total++;
+        }
+
+        count.textContent = query ? `${total} panduan untuk “${search?.value.trim()}”` : `${total} panduan`;
+        empty.hidden = total > 0;
+      };
+
+      if (search) search.value = (new URLSearchParams(window.location.search).get('q') ?? '').slice(0, 80);
+      for (const button of topicButtons) {
+        button.addEventListener('click', () => {
+          topic = button.dataset.category ?? '';
+          for (const option of topicButtons) option.setAttribute('aria-pressed', String(option === button));
+          render();
+        });
+      }
+      regionSelect?.addEventListener('change', render);
+      sortSelect?.addEventListener('change', render);
+      search?.addEventListener('input', render);
+      controls.hidden = false;
+      render();
+    }
+  }
+
+  if (!customElements.get('guide-catalog')) customElements.define('guide-catalog', GuideCatalog);
+</script>

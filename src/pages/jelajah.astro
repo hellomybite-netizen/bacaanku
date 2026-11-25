@@ -1,0 +1,14 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import GuideCatalog from '../components/GuideCatalog.astro';
+import { localGuides } from '../content/local-guides';
+import '../styles/local-wisdom.css';
+
+export const prerender = true;
+---
+<BaseLayout title="Jelajahi Rekomendasi Indonesia" description="Cari hotel, tempat wisata, dan kuliner berdasarkan kata kunci atau kategori." noindex>
+  <div class="container guide-list-content">
+    <header class="guide-search-heading"><h1>Jelajahi Rekomendasi</h1></header>
+    <GuideCatalog guides={localGuides} filter="category" search />
+  </div>
+</BaseLayout>

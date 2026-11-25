@@ -1,0 +1,36 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Breadcrumb from './Breadcrumb.astro';
+import GuideCatalog from './GuideCatalog.astro';
+import AdSlot from './AdSlot.astro';
+import { guideImage, type Guide, type GuideImage } from '../lib/local-guide';
+import { breadcrumbLd } from '../utils/seo';
+import '../styles/local-wisdom.css';
+
+interface Props {
+  title: string;
+  description: string;
+  image: GuideImage;
+  crumbs: { name: string; href: string }[];
+  guides: Guide[];
+  region?: string;
+  category?: string;
+}
+const { title, description, image, crumbs, guides, region, category } = Astro.props;
+---
+<BaseLayout title={title} description={description} currentCategory={category} jsonLd={[breadcrumbLd(crumbs)]}>
+  <div class="container guide-list-crumbs"><Breadcrumb items={crumbs} /></div>
+  <header class:list={['guide-list-hero', { 'guide-list-hero-region': region, 'guide-list-hero-food': image === 'rawon' }]}>
+    <img class="guide-cover" src={guideImage(image)} srcset={`${guideImage(image, 'card')} 640w, ${guideImage(image)} 1600w`} sizes="100vw" alt="" width="1600" height="900" fetchpriority="high" />
+    <div class="container guide-list-hero-copy">
+      <h1>{title}</h1>
+      {region && <span class="guide-province">{region}</span>}
+      <p>{description}</p>
+    </div>
+  </header>
+  <div class="container guide-list-content">
+    {region && <p class="guide-region-mobile-description">{description}</p>}
+    <GuideCatalog guides={guides} filter={region ? 'category' : 'region'} />
+    <AdSlot size="leaderboard" />
+  </div>
+</BaseLayout>

@@ -1,110 +1,68 @@
 ---
-import { Picture } from 'astro:assets';
 import BaseLayout from '../layouts/BaseLayout.astro';
-import ArticleCard from '../components/ArticleCard.astro';
 import AdSlot from '../components/AdSlot.astro';
-import Trending from '../components/Trending.astro';
-import { SITE } from '../config/site';
+import GuideIcon from '../components/GuideIcon.astro';
+import GuideCard from '../components/GuideCard.astro';
+import { guideCategories, guideImage, guideRegions, regionPath } from '../lib/local-guide';
+import { featuredGuides } from '../content/local-guides';
 import { organizationLd, websiteLd } from '../utils/seo';
 import { applyPublicCache } from '../lib/cache-headers';
-import { loadHome } from '../lib/public';
+import '../styles/local-wisdom.css';
 
-const { headline, secondary, latest, byCategory, trending } = await loadHome();
 applyPublicCache(Astro, 'home', ['home']);
 ---
 <BaseLayout
-  title="bacaankunetwork.com — Berita Terkini Hari Ini yang Jernih dan Ringkas"
+  title="Bacaanku — Local Wisdom Indonesia"
   rawTitle
-  description={SITE.description}
-  jsonLd={[organizationLd(), websiteLd()]}
+  description="Rekomendasi hotel, tempat wisata, dan kuliner khas dari berbagai daerah Indonesia."
+  jsonLd={[organizationLd(), websiteLd('/jelajah/')]}
 >
-  <h1 class="visually-hidden">bacaankunetwork.com — berita terkini hari ini</h1>
-  {headline ? (
-    <section class="home-hero" aria-labelledby="home-hero-title">
-      <div class="home-hero-media" aria-hidden="true">
-        {headline.heroImage ? (
-          <Picture src={headline.heroImage} alt="" formats={['avif', 'webp']} widths={[640, 960, 1440, 1920]} sizes="100vw" quality={74} loading="eager" fetchpriority="high" />
-        ) : headline.heroSrc && (
-          <img src={headline.heroSrc} srcset={headline.heroSrcset} alt="" width={headline.heroWidth ?? undefined} height={headline.heroHeight ?? undefined} fetchpriority="high" />
-        )}
-      </div>
-      <div class="container home-hero-content">
-        <p class="hero-kicker">Cerita dari berbagai sudut Nusantara</p>
-        <h2 id="home-hero-title">Jelajahi Indonesia,<br />Temukan Cerita Baru.</h2>
-        <p>Berita, budaya, inovasi, dan pengalaman lokal yang membantu kita memahami Indonesia lebih dekat.</p>
-        <form class="hero-search" action="/cari/" method="get" role="search">
-          <svg aria-hidden="true" width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
-          <label class="visually-hidden" for="hero-q">Cari artikel atau topik</label>
-          <input id="hero-q" name="q" type="search" placeholder="Cari berita, budaya, teknologi, atau daerah..." />
-          <button type="submit">Cari</button>
-        </form>
-      </div>
-    </section>
-  ) : (
-    <div class="container"><header class="page-head"><h2 class="page-title">Belum ada artikel terbit</h2></header></div>
-  )}
+  <section class="guide-home-hero" aria-labelledby="home-title">
+    <img class="guide-cover" src={guideImage('bromo')} srcset={`${guideImage('bromo', 'card')} 640w, ${guideImage('bromo')} 1600w`} sizes="100vw" alt="" width="1600" height="900" fetchpriority="high" />
+    <div class="container guide-home-copy">
+      <h1 id="home-title">Jelajahi Indonesia,<br />Temukan Cerita Baru.</h1>
+      <p>Rekomendasi hotel, tempat wisata, dan kuliner terbaik di berbagai daerah Indonesia.</p>
+      <form class="guide-search-form" action="/jelajah/" method="get" role="search">
+        <GuideIcon name="search" />
+        <label class="visually-hidden" for="home-search">Cari hotel, wisata, kuliner, atau kota</label>
+        <input id="home-search" name="q" type="search" placeholder="Cari hotel, wisata, kuliner, atau kota..." maxlength="80" enterkeyhint="search" />
+        <button type="submit"><span>Cari</span><GuideIcon name="search" /></button>
+      </form>
+    </div>
+  </section>
 
   <div class="container">
-    <nav class="discovery-pills" aria-label="Jelajahi topik Bacaanku">
-      <a href="/news/">
-        <span class="discovery-icon discovery-icon--teal" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 5h16v14H4zM7 8h5M7 12h10M7 16h8"/></svg></span>
-        <span><strong>Kabar</strong><small>Peristiwa terbaru</small></span>
-      </a>
-      <a href="/sains/">
-        <span class="discovery-icon discovery-icon--mint" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m3 19 6-10 4 6 3-5 5 9z"/></svg></span>
-        <span><strong>Alam & Sains</strong><small>Jelajahi pengetahuan</small></span>
-      </a>
-      <a href="/hiburan/">
-        <span class="discovery-icon discovery-icon--coral" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 4v8M4 4v5a3 3 0 0 0 6 0V4M7 12v8M16 4v16M16 4c5 2 5 8 0 9"/></svg></span>
-        <span><strong>Budaya</strong><small>Karya dan cerita lokal</small></span>
-      </a>
+    <nav class="guide-shortcuts" aria-label="Jelajahi kategori">
+      {guideCategories.map((category) => (
+        <a href={`/${category.slug}/`}>
+          <span class:list={['guide-shortcut-icon', `guide-color-${category.slug}`]}><GuideIcon name={category.slug} /></span>
+          <span><strong>{category.name}</strong><small>{category.short}</small></span>
+        </a>
+      ))}
     </nav>
 
-    {headline && (
-      <section class="featured-section" aria-labelledby="pilihan-title">
-        <div class="section-head">
-          <div>
-            <p class="section-eyebrow">Rekomendasi redaksi</p>
-            <h2 id="pilihan-title" class="section-title">Pilihan Bacaanku</h2>
-          </div>
-          <a class="more-link" href="/news/">Lihat semua</a>
-        </div>
-        <div class="grid grid--4 featured-grid">
-          {[headline, ...secondary].slice(0, 4).map((article) => <ArticleCard article={article} headingLevel={3} />)}
-        </div>
-      </section>
-    )}
+    <section class="guide-home-section" aria-labelledby="pilihan-title">
+      <div class="guide-section-head">
+        <h2 id="pilihan-title">Ulasan Pilihan</h2>
+        <a href="/jelajah/">Lihat Semua</a>
+      </div>
+      <div class="guide-grid guide-featured-grid">
+        {featuredGuides.map((guide) => <GuideCard guide={guide} />)}
+      </div>
+    </section>
 
     <AdSlot size="leaderboard" />
 
-    <div class="with-sidebar home-latest">
-      <section aria-labelledby="terbaru-title">
-        <div class="section-head latest-head">
-          <div>
-            <p class="section-eyebrow">Segar dari redaksi</p>
-            <h2 id="terbaru-title" class="section-title">Cerita Terbaru</h2>
-          </div>
-          <a class="more-link" href="/news/">Semua artikel</a>
-        </div>
-        <div class="latest-list">{latest.map((article) => <ArticleCard article={article} variant="list" showDesc />)}</div>
-      </section>
-      <div class="sidebar">
-        <Trending items={trending} />
-        <AdSlot size="rectangle" />
+    <section class="guide-home-section guide-home-regions" aria-labelledby="daerah-title">
+      <div class="guide-section-head"><h2 id="daerah-title">Jelajahi Daerah</h2><a href="/daerah/">Lihat Semua Daerah</a></div>
+      <div class="guide-grid">
+        {guideRegions.slice(0, 3).map((region) => (
+          <a class="guide-region-card" href={regionPath(region.slug)}>
+            <img src={guideImage(region.image, 'card')} alt="" width="640" height="360" loading="lazy" />
+            <span><strong>{region.name}</strong><small>{region.province}</small></span>
+          </a>
+        ))}
       </div>
-    </div>
-
-    {byCategory.map((category) => (
-      <section class="cat-section deferred" aria-labelledby={`sec-${category.slug}`}>
-        <div class="section-head">
-          <div>
-            <p class="section-eyebrow">Jelajahi topik</p>
-            <h2 id={`sec-${category.slug}`} class="section-title">{category.name}</h2>
-          </div>
-          <a class="more-link" href={`/${category.slug}/`}>Lihat semua<span class="visually-hidden"> artikel {category.name}</span></a>
-        </div>
-        <div class="grid grid--4 category-grid">{category.items.map((article) => <ArticleCard article={article} />)}</div>
-      </section>
-    ))}
+    </section>
   </div>
 </BaseLayout>

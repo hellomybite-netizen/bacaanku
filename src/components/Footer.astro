@@ -1,18 +1,20 @@
 ---
-import { SITE, categories, footerLinks } from '../config/site';
-import { SHOW_PROTOTYPE_NOTE } from '../lib/mode';
+import { SITE, footerLinks } from '../config/site';
+import { guideCategories } from '../lib/local-guide';
 const year = new Date().getFullYear();
 ---
 <footer class="site-footer">
   <div class="container footer-grid">
     <div class="footer-brand">
       <p class="site-logo footer-logo"><img class="logo-img" src="/brand/logo-local-wisdom.svg" width="340" height="88" alt="Bacaanku — Local Wisdom Indonesia" decoding="async" loading="lazy" /></p>
-      <p>Menemukan cerita, rasa, dan pengetahuan baru dari berbagai sudut Indonesia.</p>
-      {SHOW_PROTOTYPE_NOTE && <p class="footer-note">Pratinjau — artikel contoh di build statis ini fiktif. Situs tayang memakai ruang redaksi.</p>}
+      <p>Rekomendasi hotel, tempat wisata, dan kuliner dari berbagai daerah Indonesia.</p>
     </div>
     <nav aria-label="Kategori (footer)">
       <h2 class="footer-title">Kategori</h2>
-      <ul class="footer-list">{categories.map((c) => <li><a href={`/${c.slug}/`}>{c.name}</a></li>)}</ul>
+      <ul class="footer-list">
+        {guideCategories.map((c) => <li><a href={`/${c.slug}/`}>{c.name}</a></li>)}
+        <li><a href="/daerah/">Daerah</a></li>
+      </ul>
     </nav>
     <nav aria-label="Informasi">
       <h2 class="footer-title">Informasi</h2>

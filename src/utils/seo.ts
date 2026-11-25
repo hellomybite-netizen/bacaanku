@@ -14,7 +14,7 @@ export const organizationLd = () => ({
   sameAs: [`https://x.com/${SITE.twitter.replace('@', '')}`],
 });
 
-export const websiteLd = () => ({
+export const websiteLd = (searchPath = '/cari/') => ({
   '@context': 'https://schema.org',
   '@type': 'WebSite',
   '@id': `${SITE.url}/#website`,
@@ -25,7 +25,7 @@ export const websiteLd = () => ({
   publisher: { '@id': `${SITE.url}/#organization` },
   potentialAction: {
     '@type': 'SearchAction',
-    target: { '@type': 'EntryPoint', urlTemplate: `${SITE.url}/cari/?q={search_term_string}` },
+    target: { '@type': 'EntryPoint', urlTemplate: `${SITE.url}${searchPath}?q={search_term_string}` },
     'query-input': 'required name=search_term_string',
   },
 });

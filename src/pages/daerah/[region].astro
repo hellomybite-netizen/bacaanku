@@ -1,0 +1,19 @@
+---
+import GuideListing from '../../components/GuideListing.astro';
+import { localGuides } from '../../content/local-guides';
+import { guideRegions, regionPath } from '../../lib/local-guide';
+
+export const prerender = true;
+
+export function getStaticPaths() {
+  return guideRegions.map((region) => ({ params: { region: region.slug }, props: { region } }));
+}
+
+const { region } = Astro.props;
+const crumbs = [{ name: 'Beranda', href: '/' }, { name: region.province, href: '/daerah/' }, { name: region.name, href: regionPath(region.slug) }];
+const guides = localGuides.filter((guide) => guide.region === region.slug);
+const guideOrder: readonly string[] = 'guideOrder' in region ? region.guideOrder : [];
+const position = (slug: string) => guideOrder.includes(slug) ? guideOrder.indexOf(slug) : guideOrder.length;
+guides.sort((a, b) => position(a.slug) - position(b.slug));
+---
+<GuideListing title={region.name} description={region.description} image={region.image} region={`${region.province}, Indonesia`} guides={guides} crumbs={crumbs} />

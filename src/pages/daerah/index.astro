@@ -1,0 +1,22 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Breadcrumb from '../../components/Breadcrumb.astro';
+import { guideImage, guideRegions, regionPath } from '../../lib/local-guide';
+import '../../styles/local-wisdom.css';
+
+export const prerender = true;
+---
+<BaseLayout title="Jelajahi Daerah" description="Jelajahi panduan hotel, wisata, dan kuliner dari Jawa Timur dan DI Yogyakarta.">
+  <div class="container guide-list-content">
+    <Breadcrumb items={[{ name: 'Beranda', href: '/' }, { name: 'Daerah' }]} />
+    <header class="guide-search-heading"><h1>Jelajahi Daerah</h1><p>Jawa Timur dan DI Yogyakarta</p></header>
+    <div class="guide-grid">
+      {guideRegions.map((region) => (
+        <a class="guide-region-card" href={regionPath(region.slug)}>
+          <img src={guideImage(region.image, 'card')} alt="" width="640" height="360" loading="lazy" />
+          <span><strong>{region.name}</strong><small>{region.province}</small></span>
+        </a>
+      ))}
+    </div>
+  </div>
+</BaseLayout>

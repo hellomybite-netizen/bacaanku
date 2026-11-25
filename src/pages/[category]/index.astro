@@ -5,6 +5,9 @@ import ArticleCard from '../../components/ArticleCard.astro';
 import AdSlot from '../../components/AdSlot.astro';
 import Breadcrumb from '../../components/Breadcrumb.astro';
 import Trending from '../../components/Trending.astro';
+import GuideListing from '../../components/GuideListing.astro';
+import { localGuides } from '../../content/local-guides';
+import { guideCategory } from '../../lib/local-guide';
 import { SITE, categories } from '../../config/site';
 import { breadcrumbLd } from '../../utils/seo';
 import { applyPublicCache } from '../../lib/cache-headers';
@@ -14,27 +17,35 @@ export const prerender = __BUILD_MODE__ === 'static';
 
 export async function getStaticPaths() {
   if (__BUILD_MODE__ !== 'static') return [];
-  const { categoryPaths } = await import('../../lib/static-data');
-  return categoryPaths();
+  const [{ categoryPaths }, { guideCategories }] = await Promise.all([
+    import('../../lib/static-data'),
+    import('../../lib/local-guide'),
+  ]);
+  return [...await categoryPaths(), ...guideCategories.map((category) => ({ params: { category: category.slug } }))];
 }
 
 const slug = Astro.params.category ?? '';
+const guide = guideCategory(slug);
 const before = Number(Astro.url.searchParams.get('before'));
 const cursorId = Number(Astro.url.searchParams.get('id'));
 const cursor = Number.isFinite(before) && before > 0 && Number.isFinite(cursorId) ? { publishedAt: before, id: cursorId } : null;
-const page = await loadCategory(slug, cursor);
-if (!page) {
+const page = guide ? null : await loadCategory(slug, cursor);
+const category = page?.category ?? guide;
+if (!category) {
   Astro.response.status = 404;
   return new Response(null, { status: 404, statusText: 'Not Found' });
 }
-const { category, items, next, trending } = page;
-applyPublicCache(Astro, 'list', [`cat-${category.slug}`]);
+const { items = [], next, trending = [] } = page ?? {};
+if (page) applyPublicCache(Astro, 'list', [`cat-${category.slug}`]);
 const base = `/${category.slug}/`;
 const crumbs = [{ name: 'Beranda', href: '/' }, { name: category.name, href: base }];
 const title = cursor ? `Berita ${category.name} — sebelumnya` : category.slug === 'news' ? 'News — Berita Terkini Hari Ini' : `Berita ${category.name} Terkini`;
 const categoryLead = items[0];
 ---
-<BaseLayout title={title} description={`${category.description} Kumpulan berita ${category.name} terbaru di ${SITE.domain}.`} jsonLd={[breadcrumbLd(crumbs)]} currentCategory={category.slug}>
+{guide ? (
+  <GuideListing title={`${guide.name} Indonesia`} description={guide.description} image={guide.image} crumbs={crumbs}
+    guides={localGuides.filter((item) => item.category === guide.slug)} category={guide.slug} />
+) : <BaseLayout title={title} description={`${category.description} Kumpulan berita ${category.name} terbaru di ${SITE.domain}.`} jsonLd={[breadcrumbLd(crumbs)]} currentCategory={category.slug}>
   <div class="container category-shell">
     <Breadcrumb items={crumbs} />
     <header class="category-hero">
@@ -76,4 +87,4 @@ const categoryLead = items[0];
       <div class="sidebar"><Trending items={trending} /><AdSlot size="rectangle" /></div>
     </div>
   </div>
-</BaseLayout>
+</BaseLayout>}

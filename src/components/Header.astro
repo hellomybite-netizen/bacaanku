@@ -1,5 +1,6 @@
 ---
-import { SITE, categories } from '../config/site';
+import { SITE } from '../config/site';
+import { guideCategories, guideRegions, regionPath } from '../lib/local-guide';
 interface Props { currentCategory?: string }
 const { currentCategory } = Astro.props;
 const path = Astro.url.pathname;
@@ -11,23 +12,22 @@ const path = Astro.url.pathname;
     </a>
     <nav class="site-nav" aria-label="Navigasi utama">
       <ul id="site-menu" class="site-menu">
-        <li><a href="/" aria-current={path === '/' ? 'page' : undefined}>Beranda</a></li>
-        {categories.slice(0, 4).map((c) => (
-          <li><a href={`/${c.slug}/`} aria-current={currentCategory === c.slug ? (path === `/${c.slug}/` ? 'page' : 'true') : undefined}>{c.name}</a></li>
+        {guideCategories.map((c) => (
+          <li><a class={`nav-${c.slug}`} href={`/${c.slug}/`} aria-current={currentCategory === c.slug ? (path === `/${c.slug}/` ? 'page' : 'true') : undefined}>{c.name}</a></li>
         ))}
         <li class="nav-more">
           <details>
-            <summary>Daerah & topik</summary>
+            <summary>Daerah</summary>
             <div class="nav-panel">
-              {categories.slice(4).map((c) => <a href={`/${c.slug}/`} aria-current={currentCategory === c.slug ? 'true' : undefined}>{c.name}</a>)}
-              <a href="/hiburan/">Budaya & kreativitas</a>
+              <a href="/daerah/" aria-current={path === '/daerah/' ? 'page' : undefined}>Semua daerah</a>
+              {guideRegions.map((region) => <a href={regionPath(region.slug)} aria-current={path === regionPath(region.slug) ? 'page' : undefined}>{region.name}</a>)}
             </div>
           </details>
         </li>
       </ul>
     </nav>
     <div class="header-actions">
-      <a class="search-button" href="/cari/">
+      <a class="search-button" href="/jelajah/" aria-label="Cari hotel, wisata, dan kuliner">
         <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
         <span>Cari</span>
       </a>

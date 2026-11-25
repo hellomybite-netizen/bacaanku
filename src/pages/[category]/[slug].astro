@@ -6,6 +6,8 @@ import AdSlot from '../../components/AdSlot.astro';
 import Breadcrumb from '../../components/Breadcrumb.astro';
 import ShareButtons from '../../components/ShareButtons.astro';
 import Trending from '../../components/Trending.astro';
+import GuideArticle from '../../components/GuideArticle.astro';
+import { localGuides } from '../../content/local-guides';
 import { absUrl, articlePath, formatDateTime, isoDate } from '../../utils/articles';
 import { breadcrumbLd, newsArticleLd } from '../../utils/seo';
 import { applyPublicCache } from '../../lib/cache-headers';
@@ -16,20 +18,24 @@ export const prerender = __BUILD_MODE__ === 'static';
 
 export async function getStaticPaths() {
   if (__BUILD_MODE__ !== 'static') return [];
-  const { articlePaths } = await import('../../lib/static-data');
-  return articlePaths();
+  const [{ articlePaths }, { localGuides }] = await Promise.all([
+    import('../../lib/static-data'),
+    import('../../content/local-guides'),
+  ]);
+  return [...await articlePaths(), ...localGuides.map((guide) => ({ params: { category: guide.category, slug: guide.slug } }))];
 }
 
 const category = Astro.params.category ?? '';
 const slug = Astro.params.slug ?? '';
-const isGone = DELETED_SAMPLE_SLUGS.has(slug);
-const result = isGone ? null : await loadArticle(category, slug);
+const guide = localGuides.find((item) => item.category === category && item.slug === slug);
+const isGone = !guide && DELETED_SAMPLE_SLUGS.has(slug);
+const result = guide || isGone ? null : await loadArticle(category, slug);
 if (result && 'redirect' in result) return Astro.redirect(result.redirect, 301);
 if (isGone) {
   Astro.response.status = 410;
   Astro.response.headers.set('Cache-Control', 'public, max-age=3600, s-maxage=86400');
   Astro.response.headers.set('X-Robots-Tag', 'noindex');
-} else if (!result) {
+} else if (!guide && !result) {
   Astro.response.status = 404;
 }
 const payload = result && !('redirect' in result) ? result : null;
@@ -56,7 +62,7 @@ const authorUrl = article ? `/penulis/${article.authorSlug}/` : '';
 const og = article?.heroSrc ? absUrl(article.heroSrc) : undefined;
 const sizes = '(min-width: 1240px) 780px, (min-width: 960px) 64vw, calc(100vw - 2rem)';
 ---
-{article ? (
+{guide ? <GuideArticle guide={guide} /> : article ? (
   <BaseLayout
     title={article.seoTitle ?? article.title}
     description={article.excerpt}
