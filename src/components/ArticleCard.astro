@@ -53,9 +53,15 @@ const href = articlePath(article.categorySlug, article.slug);
     )}
   </div>
   <div class="card-body">
-    <a class="kicker" href={`/${article.categorySlug}/`}>{article.categoryName}</a>
+    <div class="card-topline">
+      <a class="kicker" href={`/${article.categorySlug}/`}>{article.categoryName}</a>
+      <time datetime={new Date(article.publishedAt * 1000).toISOString()}>{formatDate(article.publishedAt)}</time>
+    </div>
     <H class="card-title"><a href={href}>{article.title}</a></H>
     {(showDesc || isHero) && <p class="card-desc">{article.excerpt}</p>}
-    <p class="card-meta"><span>{article.categoryName}</span><time datetime={new Date(article.publishedAt * 1000).toISOString()}>{formatDate(article.publishedAt)}</time></p>
+    <p class="card-meta">
+      <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 10c0 5-8 12-8 12S4 15 4 10a8 8 0 1 1 16 0Z"/><circle cx="12" cy="10" r="2.5"/></svg>
+      <span>Indonesia</span>
+    </p>
   </div>
 </article>

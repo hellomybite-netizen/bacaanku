@@ -1,4 +1,5 @@
 ---
+import { Picture } from 'astro:assets';
 import BaseLayout from '../layouts/BaseLayout.astro';
 import ArticleCard from '../components/ArticleCard.astro';
 import AdSlot from '../components/AdSlot.astro';
@@ -18,52 +19,72 @@ applyPublicCache(Astro, 'home', ['home']);
   jsonLd={[organizationLd(), websiteLd()]}
 >
   <h1 class="visually-hidden">bacaankunetwork.com — berita terkini hari ini</h1>
-  <div class="container">
-    <nav class="topic-strip" aria-label="Topik pilihan">
-      <strong>Topik Pilihan</strong>
-      <div>
-        <a href="/news/">Kabar hari ini</a>
-        <a href="/teknologi/">Dunia digital</a>
-        <a href="/ekonomi/">Ekonomi rakyat</a>
-        <a href="/sains/">Sains & lingkungan</a>
+  {headline ? (
+    <section class="home-hero" aria-labelledby="home-hero-title">
+      <div class="home-hero-media" aria-hidden="true">
+        {headline.heroImage ? (
+          <Picture src={headline.heroImage} alt="" formats={['avif', 'webp']} widths={[640, 960, 1440, 1920]} sizes="100vw" quality={74} loading="eager" fetchpriority="high" />
+        ) : headline.heroSrc && (
+          <img src={headline.heroSrc} srcset={headline.heroSrcset} alt="" width={headline.heroWidth ?? undefined} height={headline.heroHeight ?? undefined} fetchpriority="high" />
+        )}
       </div>
+      <div class="container home-hero-content">
+        <p class="hero-kicker">Cerita dari berbagai sudut Nusantara</p>
+        <h2 id="home-hero-title">Jelajahi Indonesia,<br />Temukan Cerita Baru.</h2>
+        <p>Berita, budaya, inovasi, dan pengalaman lokal yang membantu kita memahami Indonesia lebih dekat.</p>
+        <form class="hero-search" action="/cari/" method="get" role="search">
+          <svg aria-hidden="true" width="21" height="21" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+          <label class="visually-hidden" for="hero-q">Cari artikel atau topik</label>
+          <input id="hero-q" name="q" type="search" placeholder="Cari berita, budaya, teknologi, atau daerah..." />
+          <button type="submit">Cari</button>
+        </form>
+      </div>
+    </section>
+  ) : (
+    <div class="container"><header class="page-head"><h2 class="page-title">Belum ada artikel terbit</h2></header></div>
+  )}
+
+  <div class="container">
+    <nav class="discovery-pills" aria-label="Jelajahi topik Bacaanku">
+      <a href="/news/">
+        <span class="discovery-icon discovery-icon--teal" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M4 5h16v14H4zM7 8h5M7 12h10M7 16h8"/></svg></span>
+        <span><strong>Kabar</strong><small>Peristiwa terbaru</small></span>
+      </a>
+      <a href="/sains/">
+        <span class="discovery-icon discovery-icon--mint" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="m3 19 6-10 4 6 3-5 5 9z"/></svg></span>
+        <span><strong>Alam & Sains</strong><small>Jelajahi pengetahuan</small></span>
+      </a>
+      <a href="/hiburan/">
+        <span class="discovery-icon discovery-icon--coral" aria-hidden="true"><svg viewBox="0 0 24 24"><path d="M7 4v8M4 4v5a3 3 0 0 0 6 0V4M7 12v8M16 4v16M16 4c5 2 5 8 0 9"/></svg></span>
+        <span><strong>Budaya</strong><small>Karya dan cerita lokal</small></span>
+      </a>
     </nav>
 
-    {headline ? (
-      <>
-        <div class="home-intro">
+    {headline && (
+      <section class="featured-section" aria-labelledby="pilihan-title">
+        <div class="section-head">
           <div>
-            <p class="section-eyebrow">Pilihan redaksi</p>
-            <h2>Kabar utama hari ini</h2>
+            <p class="section-eyebrow">Rekomendasi redaksi</p>
+            <h2 id="pilihan-title" class="section-title">Pilihan Bacaanku</h2>
           </div>
-          <p>Ringkasan peristiwa penting, disusun agar cepat dipahami dan mudah ditelusuri.</p>
+          <a class="more-link" href="/news/">Lihat semua</a>
         </div>
-        <section class="top-stories" aria-label="Berita utama">
-          <div class="top-main"><ArticleCard article={headline} variant="hero" headingLevel={2} /></div>
-          <ul class="top-side" role="list">
-            {secondary.map((article, index) => (
-              <li>
-                <span class="story-index" aria-hidden="true">{String(index + 1).padStart(2, '0')}</span>
-                <ArticleCard article={article} variant="compact" />
-              </li>
-            ))}
-          </ul>
-        </section>
-      </>
-    ) : (
-      <header class="page-head"><h2 class="page-title">Belum ada berita terbit</h2></header>
+        <div class="grid grid--4 featured-grid">
+          {[headline, ...secondary].slice(0, 4).map((article) => <ArticleCard article={article} headingLevel={3} />)}
+        </div>
+      </section>
     )}
 
     <AdSlot size="leaderboard" />
 
-    <div class="with-sidebar">
+    <div class="with-sidebar home-latest">
       <section aria-labelledby="terbaru-title">
         <div class="section-head latest-head">
           <div>
-            <p class="section-eyebrow">Update pilihan redaksi</p>
-            <h2 id="terbaru-title" class="section-title">Berita Terbaru</h2>
+            <p class="section-eyebrow">Segar dari redaksi</p>
+            <h2 id="terbaru-title" class="section-title">Cerita Terbaru</h2>
           </div>
-          <a class="more-link" href="/news/">Semua berita <span aria-hidden="true">→</span></a>
+          <a class="more-link" href="/news/">Semua artikel</a>
         </div>
         <div class="latest-list">{latest.map((article) => <ArticleCard article={article} variant="list" showDesc />)}</div>
       </section>
@@ -80,7 +101,7 @@ applyPublicCache(Astro, 'home', ['home']);
             <p class="section-eyebrow">Jelajahi topik</p>
             <h2 id={`sec-${category.slug}`} class="section-title">{category.name}</h2>
           </div>
-          <a class="more-link" href={`/${category.slug}/`}>Lihat semua<span class="visually-hidden"> berita {category.name}</span> <span aria-hidden="true">→</span></a>
+          <a class="more-link" href={`/${category.slug}/`}>Lihat semua<span class="visually-hidden"> artikel {category.name}</span></a>
         </div>
         <div class="grid grid--4 category-grid">{category.items.map((article) => <ArticleCard article={article} />)}</div>
       </section>
