@@ -6,7 +6,7 @@ import AdSlot from '../../components/AdSlot.astro';
 import Breadcrumb from '../../components/Breadcrumb.astro';
 import Trending from '../../components/Trending.astro';
 import GuideListing from '../../components/GuideListing.astro';
-import { localGuides } from '../../content/local-guides';
+import { loadGuidesByCategory } from '../../lib/guide-repo';
 import { guideCategory } from '../../lib/local-guide';
 import { SITE, categories } from '../../config/site';
 import { breadcrumbLd } from '../../utils/seo';
@@ -30,6 +30,8 @@ const before = Number(Astro.url.searchParams.get('before'));
 const cursorId = Number(Astro.url.searchParams.get('id'));
 const cursor = Number.isFinite(before) && before > 0 && Number.isFinite(cursorId) ? { publishedAt: before, id: cursorId } : null;
 const page = guide ? null : await loadCategory(slug, cursor);
+const guides = guide ? await loadGuidesByCategory(guide.slug) : [];
+if (guide) applyPublicCache(Astro, 'list', [`cat-${guide.slug}`]);
 const category = page?.category ?? guide;
 if (!category) {
   Astro.response.status = 404;
@@ -44,7 +46,7 @@ const categoryLead = items[0];
 ---
 {guide ? (
   <GuideListing title={`${guide.name} Indonesia`} description={guide.description} image={guide.image} crumbs={crumbs}
-    guides={localGuides.filter((item) => item.category === guide.slug)} category={guide.slug} />
+    guides={guides} category={guide.slug} />
 ) : <BaseLayout title={title} description={`${category.description} Kumpulan berita ${category.name} terbaru di ${SITE.domain}.`} jsonLd={[breadcrumbLd(crumbs)]} currentCategory={category.slug}>
   <div class="container category-shell">
     <Breadcrumb items={crumbs} />

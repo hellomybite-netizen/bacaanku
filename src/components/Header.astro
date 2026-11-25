@@ -1,6 +1,6 @@
 ---
 import { SITE } from '../config/site';
-import { guideCategories, guideRegions, regionPath } from '../lib/local-guide';
+import { cityPath, guideCategories, guideCities, guideProvinces, provincePath } from '../lib/local-guide';
 interface Props { currentCategory?: string }
 const { currentCategory } = Astro.props;
 const path = Astro.url.pathname;
@@ -20,10 +20,12 @@ const path = Astro.url.pathname;
             <summary>Daerah</summary>
             <div class="nav-panel">
               <a href="/daerah/" aria-current={path === '/daerah/' ? 'page' : undefined}>Semua daerah</a>
-              {guideRegions.map((region) => <a href={regionPath(region.slug)} aria-current={path === regionPath(region.slug) ? 'page' : undefined}>{region.name}</a>)}
+              {guideProvinces.map((province) => <a href={provincePath(province.slug)} aria-current={path === provincePath(province.slug) ? 'page' : undefined}>{province.name}</a>)}
+              {guideCities.filter((city) => city.nav).map((city) => <a href={cityPath(city.slug)} aria-current={path === cityPath(city.slug) ? 'page' : undefined}>{city.name}</a>)}
             </div>
           </details>
         </li>
+        <li><a class="nav-artikel" href="/artikel/" aria-current={path === '/artikel/' ? 'page' : path.startsWith('/artikel/') ? 'true' : undefined}>Artikel</a></li>
       </ul>
     </nav>
     <div class="header-actions">

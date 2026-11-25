@@ -1,5 +1,6 @@
 ---
 import type { ArticleValues } from '../../lib/editorial';
+import { guideCities, guideProvince, isGuideCategory } from '../../lib/local-guide';
 interface Author { slug: string; name: string; role: string }
 interface Category { slug: string; name: string }
 interface Props {
@@ -13,6 +14,8 @@ interface Props {
 }
 const { values, errors, categories, authors, csrf, saved = false, status } = Astro.props;
 const errorList = Object.values(errors);
+const local = values.local;
+const localOpen = isGuideCategory(values.category) || Object.values(local).some(Boolean);
 ---
 {saved && <p class="admin-ok" role="status">Tersimpan.</p>}
 {errorList.length > 0 && (
@@ -56,6 +59,47 @@ const errorList = Object.values(errors);
       <span>Tag, dipisah koma</span>
       <input name="tags" value={values.tags} placeholder="hujan meteor, astronomi" />
     </label>
+    <details class="panel local-panel" open={localOpen}>
+      <summary><strong>Artikel lokal: kota &amp; info panduan</strong> <small class="hint">opsional · hanya untuk kategori Hotel/Wisata/Kuliner (= tipe wisata)</small></summary>
+      <p class="hint">Isi kota agar artikel muncul di menu Artikel (/artikel/kota/). Kategori di atas = tipe wisata. Kosongkan semua bila menulis berita biasa.</p>
+      <div class="split split-2">
+        <label class="field">
+          <span>Kota</span>
+          <select name="kota">
+            <option value="">— pilih kota —</option>
+            {guideCities.map((city) => <option value={city.slug} selected={city.slug === local.city}>{city.name} ({guideProvince(city.province)?.name})</option>)}
+          </select>
+          {errors.city && <small class="field-error">{errors.city}</small>}
+        </label>
+        <label class="field"><span>Nama tempat</span><input name="place_name" maxlength="80" value={local.placeName} placeholder="Rawon Nguling" /></label>
+      </div>
+      <label class="field">
+        <span>Lokasi singkat (pil lokasi)</span>
+        <input name="location_label" maxlength="80" value={local.locationLabel} placeholder="Tongas, Kab. Probolinggo" />
+        {errors.locationLabel && <small class="field-error">{errors.locationLabel}</small>}
+      </label>
+      <label class="field">
+        <span>Info Singkat, satu baris "Label: nilai"</span>
+        <textarea name="facts" rows="4" placeholder={"Alamat: Jl. Raya Tambakrejo No.75, Tongas\nJam buka: Setiap hari 05.30–21.00 WIB"}>{local.facts}</textarea>
+        {errors.facts && <small class="field-error">{errors.facts}</small>}
+      </label>
+      <div class="split split-2">
+        <label class="field"><span>Label anggaran</span><input name="budget_label" value={local.budgetLabel} placeholder="Kisaran harga" /></label>
+        <label class="field"><span>Nilai anggaran</span><input name="budget_value" value={local.budgetValue} placeholder="Rp22.000–Rp60.000" /></label>
+      </div>
+      {errors.budget && <small class="field-error">{errors.budget}</small>}
+      <label class="field"><span>Kata kunci Google Maps</span><input name="map_query" maxlength="140" value={local.mapQuery} placeholder="Rawon Nguling Tambakrejo Tongas Probolinggo" /></label>
+      <div class="split split-2">
+        <label class="field"><span>Teks tombol aksi</span><input name="action_label" maxlength="60" value={local.actionLabel} placeholder="Lihat Situs Resmi" />{errors.actionLabel && <small class="field-error">{errors.actionLabel}</small>}</label>
+        <label class="field"><span>URL tombol aksi (https)</span><input name="action_url" type="url" value={local.actionUrl} placeholder="https://" />{errors.actionUrl && <small class="field-error">{errors.actionUrl}</small>}</label>
+      </div>
+      <label class="field">
+        <span>Galeri tambahan, satu baris "URL | teks alternatif"</span>
+        <textarea name="gallery" rows="3" placeholder="/media/local-wisdom/rawon-detail-wide.webp | Semangkuk rawon dengan tauge">{local.gallery}</textarea>
+        {errors.gallery && <small class="field-error">{errors.gallery}</small>}
+      </label>
+      {errors.local && <small class="field-error">{errors.local}</small>}
+    </details>
     <label class="field">
       <span>Isi (Markdown)</span>
       <textarea name="body" id="body-md">{values.body}</textarea>
@@ -77,7 +121,7 @@ const errorList = Object.values(errors);
       <label class="field"><span>Lebar (px)</span><input name="hero_width" inputmode="numeric" value={values.heroWidth} /></label>
       <label class="field"><span>Tinggi (px)</span><input name="hero_height" inputmode="numeric" value={values.heroHeight} /></label>
     </div>
-    <p class="admin-kicker">Sumber (minimal 3 saat tayang)</p>
+    <p class="admin-kicker">Sumber (minimal 3 saat tayang; artikel Hotel/Wisata/Kuliner minimal 2)</p>
     <div id="sources">
       {values.sources.map((source) => (
         <div class="source-row">

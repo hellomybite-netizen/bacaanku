@@ -1,21 +1,21 @@
 ---
-import { guideImage, type Guide } from '../lib/local-guide';
+import type { Guide } from '../lib/local-guide';
 
 interface Props { guide: Guide }
 const { guide } = Astro.props;
-const photos = [{ image: guide.image, alt: guide.imageAlt }, ...(guide.gallery ?? [])];
+const photos = [{ src: guide.heroSrc, cardSrc: guide.cardSrc, alt: guide.imageAlt }, ...guide.gallery];
 const main = photos[0];
 ---
 <guide-gallery class="guide-article-photo">
   <figure>
-    <img data-main-image src={guideImage(main.image)} srcset={`${guideImage(main.image, 'card')} 640w, ${guideImage(main.image)} 1600w`} sizes="(min-width: 1240px) 740px, (min-width: 760px) 65vw, calc(100vw - 2rem)" alt={main.alt} width="1600" height="900" fetchpriority="high" />
-    <figcaption>Ilustrasi visual</figcaption>
+    <img data-main-image src={main.src} srcset={main.cardSrc !== main.src ? `${main.cardSrc} 640w, ${main.src} 1600w` : undefined} sizes="(min-width: 1240px) 740px, (min-width: 760px) 65vw, calc(100vw - 2rem)" alt={main.alt} width="1600" height="900" fetchpriority="high" />
+    <figcaption>{guide.heroCaption || 'Ilustrasi visual'}</figcaption>
   </figure>
   {photos.length > 1 && (
     <div class="guide-thumbnails" data-thumbnails role="group" aria-label="Galeri ilustrasi" hidden>
       {photos.map((photo, index) => (
-        <button type="button" aria-label={photo.alt} aria-pressed={index === 0 ? 'true' : 'false'}>
-          <img src={guideImage(photo.image, 'card')} alt="" width="640" height="360" loading="lazy" />
+        <button type="button" aria-label={photo.alt} aria-pressed={index === 0 ? 'true' : 'false'} data-full={photo.src} data-card={photo.cardSrc}>
+          <img src={photo.cardSrc} alt="" width="640" height="360" loading="lazy" />
         </button>
       ))}
     </div>
@@ -31,11 +31,11 @@ const main = photos[0];
       const buttons = [...thumbnails.querySelectorAll('button')];
       for (const button of buttons) {
         button.addEventListener('click', () => {
-          const card = button.querySelector('img')?.getAttribute('src');
+          const card = button.dataset.card;
+          const wide = button.dataset.full;
           const alt = button.getAttribute('aria-label');
-          if (!card || !alt) return;
-          const wide = card.replace(/-card\.webp$/, '-wide.webp');
-          main.srcset = `${card} 640w, ${wide} 1600w`;
+          if (!card || !wide || alt == null) return;
+          if (card !== wide) main.srcset = `${card} 640w, ${wide} 1600w`; else main.removeAttribute('srcset');
           main.src = wide;
           main.alt = alt;
           for (const item of buttons) item.setAttribute('aria-pressed', String(item === button));

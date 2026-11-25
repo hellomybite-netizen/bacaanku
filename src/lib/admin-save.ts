@@ -4,6 +4,18 @@ import { parseArticleForm, validateRemoteHeroSize, type ArticleValues } from './
 import { purgeContent, purgeForArticle } from './purge';
 import { adminArticle, saveArticle } from './repo';
 import { sqlArticleTags } from './sql.mjs';
+import { localFromRecord, sqlSelectLocal, sqlUpdateLocal, type LocalRecord } from './local-fields';
+import { guideCity } from './local-guide';
+import { SITE } from '../config/site';
+
+/** Kolom lokal belum ada (migrasi 0003 belum jalan) → null, bukan error, supaya /admin berita tetap jalan. */
+async function readLocal(db: D1Database, id: number): Promise<LocalRecord | null> {
+  try {
+    return await db.prepare(sqlSelectLocal).bind(id).first<LocalRecord>();
+  } catch {
+    return null;
+  }
+}
 
 export type SaveResult =
   | { ok: false; errors: Record<string, string>; values: ArticleValues }
@@ -24,7 +36,17 @@ export async function handleArticlePost(
   await validateRemoteHeroSize(prepared.values, prepared.errors);
   if (Object.keys(prepared.errors).length) return { ok: false, errors: prepared.errors, values: prepared.values };
   const db = getDb();
+  const previousLocal = opts.id && prepared.local.write ? await readLocal(db, opts.id) : null;
   const saved = await saveArticle(db, prepared, opts.id);
+  // Kolom local wisdom ditulis terpisah dan HANYA bila artikel tipe hotel/wisata/kuliner
+  // atau field lokal dikirim. Berita biasa (alur Jenny/Rere) tidak menyentuh kolom ini.
+  if (prepared.local.write) {
+    const l = prepared.local;
+    await db.prepare(sqlUpdateLocal).bind(
+      l.citySlug, l.provinceSlug, l.placeName, l.locationLabel, l.factsJson, l.budgetLabel, l.budgetValue,
+      l.mapQuery, l.actionLabel, l.actionUrl, l.galleryJson, saved.id,
+    ).run();
+  }
   const tags = await db.prepare(sqlArticleTags).bind(saved.id).all<{ slug: string }>();
   const category = prepared.values.category;
   const target = purgeForArticle({
@@ -35,6 +57,17 @@ export async function handleArticlePost(
     tagSlugs: tags.results.map((tag) => tag.slug),
   });
   if (saved.oldPath) target.urls.push(new URL(saved.oldPath, 'https://bacaankunetwork.com').href);
+  if (prepared.local.write) {
+    const origin = SITE.url.replace(/\/$/, '');
+    target.tags.push('artikel', 'daerah');
+    target.urls.push(`${origin}/artikel/`, `${origin}/daerah/`);
+    for (const slug of new Set([prepared.local.citySlug, previousLocal?.city_slug].filter(Boolean) as string[])) {
+      const city = guideCity(slug);
+      if (!city) continue;
+      target.tags.push(`kota-${city.slug}`, `prov-${city.province}`);
+      target.urls.push(`${origin}/artikel/${city.slug}/`, `${origin}/artikel/${city.slug}/${category}/`, `${origin}/daerah/${city.province}/`);
+    }
+  }
   const job = purgeContent(env, target).catch((error) => console.error('purge', error));
   if (opts.waitUntil) opts.waitUntil(job);
   else await job;
@@ -42,5 +75,8 @@ export async function handleArticlePost(
 }
 
 export async function loadEditor(id: number) {
-  return adminArticle(getDb(), id);
+  const db = getDb();
+  const record = await adminArticle(db, id);
+  if (!record) return null;
+  return { ...record, local: localFromRecord(await readLocal(db, id)) };
 }

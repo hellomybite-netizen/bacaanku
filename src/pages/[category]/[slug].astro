@@ -7,7 +7,8 @@ import Breadcrumb from '../../components/Breadcrumb.astro';
 import ShareButtons from '../../components/ShareButtons.astro';
 import Trending from '../../components/Trending.astro';
 import GuideArticle from '../../components/GuideArticle.astro';
-import { localGuides } from '../../content/local-guides';
+import { loadGuide, loadGuidesByCity, loadGuidesByCategory } from '../../lib/guide-repo';
+import { isGuideCategory } from '../../lib/local-guide';
 import { absUrl, articlePath, formatDateTime, isoDate } from '../../utils/articles';
 import { breadcrumbLd, newsArticleLd } from '../../utils/seo';
 import { applyPublicCache } from '../../lib/cache-headers';
@@ -18,16 +19,26 @@ export const prerender = __BUILD_MODE__ === 'static';
 
 export async function getStaticPaths() {
   if (__BUILD_MODE__ !== 'static') return [];
-  const [{ articlePaths }, { localGuides }] = await Promise.all([
+  const [{ articlePaths }, { loadAllGuides }] = await Promise.all([
     import('../../lib/static-data'),
-    import('../../content/local-guides'),
+    import('../../lib/guide-repo'),
   ]);
-  return [...await articlePaths(), ...localGuides.map((guide) => ({ params: { category: guide.category, slug: guide.slug } }))];
+  return [...await articlePaths(), ...(await loadAllGuides()).map((guide) => ({ params: { category: guide.category, slug: guide.slug } }))];
 }
 
 const category = Astro.params.category ?? '';
 const slug = Astro.params.slug ?? '';
-const guide = localGuides.find((item) => item.category === category && item.slug === slug);
+const guide = isGuideCategory(category) ? await loadGuide(category, slug) : null;
+let guideRelated: Awaited<ReturnType<typeof loadGuidesByCity>> = [];
+if (guide) {
+  const [sameCity, sameType] = await Promise.all([
+    guide.citySlug ? loadGuidesByCity(guide.citySlug, 6) : Promise.resolve([]),
+    loadGuidesByCategory(guide.category, 6),
+  ]);
+  const seen = new Set<number>([guide.id]);
+  guideRelated = [...sameCity, ...sameType].filter((item) => !seen.has(item.id) && (seen.add(item.id), true)).slice(0, 3);
+  applyPublicCache(Astro, 'article', [`article-${guide.id}`, `cat-${guide.category}`, `author-${guide.authorSlug}`, ...(guide.citySlug ? [`kota-${guide.citySlug}`] : [])]);
+}
 const isGone = !guide && DELETED_SAMPLE_SLUGS.has(slug);
 const result = guide || isGone ? null : await loadArticle(category, slug);
 if (result && 'redirect' in result) return Astro.redirect(result.redirect, 301);
@@ -62,7 +73,7 @@ const authorUrl = article ? `/penulis/${article.authorSlug}/` : '';
 const og = article?.heroSrc ? absUrl(article.heroSrc) : undefined;
 const sizes = '(min-width: 1240px) 780px, (min-width: 960px) 64vw, calc(100vw - 2rem)';
 ---
-{guide ? <GuideArticle guide={guide} /> : article ? (
+{guide ? <GuideArticle guide={guide} related={guideRelated} /> : article ? (
   <BaseLayout
     title={article.seoTitle ?? article.title}
     description={article.excerpt}

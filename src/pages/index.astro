@@ -3,13 +3,15 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 import AdSlot from '../components/AdSlot.astro';
 import GuideIcon from '../components/GuideIcon.astro';
 import GuideCard from '../components/GuideCard.astro';
-import { guideCategories, guideImage, guideRegions, regionPath } from '../lib/local-guide';
-import { featuredGuides } from '../content/local-guides';
+import { guideCategories, guideImage, guideCities, guideProvince, cityPath } from '../lib/local-guide';
+import { loadAllGuides } from '../lib/guide-repo';
 import { organizationLd, websiteLd } from '../utils/seo';
 import { applyPublicCache } from '../lib/cache-headers';
 import '../styles/local-wisdom.css';
 
 applyPublicCache(Astro, 'home', ['home']);
+const featuredGuides = await loadAllGuides(3);
+const homeCities = guideCities.filter((city) => city.nav).slice(0, 3);
 ---
 <BaseLayout
   title="Bacaanku — Local Wisdom Indonesia"
@@ -44,7 +46,7 @@ applyPublicCache(Astro, 'home', ['home']);
     <section class="guide-home-section" aria-labelledby="pilihan-title">
       <div class="guide-section-head">
         <h2 id="pilihan-title">Ulasan Pilihan</h2>
-        <a href="/jelajah/">Lihat Semua</a>
+        <a href="/artikel/">Lihat Semua</a>
       </div>
       <div class="guide-grid guide-featured-grid">
         {featuredGuides.map((guide) => <GuideCard guide={guide} />)}
@@ -56,10 +58,10 @@ applyPublicCache(Astro, 'home', ['home']);
     <section class="guide-home-section guide-home-regions" aria-labelledby="daerah-title">
       <div class="guide-section-head"><h2 id="daerah-title">Jelajahi Daerah</h2><a href="/daerah/">Lihat Semua Daerah</a></div>
       <div class="guide-grid">
-        {guideRegions.slice(0, 3).map((region) => (
-          <a class="guide-region-card" href={regionPath(region.slug)}>
+        {homeCities.map((region) => (
+          <a class="guide-region-card" href={cityPath(region.slug)}>
             <img src={guideImage(region.image, 'card')} alt="" width="640" height="360" loading="lazy" />
-            <span><strong>{region.name}</strong><small>{region.province}</small></span>
+            <span><strong>{region.name}</strong><small>{guideProvince(region.province)?.name}</small></span>
           </a>
         ))}
       </div>

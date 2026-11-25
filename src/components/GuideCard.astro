@@ -1,17 +1,16 @@
 ---
-import { guideCategory, guideImage, guidePath, type Guide } from '../lib/local-guide';
+import { guidePath, type Guide } from '../lib/local-guide';
 import GuideIcon from './GuideIcon.astro';
 
 interface Props { guide: Guide; headingLevel?: 2 | 3; showBudget?: boolean }
 const { guide, headingLevel = 3, showBudget = false } = Astro.props;
 const Heading = `h${headingLevel}` as 'h2' | 'h3';
-const category = guideCategory(guide.category);
 ---
 <article class="guide-card">
   <a class="guide-card-link" href={guidePath(guide)}>
-    <img class="guide-card-image" src={guideImage(guide.image, 'card')} alt="" width="640" height="360" loading="lazy" decoding="async" />
+    <img class="guide-card-image" src={guide.cardSrc || guide.heroSrc} alt="" width="640" height="360" loading="lazy" decoding="async" />
     <div class="guide-card-copy">
-      <span class:list={['guide-badge', `guide-color-${guide.category}`]}>{category?.name}</span>
+      <span class:list={['guide-badge', `guide-color-${guide.category}`]}>{guide.categoryName}</span>
       <Heading>{guide.name}</Heading>
       <p class="guide-card-location"><GuideIcon name="pin" />{guide.location}</p>
       {showBudget && (guide.budget ? (

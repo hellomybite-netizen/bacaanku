@@ -2,7 +2,7 @@
 import GuideCard from './GuideCard.astro';
 import GuideIcon from './GuideIcon.astro';
 import type { Guide } from '../lib/local-guide';
-import { guideCategories, guideCategory, guideRegions, guideRegion } from '../lib/local-guide';
+import { guideCategories, guideCities } from '../lib/local-guide';
 
 interface Props { guides: Guide[]; filter?: 'region' | 'category'; search?: boolean }
 const { guides, filter, search = false } = Astro.props;
@@ -27,7 +27,7 @@ const { guides, filter, search = false } = Astro.props;
       <label class="guide-select"><span>Filter daerah</span>
         <select data-region>
           <option value="">Semua Daerah</option>
-          {guideRegions.filter((region) => guides.some((guide) => guide.region === region.slug)).map((region) => (
+          {guideCities.filter((region) => guides.some((guide) => guide.citySlug === region.slug)).map((region) => (
             <option value={region.slug}>{region.name}</option>
           ))}
         </select>
@@ -45,8 +45,8 @@ const { guides, filter, search = false } = Astro.props;
   <p class="guide-empty" data-empty hidden>Belum ada panduan yang cocok. Coba kata kunci atau filter lain.</p>
   <div class="guide-grid" data-grid>
     {guides.map((guide) => (
-      <div data-entry data-topic={guide.category} data-area={guide.region} data-name={guide.name}
-        data-search={[guide.name, guide.title, guide.description, guide.location, guideCategory(guide.category)?.name, guideRegion(guide.region)?.name, guideRegion(guide.region)?.province].join(' ')}>
+      <div data-entry data-topic={guide.category} data-area={guide.citySlug ?? ''} data-name={guide.name}
+        data-search={[guide.name, guide.title, guide.description, guide.location, guide.categoryName, guide.cityName, guide.provinceName].filter(Boolean).join(' ')}>
         <GuideCard guide={guide} headingLevel={2} showBudget />
       </div>
     ))}

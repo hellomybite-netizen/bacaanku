@@ -1,7 +1,7 @@
 @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Poppins:wght@600;700;800&display=swap');
 
 :root {
-  --teal: #0d9488;
+  --teal: #0f766e; /* GPT: #0d9488 — digelapkan agar teks putih/teal lolos AA 4.5:1 */
   --teal-dark: #08756c;
   --teal-deep: #123b3b;
   --mint: #e6f9f6;
@@ -84,7 +84,7 @@ main:focus { outline: none; }
 .home-hero-content > p:not(.hero-kicker) { max-inline-size: 58ch; margin-block: 1rem 1.55rem; color: rgb(255 255 255 / .9); font-size: 1.02rem; }
 .hero-search { inline-size: min(100%, 43rem); min-block-size: 3.8rem; display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: .7rem; padding: .36rem .38rem .36rem 1rem; border: 5px solid rgb(255 255 255 / .2); border-radius: 999px; background: #fff; color: var(--teal-deep); box-shadow: var(--shadow); }
 .hero-search input { min-inline-size: 0; border: 0; outline: 0; background: transparent; color: var(--text); font-size: .92rem; }
-.hero-search button { min-block-size: 2.75rem; padding-inline: 1.35rem; border: 0; border-radius: 999px; background: var(--coral); color: #fff; font-weight: 800; cursor: pointer; }
+.hero-search button { min-block-size: 2.75rem; padding-inline: 1.35rem; border: 0; border-radius: 999px; background: #c2410c; color: #fff; font-weight: 800; cursor: pointer; }
 .hero-search button:hover { background: var(--coral-dark); }
 .discovery-pills { display: grid; grid-template-columns: repeat(3, 1fr); gap: 1rem; margin-block: -2rem 3.2rem; position: relative; z-index: 2; }
 .discovery-pills > a { display: flex; align-items: center; gap: .9rem; min-block-size: 6rem; padding: .9rem 1rem; border: 1px solid var(--border); border-radius: var(--radius); background: #fff; color: var(--text); box-shadow: var(--shadow-sm); text-decoration: none; }
@@ -148,7 +148,7 @@ main:focus { outline: none; }
 .trending-list { list-style: none; margin: 0; padding: 0; }
 .trending-list li { display: grid; grid-template-columns: 2rem 1fr; gap: .65rem; padding-block: .9rem; }
 .trending-list li + li { border-block-start: 1px solid var(--border); }
-.trend-number { color: var(--coral); font-family: var(--font-display); font-size: 1.2rem; font-weight: 800; line-height: 1.2; }
+.trend-number { color: var(--coral-dark); font-family: var(--font-display); font-size: 1.2rem; font-weight: 800; line-height: 1.2; }
 .trending-list a { font-size: .84rem; font-weight: 800; line-height: 1.35; text-decoration: none; }
 .trending-list li p { display: flex; gap: .35rem; margin: .35rem 0 0; color: var(--muted); font-size: .67rem; }
 .trending-list li p span { color: var(--teal); font-weight: 800; text-transform: uppercase; }
@@ -236,7 +236,7 @@ main:focus { outline: none; }
 .search-box { --pagefind-ui-primary: var(--teal); --pagefind-ui-text: var(--text); --pagefind-ui-background: #fff; --pagefind-ui-border: var(--border); --pagefind-ui-tag: var(--mint); --pagefind-ui-font: var(--font-sans); min-block-size: 4rem; margin-block: 1rem 2rem; }
 .search-form { display: flex; gap: .6rem; margin-block: .5rem 1.5rem; }
 .search-form input { flex: 1; min-inline-size: 0; min-block-size: 3rem; padding: .6rem .9rem; border: 1px solid var(--border); border-radius: var(--radius); background: #fff; color: var(--text); }
-.search-form button { min-block-size: 3rem; padding-inline: 1.1rem; border: 0; border-radius: var(--radius); background: var(--coral); color: #fff; font-weight: 800; cursor: pointer; }
+.search-form button { min-block-size: 3rem; padding-inline: 1.1rem; border: 0; border-radius: var(--radius); background: #c2410c; color: #fff; font-weight: 800; cursor: pointer; }
 .static-page { padding-block: 1.5rem 3rem; font-family: var(--font-sans); font-size: 1.02rem; }
 .static-page .page-title { margin-block-end: 1rem; }
 .link-list { display: grid; gap: .6rem; padding-inline-start: 1.25rem; }

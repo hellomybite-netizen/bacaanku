@@ -15,10 +15,15 @@ interface Props {
   guides: Guide[];
   region?: string;
   category?: string;
+  /** Judul <title> (SEO); default = title. */
+  seoTitle?: string;
+  noindex?: boolean;
+  filter?: 'region' | 'category' | 'none';
 }
-const { title, description, image, crumbs, guides, region, category } = Astro.props;
+const { title, description, image, crumbs, guides, region, category, seoTitle, noindex = false } = Astro.props;
+const filter = Astro.props.filter ?? (region ? 'category' : 'region');
 ---
-<BaseLayout title={title} description={description} currentCategory={category} jsonLd={[breadcrumbLd(crumbs)]}>
+<BaseLayout title={seoTitle ?? title} description={description} currentCategory={category} noindex={noindex} jsonLd={[breadcrumbLd(crumbs)]}>
   <div class="container guide-list-crumbs"><Breadcrumb items={crumbs} /></div>
   <header class:list={['guide-list-hero', { 'guide-list-hero-region': region, 'guide-list-hero-food': image === 'rawon' }]}>
     <img class="guide-cover" src={guideImage(image)} srcset={`${guideImage(image, 'card')} 640w, ${guideImage(image)} 1600w`} sizes="100vw" alt="" width="1600" height="900" fetchpriority="high" />
@@ -30,7 +35,8 @@ const { title, description, image, crumbs, guides, region, category } = Astro.pr
   </header>
   <div class="container guide-list-content">
     {region && <p class="guide-region-mobile-description">{description}</p>}
-    <GuideCatalog guides={guides} filter={region ? 'category' : 'region'} />
+    <slot />
+    <GuideCatalog guides={guides} filter={filter === 'none' ? undefined : filter} />
     <AdSlot size="leaderboard" />
   </div>
 </BaseLayout>

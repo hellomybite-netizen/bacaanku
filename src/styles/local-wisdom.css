@@ -178,3 +178,15 @@ guide-catalog [hidden] { display: none !important; }
   .guide-article .breadcrumb li:not(:first-child):not(:last-child) { display: none; }
   .guide-thumbnails { display: none; }
 }
+
+/* Tautan kota/tipe yang bisa dirayapi (menu Artikel & Daerah) — gaya mengikuti .guide-tabs desain GPT. */
+.guide-city-links { display: flex; flex-wrap: wrap; align-items: center; gap: .45rem; margin-block: 0 1rem; }
+.guide-city-links > span { margin-inline-end: .25rem; color: #15353a; font-size: .85rem; font-weight: 800; }
+.guide-city-links a { display: inline-flex; align-items: center; gap: .35rem; min-block-size: 2.55rem; padding: .35rem .9rem; border-radius: 999px; background: #edf2f4; color: #15353a; font-size: .85rem; font-weight: 750; text-decoration: none; }
+.guide-city-links a:hover { background: #e2f1ef; }
+.guide-city-links a small { display: inline-grid; place-items: center; min-inline-size: 1.35rem; padding-inline: .3rem; border-radius: 999px; background: #fff; color: #15353a; font-size: .72rem; font-weight: 800; }
+.guide-byline a.guide-byline-author { color: #15353a; text-decoration: none; }
+.guide-byline a.guide-byline-author:hover { text-decoration: underline; }
+/* Target sentuh ≥24px (WCAG 2.5.8) untuk tautan "Lihat Semua" & kolom cari. */
+.guide-section-head > a { display: inline-flex; align-items: center; min-block-size: 1.5rem; }
+.guide-search-form input { min-block-size: 1.6rem; }
