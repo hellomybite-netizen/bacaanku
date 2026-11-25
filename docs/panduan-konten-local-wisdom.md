@@ -139,3 +139,9 @@ npm run preview:db -- --apply   # D1 lokal: skema + berita + 0003 + contoh
 npm run build
 npx wrangler dev --local --local-upstream 127.0.0.1:8788 --persist-to .wrangler/state --port 8788
 ```
+
+## Catatan tampilan v3 (referensi explorer.id)
+
+- Font: Onest (lisensi OFL), di-host sendiri di `public/fonts/onest-latin-var.woff2`; lisensi di `public/fonts/OFL-Onest.txt`.
+- Hero beranda memakai ilustrasi buatan sendiri (`public/media/hero-nusantara-*.jpg`, dibuat oleh `scripts/generate-hero-nusantara.mjs`). Ini ilustrasi contoh, bukan foto. Boleh diganti foto berlisensi jelas (simpan kredit di caption) tanpa mengubah tata letak.
+- Kartu contoh tetap berlabel CONTOH; foto asli hanya boleh dipakai jika milik sendiri atau berlisensi terbuka.

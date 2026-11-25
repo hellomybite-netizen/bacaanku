@@ -21,8 +21,8 @@ const blurb: Record<string, string> = {
   kuliner: 'Warung & jajanan khas',
 };
 const feature = latest.find((a) => a.isHeadline) ?? latest[0] ?? null;
-const fresh = latest.filter((a) => a.id !== feature?.id).slice(0, 4);
-const shown = new Set([feature?.id, ...fresh.map((a) => a.id)]);
+const glass = [...(feature ? [feature] : []), ...latest.filter((a) => a.id !== feature?.id)].slice(0, 4);
+const shown = new Set(glass.map((a) => a.id));
 const sections = byCategory.map((c) => ({ ...c, rest: c.items.filter((a) => !shown.has(a.id)) }));
 const catCount = (slug: string) => byCategory.find((c) => c.slug === slug)?.items.length ?? 0;
 ---
@@ -32,30 +32,51 @@ const catCount = (slug: string) => byCategory.find((c) => c.slug === slug)?.item
   description={SITE.description}
   jsonLd={[organizationLd(), websiteLd()]}
 >
-  <section class="lw-hero" aria-labelledby="hero-title">
-    <div class="container lw-hero-grid">
-      <div class="lw-hero-copy">
-        <p class="section-eyebrow">Local wisdom · Nusantara</p>
-        <h1 id="hero-title">Jelajahi Nusantara lewat ulasan hotel, wisata, dan kuliner lokal</h1>
-        <p class="lw-hero-lead">Dari warung legendaris sampai penginapan di kaki gunung. Setiap ulasan mencantumkan alamat, harga, dan jam buka, dan dikelompokkan per daerah.</p>
-        <nav class="lw-rubrik" aria-label="Rubrik">
-          <ul role="list">
-            {localCategories.map((c) => (
-              <li>
-                <a href={`/${c.slug}/`} class={`lw-rubrik-${c.slug}`}>
-                  <svg aria-hidden="true" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d={icons[c.slug]} /></svg>
-                  <strong>{c.name}</strong>
-                  <span>{blurb[c.slug]}</span>
-                </a>
-              </li>
-            ))}
-          </ul>
-        </nav>
+  <section class="xp-hero" aria-labelledby="hero-title">
+    <picture>
+      <source media="(max-width: 672px)" srcset="/media/hero-nusantara-m-540.jpg 540w, /media/hero-nusantara-m-900.jpg 900w" sizes="100vw" />
+      <img
+        class="xp-hero-bg"
+        src="/media/hero-nusantara-1920.jpg"
+        srcset="/media/hero-nusantara-960.jpg 960w, /media/hero-nusantara-1920.jpg 1920w"
+        sizes="100vw"
+        width="1920"
+        height="1000"
+        alt=""
+        fetchpriority="high"
+        decoding="async"
+      />
+    </picture>
+    <p class="xp-hero-credit">Ilustrasi contoh, bukan foto</p>
+    <div class="container xp-hero-inner">
+      <nav class="xp-rubrik" aria-label="Rubrik">
+        <ul role="list">
+          {localCategories.map((c) => (
+            <li>
+              <a href={`/${c.slug}/`}>
+                <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d={icons[c.slug]} /></svg>
+                {c.name}
+              </a>
+            </li>
+          ))}
+        </ul>
+      </nav>
+      <h1 id="hero-title">Jelajahi Nusantara lewat ulasan lokal</h1>
+      <div class="xp-hero-search">
+        <form action="/cari/" method="get" role="search" class="xp-search">
+          <svg aria-hidden="true" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+          <label class="visually-hidden" for="hero-q">Cari ulasan</label>
+          <input id="hero-q" name="q" type="search" maxlength="80" placeholder="Cari warung, hotel, atau tempat wisata" enterkeyhint="search" />
+          <button type="submit">Cari</button>
+        </form>
+        <a class="xp-btn-light" href="/daerah/">Lihat semua daerah <span aria-hidden="true">→</span></a>
       </div>
-      {feature && (
-        <div class="lw-hero-feature">
-          <p class="lw-hero-feature-label"><span aria-hidden="true">✦</span> Ulasan pilihan</p>
-          <ArticleCard article={feature} variant="hero" headingLevel={2} />
+      {glass.length > 0 && (
+        <div class="xp-glass-wrap">
+          <h2 class="xp-glass-title">Ulasan pilihan</h2>
+          <ul class="xp-glass lw-rail" role="list" aria-label="Ulasan pilihan, geser ke samping" tabindex="0">
+            {glass.map((article, i) => <li><ArticleCard article={article} variant="glass" headingLevel={3} eager={i === 0} /></li>)}
+          </ul>
         </div>
       )}
     </div>
@@ -72,20 +93,6 @@ const catCount = (slug: string) => byCategory.find((c) => c.slug === slug)?.item
       </div>
       <RegionTiles counts={regionCounts} rail />
     </section>
-
-    {fresh.length > 0 && (
-      <section class="lw-section" aria-labelledby="terbaru-title">
-        <div class="section-head">
-          <div>
-            <p class="section-eyebrow">Ulasan terbaru</p>
-            <h2 id="terbaru-title" class="section-title">Baru dari redaksi</h2>
-          </div>
-        </div>
-        <div class="lw-rail grid grid--4" role="region" aria-label="Ulasan terbaru, geser ke samping" tabindex="0">
-          {fresh.map((article) => <ArticleCard article={article} />)}
-        </div>
-      </section>
-    )}
 
     <AdSlot size="leaderboard" />
 
@@ -109,6 +116,7 @@ const catCount = (slug: string) => byCategory.find((c) => c.slug === slug)?.item
 
     <section class="lw-promise" aria-labelledby="janji-title">
       <span class="lw-promise-motif" aria-hidden="true"></span>
+      <p class="lw-promise-eyebrow">Janji redaksi</p>
       <h2 id="janji-title" class="section-title">Cara kami menulis</h2>
       <ul role="list">
         <li><strong>Ada alamat dan harga.</strong> Setiap ulasan punya kotak info: kisaran harga, alamat, jam buka, dan tautan peta.</li>

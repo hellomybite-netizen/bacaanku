@@ -4,13 +4,10 @@ import { SHOW_PROTOTYPE_NOTE } from '../lib/mode';
 const year = new Date().getFullYear();
 ---
 <footer class="site-footer">
-  <div class="wastra-band wastra-band--footer" aria-hidden="true"></div>
+  <div class="footer-wave" aria-hidden="true"></div>
   <div class="container footer-grid">
     <div class="footer-brand">
-      <p class="site-logo footer-logo">
-        <img class="logo-img logo-img--light" src="/brand/logo-light-h96.webp" srcset="/brand/logo-light-h48.webp 1x, /brand/logo-light-h96.webp 2x, /brand/logo-light-h144.webp 3x" width="340" height="96" alt="Bacaanku Network" decoding="async" loading="lazy" />
-        <img class="logo-img logo-img--dark" src="/brand/logo-dark-h96.webp" srcset="/brand/logo-dark-h48.webp 1x, /brand/logo-dark-h96.webp 2x, /brand/logo-dark-h144.webp 3x" width="340" height="96" alt="Bacaanku Network" decoding="async" loading="lazy" />
-      </p>
+      <p class="site-logo footer-logo"><img class="logo-img" src="/brand/logo-light-h96.webp" srcset="/brand/logo-light-h48.webp 1x, /brand/logo-light-h96.webp 2x, /brand/logo-light-h144.webp 3x" width="340" height="96" alt="Bacaanku Network" decoding="async" loading="lazy" /></p>
       <p>{SITE.subline}. Kami menulis dari pengalaman dan data yang bisa dicek: alamat, harga, jam buka, dan foto yang jelas sumbernya.</p>
       {SHOW_PROTOTYPE_NOTE && <p class="footer-note">Pratinjau desain — artikel berlabel CONTOH hanyalah placeholder tata letak, bukan ulasan nyata.</p>}
     </div>

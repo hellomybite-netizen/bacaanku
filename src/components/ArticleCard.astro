@@ -5,7 +5,7 @@ import type { ArticleCard as Card } from '../lib/content-types';
 
 interface Props {
   article: Card;
-  variant?: 'default' | 'compact' | 'hero' | 'list';
+  variant?: 'default' | 'compact' | 'hero' | 'list' | 'glass';
   headingLevel?: 2 | 3;
   showDesc?: boolean;
   /** Kartu pertama di atas lipatan (kandidat LCP): eager + fetchpriority=high. */
@@ -28,6 +28,12 @@ const href = articlePath(article.categorySlug, article.slug);
 <article class:list={['card', `card--${variant}`]}>
   <div class="card-media">
     {article.isSample && <span class="badge-contoh" title="Artikel contoh untuk tata letak, bukan ulasan nyata">CONTOH</span>}
+    {article.daerahSlug && variant !== 'compact' && (
+      <span class="card-pills">
+        <span class="pill">{article.categoryName}</span>
+        {article.rating != null && <span class="pill pill--rating"><span aria-hidden="true">★ </span>{article.rating.toFixed(1).replace('.', ',')}<span class="visually-hidden"> dari 5</span></span>}
+      </span>
+    )}
     {article.heroImage ? (
       <Picture
         src={article.heroImage}
@@ -57,14 +63,14 @@ const href = articlePath(article.categorySlug, article.slug);
     )}
   </div>
   <div class="card-body">
-    <a class="kicker" href={`/${article.categorySlug}/`}>{article.categoryName}</a>
+    {(!article.daerahSlug || variant === 'compact') && <a class="kicker" href={`/${article.categorySlug}/`}>{article.categoryName}</a>}
     <H class="card-title"><a href={href}>{article.title}</a></H>
     {(showDesc || isHero) && <p class="card-desc">{article.excerpt}</p>}
     {article.daerahSlug && (
       <p class="card-place">
         <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.2-7-11.2A7 7 0 0 1 19 9.8C19 14.8 12 21 12 21Z"/><circle cx="12" cy="10" r="2.5"/></svg>
         <a href={article.kotaSlug ? `/daerah/${article.daerahSlug}/${article.kotaSlug}/` : `/daerah/${article.daerahSlug}/`}>{article.kota ? `${article.kota}, ` : ''}{article.daerahName}</a>
-        {article.rating != null && <span class="card-rating"><span aria-hidden="true">★ </span>{article.rating.toFixed(1).replace('.', ',')}<span class="visually-hidden"> dari 5</span></span>}
+        {article.rating != null && variant === 'compact' && <span class="card-rating"><span aria-hidden="true">★ </span>{article.rating.toFixed(1).replace('.', ',')}<span class="visually-hidden"> dari 5</span></span>}
       </p>
     )}
     {article.priceRange && variant !== 'compact' && <p class="card-price">{article.priceRange}</p>}
