@@ -1,0 +1,24 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Breadcrumb from '../components/Breadcrumb.astro';
+import { categories } from '../config/site';
+import { breadcrumbLd } from '../utils/seo';
+import { applyPublicCache } from '../lib/cache-headers';
+
+applyPublicCache(Astro, 'list', ['arsip']);
+const crumbs = [{ name: 'Beranda', href: '/' }, { name: 'Arsip Berita', href: '/arsip-berita/' }];
+---
+<BaseLayout title="Arsip Berita" description="Arsip berita bacaankunetwork.com: news, teknologi, otomotif, sains, ekonomi, olahraga, dan hiburan. Semua tautan lama tetap bisa dibuka." jsonLd={[breadcrumbLd(crumbs)]}>
+  <div class="container">
+    <Breadcrumb items={crumbs} />
+    <header class="page-head">
+      <h1 class="page-title">Arsip Berita</h1>
+      <p class="muted">Bacaanku kini fokus pada ulasan hotel, wisata, dan kuliner lokal. Berita yang sudah terbit tetap tersimpan di sini, dan semua tautan lamanya tetap berfungsi.</p>
+    </header>
+    <ul class="footer-list archive-list" role="list">
+      {categories.map((c) => (
+        <li><a href={`/${c.slug}/`}><strong>{c.name}</strong></a>{'description' in c && c.description ? <span class="muted"> — {c.description}</span> : null}</li>
+      ))}
+    </ul>
+  </div>
+</BaseLayout>

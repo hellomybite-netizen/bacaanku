@@ -190,3 +190,11 @@ guide-catalog [hidden] { display: none !important; }
 /* Target sentuh ≥24px (WCAG 2.5.8) untuk tautan "Lihat Semua" & kolom cari. */
 .guide-section-head > a { display: inline-flex; align-items: center; min-block-size: 1.5rem; }
 .guide-search-form input { min-block-size: 1.6rem; }
+
+/* Kredit foto berlisensi (CC BY / CC BY-SA) di pojok sampul */
+.photo-credit { position: absolute; inset-inline-end: .5rem; inset-block-end: .4rem; z-index: 1; max-inline-size: min(28rem, calc(100% - 1rem)); padding: .2rem .45rem; border-radius: .3rem; background: rgb(0 0 0 / .62); color: #fff; font-size: .6875rem; line-height: 1.35; text-decoration: none; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.photo-credit:hover, .photo-credit:focus-visible { text-decoration: underline; white-space: normal; }
+.guide-photo-credit a { color: inherit; text-decoration: underline; text-underline-offset: 2px; }
+.credit-table { inline-size: 100%; border-collapse: collapse; font-size: .875rem; }
+.credit-table th, .credit-table td { padding: .5rem; border-block-end: 1px solid #e5e7eb; text-align: start; vertical-align: top; }
+.credit-table img { inline-size: 8rem; block-size: auto; border-radius: .4rem; }

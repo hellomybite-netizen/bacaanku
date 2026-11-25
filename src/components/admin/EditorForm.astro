@@ -95,7 +95,7 @@ const localOpen = isGuideCategory(values.category) || Object.values(local).some(
       </div>
       <label class="field">
         <span>Galeri tambahan, satu baris "URL | teks alternatif"</span>
-        <textarea name="gallery" rows="3" placeholder="/media/local-wisdom/rawon-detail-wide.webp | Semangkuk rawon dengan tauge">{local.gallery}</textarea>
+        <textarea name="gallery" rows="3" placeholder="/media/local-wisdom/rawon-wide.webp | Semangkuk rawon dengan tauge">{local.gallery}</textarea>
         {errors.gallery && <small class="field-error">{errors.gallery}</small>}
       </label>
       {errors.local && <small class="field-error">{errors.local}</small>}

@@ -6,6 +6,7 @@ import GuideCard from '../components/GuideCard.astro';
 import { guideCategories, guideImage, guideCities, guideProvince, cityPath } from '../lib/local-guide';
 import { loadAllGuides } from '../lib/guide-repo';
 import { organizationLd, websiteLd } from '../utils/seo';
+import { photoCredits, photoCreditText } from '../lib/photo-credits';
 import { applyPublicCache } from '../lib/cache-headers';
 import '../styles/local-wisdom.css';
 
@@ -21,6 +22,7 @@ const homeCities = guideCities.filter((city) => city.nav).slice(0, 3);
 >
   <section class="guide-home-hero" aria-labelledby="home-title">
     <img class="guide-cover" src={guideImage('bromo')} srcset={`${guideImage('bromo', 'card')} 640w, ${guideImage('bromo')} 1600w`} sizes="100vw" alt="" width="1600" height="900" fetchpriority="high" />
+    <a class="photo-credit" href={photoCredits.bromo.source} rel="noopener noreferrer license" target="_blank">{photoCreditText('bromo')}</a>
     <div class="container guide-home-copy">
       <h1 id="home-title">Jelajahi Indonesia,<br />Temukan Cerita Baru.</h1>
       <p>Rekomendasi hotel, tempat wisata, dan kuliner terbaik di berbagai daerah Indonesia.</p>
@@ -60,7 +62,7 @@ const homeCities = guideCities.filter((city) => city.nav).slice(0, 3);
       <div class="guide-grid">
         {homeCities.map((region) => (
           <a class="guide-region-card" href={cityPath(region.slug)}>
-            <img src={guideImage(region.image, 'card')} alt="" width="640" height="360" loading="lazy" />
+            <img src={guideImage(region.image, 'card')} alt="" title={photoCreditText(region.image)} width="640" height="360" loading="lazy" />
             <span><strong>{region.name}</strong><small>{guideProvince(region.province)?.name}</small></span>
           </a>
         ))}

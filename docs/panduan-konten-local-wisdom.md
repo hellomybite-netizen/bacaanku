@@ -25,6 +25,14 @@ Kota terdaftar (`src/lib/local-guide.ts`, minta admin bila perlu kota baru):
 | `probolinggo` | Probolinggo | Jawa Timur |
 | `surabaya` | Surabaya | Jawa Timur |
 | `yogyakarta` | Yogyakarta | DI Yogyakarta |
+| `mojokerto` | Mojokerto | Jawa Timur |
+| `pasuruan` | Pasuruan (Kota) | Jawa Timur |
+| `bangil` | Bangil, Kab. Pasuruan | Jawa Timur |
+| `blitar` | Blitar | Jawa Timur |
+| `kediri` | Kediri | Jawa Timur |
+| `lumajang` | Lumajang | Jawa Timur |
+| `jember` | Jember | Jawa Timur |
+| `solo` | Solo (Surakarta) | Jawa Tengah |
 
 ## 2. Di mana artikel muncul (struktur URL)
 
@@ -51,7 +59,7 @@ tidak membuat URL baru, jadi tidak ada halaman duplikat. `/daerah/{kota}/` lama 
 | Anggaran | `budget_label` + `budget_value` | tidak (isi berdua) | `Kisaran harga` / `Rp22.000–Rp60.000` |
 | Kata kunci peta | `map_query` | tidak | `Rawon Nguling Tambakrejo Tongas Probolinggo` |
 | Tombol aksi | `action_label` + `action_url` (https) | tidak | `Lihat Situs Resmi` / `https://…` |
-| Galeri tambahan | `gallery` (baris "URL \| alt") atau `gallery_json` | tidak, maks 6 | `/media/local-wisdom/rawon-detail-wide.webp \| Semangkuk rawon` |
+| Galeri tambahan | `gallery` (baris "URL \| alt") atau `gallery_json` | tidak, maks 6 | `/media/local-wisdom/rawon-wide.webp \| Semangkuk rawon` |
 
 Aturan lain sama dengan berita (ringkasan 50–170 karakter, gambar + alt + keterangan + kredit + URL kredit https, ≥1 tag),
 **kecuali sumber: minimal 2** untuk Hotel/Wisata/Kuliner (berita tetap minimal 3).
@@ -98,18 +106,23 @@ body=## Kenapa Rawon Nguling terkenal
 Versi JSON untuk skrip: `facts_json=[{"label":"Jam buka","value":"Setiap hari 05.30–21.00 WIB"}]`.
 Hasil: artikel tayang di `/kuliner/rawon-nguling/`, `/kuliner/`, `/artikel/`, `/artikel/probolinggo/`, dan `/daerah/jawa-timur/`.
 
-## 5. Gambar
+## 5. Gambar (wajib foto berlisensi — keputusan Rizal 26 Nov 2026)
 
-- Gambar di `public/media/local-wisdom/*.webp` **dibuat oleh GPT (AI)** — dikonfirmasi Rizal, 25 Nov 2026.
-  Isi keterangan `Ilustrasi visual` dan kredit `Ilustrasi dibuat dengan AI (GPT) untuk Bacaanku`.
-  Jangan menyebutnya foto asli tempat itu.
-- Untuk artikel baru: pakai foto berlisensi (mis. Wikimedia Commons, kredit + URL lisensi) atau ilustrasi dengan label yang sama.
-  Ukuran ≤1.600 px, ≤1,5 MB. Kartu otomatis memakai varian `-card.webp` bila nama file berakhiran `-wide.webp`.
+- **Tidak boleh** memakai gambar AI yang meniru tempat nyata. Ilustrasi AI lama (GPT) sudah diganti semua.
+- Pakai foto berlisensi terbuka, mis. Wikimedia Commons dengan lisensi **CC BY, CC BY-SA, CC0, atau domain publik**
+  (bukan NC/ND). Catat pembuat, lisensi, dan URL halaman file.
+- Isi `hero_caption` dengan apa yang benar-benar tampak di foto. Jika foto bukan dari tempat yang diulas, tulis jujur,
+  mis. `Bakso Malang (foto ilustrasi menu, bukan di Bakso President)` atau `Kawasan Alun-Alun Tugu (foto kawasan, bukan foto hotel)`.
+- `hero_credit` = `Foto: {Pembuat} / Wikimedia Commons, {Lisensi}`; `hero_credit_url` = URL halaman file Commons.
+- Jika tidak ada foto berlisensi, jangan pakai foto tempat lain yang menyesatkan; pakai foto kawasan/menu umum dengan label jelas.
+- Simpan di `public/media/local-wisdom/` sebagai WebP 16:9: `{nama}-wide.webp` (≤1.600 px) + `{nama}-card.webp` (640 px).
+  Kartu otomatis memakai varian `-card.webp`. Sampul kota/kategori dikreditkan di `src/lib/photo-credits.ts` dan `/kredit-foto/`.
+- Alat bantu: `/workspace/bacaanku-photos/photos.py` (cari + unduh + konversi + catat kredit).
 
 ## 6. Cek fakta (wajib sebelum terbit)
 
 Alamat, jam buka, harga, tiket, dan tautan resmi wajib dicek ke situs resmi/pemerintah/media kredibel, dan dicantumkan di sumber.
-Log koreksi untuk 7 panduan awal (dicek 25 Nov 2026):
+Log koreksi untuk 7 panduan awal (dicek 25 Nov 2026; foto diganti foto berlisensi 26 Nov 2026):
 
 | Panduan | Koreksi | Sumber |
 |---|---|---|

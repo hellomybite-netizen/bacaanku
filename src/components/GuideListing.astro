@@ -5,6 +5,7 @@ import GuideCatalog from './GuideCatalog.astro';
 import AdSlot from './AdSlot.astro';
 import { guideImage, type Guide, type GuideImage } from '../lib/local-guide';
 import { breadcrumbLd } from '../utils/seo';
+import { photoCredits, photoCreditText } from '../lib/photo-credits';
 import '../styles/local-wisdom.css';
 
 interface Props {
@@ -27,6 +28,7 @@ const filter = Astro.props.filter ?? (region ? 'category' : 'region');
   <div class="container guide-list-crumbs"><Breadcrumb items={crumbs} /></div>
   <header class:list={['guide-list-hero', { 'guide-list-hero-region': region, 'guide-list-hero-food': image === 'rawon' }]}>
     <img class="guide-cover" src={guideImage(image)} srcset={`${guideImage(image, 'card')} 640w, ${guideImage(image)} 1600w`} sizes="100vw" alt="" width="1600" height="900" fetchpriority="high" />
+    <a class="photo-credit" href={photoCredits[image].source} rel="noopener noreferrer license" target="_blank">{photoCreditText(image)}</a>
     <div class="container guide-list-hero-copy">
       <h1>{title}</h1>
       {region && <span class="guide-province">{region}</span>}

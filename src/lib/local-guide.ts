@@ -10,6 +10,7 @@ export const guideCategories = [
 
 export const guideProvinces = [
   { slug: 'jawa-timur', name: 'Jawa Timur', description: 'Dari kaldera Tengger di Probolinggo sampai kota sejuk Malang dan Batu: panduan hotel, wisata, dan kuliner Jawa Timur.', image: 'bromo' },
+  { slug: 'jawa-tengah', name: 'Jawa Tengah', description: 'Panduan hotel, wisata, dan kuliner Jawa Tengah, dimulai dari Kota Surakarta (Solo).', image: 'solo' },
   { slug: 'di-yogyakarta', name: 'DI Yogyakarta', description: 'Kenali Yogyakarta lewat dapur gudeg, kampung lama, dan tempat singgah di sekitar Keraton.', image: 'gudeg' },
 ] as const;
 
@@ -20,14 +21,23 @@ export const guideProvinces = [
  */
 export const guideCities = [
   { slug: 'malang', name: 'Malang', province: 'jawa-timur', description: 'Jelajahi sudut Kota Malang, dari hotel bersejarah di pusat kota sampai bakso di tepi rel.', image: 'malang', nav: true },
-  { slug: 'batu', name: 'Batu', province: 'jawa-timur', description: 'Kota sejuk di kaki pegunungan: penginapan di Sisir dan wisata keluarga di Temas.', image: 'jatim', nav: true },
+  { slug: 'batu', name: 'Batu', province: 'jawa-timur', description: 'Kota sejuk di kaki pegunungan: penginapan di Sisir dan wisata keluarga di Temas.', image: 'batu', nav: true },
   { slug: 'probolinggo', name: 'Probolinggo', province: 'jawa-timur', description: 'Sisi timur Bromo Tengger Semeru dan rawon legendaris di jalur Pantura Tongas.', image: 'bromo', nav: true },
-  { slug: 'surabaya', name: 'Surabaya', province: 'jawa-timur', description: 'Panduan hotel, wisata, dan kuliner di Kota Surabaya.', image: 'rawon', nav: false },
+  { slug: 'surabaya', name: 'Surabaya', province: 'jawa-timur', description: 'Panduan hotel, wisata, dan kuliner di Kota Surabaya.', image: 'surabaya', nav: false },
+  { slug: 'mojokerto', name: 'Mojokerto', province: 'jawa-timur', description: 'Jejak Majapahit di Trowulan, kuliner khas, dan tempat menginap di Mojokerto.', image: 'mojokerto', nav: false },
+  { slug: 'pasuruan', name: 'Pasuruan', province: 'jawa-timur', description: 'Kota santri di pesisir utara: wisata, kuliner, dan penginapan di Pasuruan.', image: 'pasuruan', nav: false },
+  { slug: 'bangil', name: 'Bangil', province: 'jawa-timur', description: 'Bangil, ibu kota Kabupaten Pasuruan: kuliner, wisata, dan tempat singgah di jalur Surabaya–Malang.', image: 'bangil', nav: false },
+  { slug: 'blitar', name: 'Blitar', province: 'jawa-timur', description: 'Kota Bung Karno dan Candi Penataran: wisata sejarah, kuliner, dan penginapan di Blitar.', image: 'blitar', nav: false },
+  { slug: 'kediri', name: 'Kediri', province: 'jawa-timur', description: 'Dari Gunung Kelud sampai Simpang Lima Gumul: wisata, kuliner, dan hotel di Kediri.', image: 'kediri', nav: false },
+  { slug: 'lumajang', name: 'Lumajang', province: 'jawa-timur', description: 'Air terjun di kaki Semeru, danau, dan kuliner khas Lumajang.', image: 'lumajang', nav: false },
+  { slug: 'jember', name: 'Jember', province: 'jawa-timur', description: 'Pantai selatan, kebun kopi, dan kuliner khas Jember.', image: 'jember', nav: false },
+  { slug: 'solo', name: 'Solo', province: 'jawa-tengah', description: 'Keraton, pasar, dan kuliner legendaris Kota Surakarta (Solo).', image: 'solo', nav: false },
   { slug: 'yogyakarta', name: 'Yogyakarta', province: 'di-yogyakarta', description: 'Kenali kuliner Yogyakarta lewat dapur dan kedai gudeg di sekitar Wijilan.', image: 'gudeg', nav: true },
 ] as const;
 
 export type GuideCategory = (typeof guideCategories)[number]['slug'];
-export type GuideImage = 'bromo' | 'malang' | 'rawon' | 'rawon-kuah' | 'rawon-sajian' | 'hotel' | 'tugu' | 'bakso' | 'jatim' | 'gudeg';
+export type GuideImage = 'bromo' | 'malang' | 'batu' | 'surabaya' | 'rawon' | 'hotel' | 'tugu' | 'bakso' | 'jatim' | 'gudeg'
+  | 'mojokerto' | 'pasuruan' | 'bangil' | 'blitar' | 'kediri' | 'lumajang' | 'jember' | 'solo';
 
 /** Satu artikel local wisdom (ulasan/panduan) hasil baca D1. */
 export type Guide = {

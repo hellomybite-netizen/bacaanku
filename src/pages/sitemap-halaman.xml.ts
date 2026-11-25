@@ -38,7 +38,7 @@ async function guideListPaths(): Promise<string[]> {
 export const prerender = IS_STATIC;
 
 const BUILD_LASTMOD = new Date().toISOString();
-const staticPages = ['/tentang/', '/pedoman-media-siber/', '/kebijakan-privasi/', '/kontak/', '/redaksi/'];
+const staticPages = ['/tentang/', '/pedoman-media-siber/', '/kebijakan-privasi/', '/kontak/', '/redaksi/', '/arsip-berita/', '/kredit-foto/'];
 
 function isoOrFallback(epoch: number | null | undefined, fallback: string): string {
   return epoch && Number.isFinite(epoch) ? new Date(epoch * 1000).toISOString() : fallback;

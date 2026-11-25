@@ -1,0 +1,29 @@
+// Kredit foto berlisensi untuk gambar sampul kategori/kota/provinsi (public/media/local-wisdom/{key}-wide.webp).
+// Semua dari Wikimedia Commons (CC BY / CC BY-SA / domain publik). Diunduh & dikonversi ke WebP 26 Nov 2026.
+// Foto artikel dikreditkan di masing-masing artikel (hero_credit + hero_credit_url).
+import type { GuideImage } from './local-guide';
+
+export type PhotoCredit = { title: string; author: string; license: string; licenseUrl: string; source: string };
+
+export const photoCredits: Record<GuideImage, PhotoCredit> = {
+  "bromo": { title: "Kaldera Tengger dengan Gunung Bromo, Batok, dan Semeru di latar belakang", author: "Jakub Hałun", license: "CC BY-SA 4.0", licenseUrl: "https://creativecommons.org/licenses/by-sa/4.0", source: "https://commons.wikimedia.org/wiki/File:Bromo,_Semeru,_Batok_-_view_of_Tengger_caldera,_East_Java,_Indonesia,_20220820_0709_9507.jpg" },
+  "malang": { title: "Monumen Tugu Kota Malang di Alun-Alun Tugu", author: "Ulumarifah", license: "CC BY-SA 4.0", licenseUrl: "https://creativecommons.org/licenses/by-sa/4.0", source: "https://commons.wikimedia.org/wiki/File:Tugu_Kota_Malang_(3).jpg" },
+  "batu": { title: "Pemandangan Kota Batu dilihat dari Museum Angkut", author: "Ya, saya inBaliTimur", license: "CC BY-SA 2.0", licenseUrl: "https://creativecommons.org/licenses/by-sa/2.0", source: "https://commons.wikimedia.org/wiki/File:Kota_Batu_Panorama_(35062670326).jpg" },
+  "surabaya": { title: "Tugu Pahlawan, Surabaya", author: "Eny Santiati", license: "CC BY-SA 4.0", licenseUrl: "https://creativecommons.org/licenses/by-sa/4.0", source: "https://commons.wikimedia.org/wiki/File:Tugu_Pahlawan_Surabaya_Jawa_Timur.jpg" },
+  "rawon": { title: "Seporsi nasi rawon di Rawon Nguling, Probolinggo", author: "ESCapade", license: "CC BY-SA 3.0", licenseUrl: "https://creativecommons.org/licenses/by-sa/3.0", source: "https://commons.wikimedia.org/wiki/File:Nasi_Rawon_B.JPG" },
+  "hotel": { title: "Contoh kamar hotel (foto ilustrasi)", author: "Allvin Garamar", license: "CC BY-SA 4.0", licenseUrl: "https://creativecommons.org/licenses/by-sa/4.0", source: "https://commons.wikimedia.org/wiki/File:EXECUTIVE_ROOM_-_Teraskita_Hotel_Makassar.jpg" },
+  "tugu": { title: "Kawasan Alun-Alun Tugu Malang di depan Balai Kota", author: "Christophe95", license: "CC BY-SA 4.0", licenseUrl: "https://creativecommons.org/licenses/by-sa/4.0", source: "https://commons.wikimedia.org/wiki/File:Alun-Alun_Tugu_1.jpg" },
+  "bakso": { title: "Semangkuk bakso Malang dengan pangsit goreng (foto ilustrasi)", author: "Gunawan Kartapranata", license: "CC BY-SA 3.0", licenseUrl: "https://creativecommons.org/licenses/by-sa/3.0", source: "https://commons.wikimedia.org/wiki/File:Baso_Malang_Karapitan.JPG" },
+  "jatim": { title: "Paviliun pintu masuk Batu Secret Zoo di kawasan Jatim Park 2, Kota Batu", author: "Rochelimit", license: "CC BY-SA 4.0", licenseUrl: "https://creativecommons.org/licenses/by-sa/4.0", source: "https://commons.wikimedia.org/wiki/File:Batu_Secret_Zoo_entrance_pavilion.jpg" },
+  "gudeg": { title: "Deretan rumah makan gudeg di Sentra Gudeg Wijilan, Yogyakarta", author: "Dietrich Ayala from Portland, USA", license: "CC BY 2.0", licenseUrl: "https://creativecommons.org/licenses/by/2.0", source: "https://commons.wikimedia.org/wiki/File:Sentra_Gudeg_Wijilan.jpg" },
+  "mojokerto": { title: "Gapura Bajang Ratu peninggalan Majapahit di Trowulan, Mojokerto", author: "Ivuvisual", license: "CC BY-SA 4.0", licenseUrl: "https://creativecommons.org/licenses/by-sa/4.0", source: "https://commons.wikimedia.org/wiki/File:Candi_Bajang_Ratu.jpg" },
+  "pasuruan": { title: "Masjid Agung Al-Anwar dekat Alun-Alun Kota Pasuruan", author: "Gunarta", license: "CC BY-SA 4.0", licenseUrl: "https://creativecommons.org/licenses/by-sa/4.0", source: "https://commons.wikimedia.org/wiki/File:Masjid_Agung_Pasuruan.jpg" },
+  "bangil": { title: "Alun-Alun Bangil, Kabupaten Pasuruan, pada malam hari", author: "Government of East Java", license: "Public domain", licenseUrl: "", source: "https://commons.wikimedia.org/wiki/File:Alun_alun_Bangil_Pasuruan_di_malam_hari.jpg" },
+  "blitar": { title: "Candi Penataran di Nglegok, Kabupaten Blitar", author: "Pandu Aji Wirawan", license: "CC BY-SA 4.0", licenseUrl: "https://creativecommons.org/licenses/by-sa/4.0", source: "https://commons.wikimedia.org/wiki/File:Bangunan_Utama_Candi_Penataran_di_Blitar.jpg" },
+  "kediri": { title: "Gunung Kelud di perbatasan Kabupaten Kediri", author: "GusJuned", license: "CC BY-SA 3.0", licenseUrl: "https://creativecommons.org/licenses/by-sa/3.0", source: "https://commons.wikimedia.org/wiki/File:Gunung_Kelud_(Kelud_Mountain)_-_panoramio.jpg" },
+  "lumajang": { title: "Air Terjun Tumpak Sewu di Kabupaten Lumajang", author: "Irsam24", license: "CC BY-SA 4.0", licenseUrl: "https://creativecommons.org/licenses/by-sa/4.0", source: "https://commons.wikimedia.org/wiki/File:Air_rerjun_Tumpak_Sewu.jpg" },
+  "jember": { title: "Pantai Papuma, Kabupaten Jember", author: "Herreads", license: "CC BY 4.0", licenseUrl: "https://creativecommons.org/licenses/by/4.0", source: "https://commons.wikimedia.org/wiki/File:Laut_Pantai_Papuma_Jember.jpg" },
+  "solo": { title: "Pendapa Agung Pura Mangkunegaran, Surakarta", author: "Crisco 1492", license: "CC BY-SA 3.0", licenseUrl: "https://creativecommons.org/licenses/by-sa/3.0", source: "https://commons.wikimedia.org/wiki/File:Grand_Pendopo,_Mangkunegaran_Palace.jpg" },
+};
+
+export const photoCreditText = (key: GuideImage) => { const c = photoCredits[key]; return `Foto: ${c.author} / Wikimedia Commons, ${c.license}`; };

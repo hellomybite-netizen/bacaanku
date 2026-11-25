@@ -105,7 +105,7 @@ export function parseLocal(form: FormData, category: string, strict: boolean, er
   }
 
   const city = values.city ? guideCity(values.city) : undefined;
-  if (values.city && !city) errors.city = `Kota "${values.city}" belum terdaftar. Pakai slug kota yang ada di panduan (mis. probolinggo, malang, batu, yogyakarta) atau minta admin menambahkannya.`;
+  if (values.city && !city) errors.city = `Kota "${values.city}" belum terdaftar. Pakai slug kota yang ada di panduan (mis. probolinggo, malang, batu, kediri, solo) atau minta admin menambahkannya.`;
   if (guide && strict && !values.city) errors.city = 'Kota wajib diisi untuk artikel Hotel/Wisata/Kuliner.';
   if (guide && strict && !values.locationLabel) errors.locationLabel = 'Lokasi singkat wajib diisi (mis. "Tongas, Kab. Probolinggo").';
   if (values.placeName.length > 80) errors.placeName = 'Nama tempat maksimal 80 karakter.';

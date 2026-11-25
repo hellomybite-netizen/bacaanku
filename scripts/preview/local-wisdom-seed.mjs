@@ -1,7 +1,8 @@
 // Data awal 7 panduan local wisdom (desain GPT, fakta sudah dicek 25 Nov 2026).
 // HANYA untuk D1 LOKAL / pratinjau. Di produksi, panduan diterbitkan lewat /admin atau API.
-// Gambar /media/local-wisdom/*.webp dibuat oleh GPT (konfirmasi Rizal, 25 Nov 2026).
-const credit = { caption: 'Ilustrasi visual', credit: 'Ilustrasi dibuat dengan AI (GPT) untuk Bacaanku', creditUrl: 'https://bacaankunetwork.com/tentang/' };
+// Gambar /media/local-wisdom/*.webp = foto berlisensi Wikimedia Commons (26 Nov 2026), menggantikan ilustrasi AI.
+// Kredit per foto: src/lib/photo-credits.ts (sampul) dan field caption/credit/creditUrl di bawah (artikel).
+const credit = {};
 const img = (key) => `/media/local-wisdom/${key}-wide.webp`;
 
 export const guides = [
@@ -9,7 +10,7 @@ export const guides = [
     slug: 'gunung-bromo', category: 'wisata', city: 'probolinggo', name: 'Gunung Bromo', hoursAgo: 1,
     title: 'Gunung Bromo: Menyambut Matahari Terbit di Dataran Tengger',
     excerpt: 'Panduan memilih titik pandang, membeli tiket daring, dan menyusun perjalanan pertama ke Gunung Bromo dari sisi Probolinggo.',
-    location: 'Cemorolawang, Kab. Probolinggo', hero: img('bromo'), heroAlt: 'Ilustrasi lanskap gunung dan kabut pagi di kaldera Tengger',
+    location: 'Cemorolawang, Kab. Probolinggo', hero: img('bromo'), heroAlt: "Kaldera Tengger dengan Gunung Bromo, Gunung Batok, dan Gunung Semeru", caption: "Kaldera Tengger dengan Gunung Bromo (berasap), Batok, dan Semeru di kejauhan", credit: "Foto: Jakub Hałun / Wikimedia Commons, CC BY-SA 4.0", creditUrl: "https://commons.wikimedia.org/wiki/File:Bromo,_Semeru,_Batok_-_view_of_Tengger_caldera,_East_Java,_Indonesia,_20220820_0709_9507.jpg",
     facts: [
       { label: 'Pintu masuk', value: 'Cemorolawang, Ngadisari, Sukapura, Kab. Probolinggo' },
       { label: 'Tiket', value: 'Wajib dibeli daring di situs resmi TNBTS; tidak bisa refund atau jadwal ulang' },
@@ -37,7 +38,7 @@ Untuk masuk ke Laut Pasir dan Savana, pengunjung wajib memakai kendaraan roda em
     slug: 'the-batu-villas', category: 'hotel', city: 'batu', name: 'The Batu Villas', hoursAgo: 2,
     title: 'The Batu Villas: Menginap di Sisir untuk Menjelajahi Kota Batu',
     excerpt: 'Cara menilai pilihan kamar, lokasi, dan biaya menginap di The Batu Hotel & Villas sebelum menyusun agenda liburan di Kota Batu.',
-    location: 'Sisir, Kota Batu', hero: img('hotel'), heroAlt: 'Ilustrasi suasana penginapan dengan paviliun dan taman tropis',
+    location: 'Sisir, Kota Batu', hero: img('batu'), heroAlt: "Pemandangan atap rumah dan pegunungan di Kota Batu", caption: "Pemandangan Kota Batu dari Museum Angkut (foto kawasan, bukan foto hotel)", credit: "Foto: Ya, saya inBaliTimur / Wikimedia Commons, CC BY-SA 2.0", creditUrl: "https://commons.wikimedia.org/wiki/File:Kota_Batu_Panorama_(35062670326).jpg",
     facts: [
       { label: 'Nama resmi', value: 'The Batu Hotel & Villas' },
       { label: 'Alamat', value: 'Jl. Sultan Agung No.29, Sisir, Kec. Batu, Kota Batu 65314' },
@@ -64,11 +65,7 @@ Jika tiba malam atau membawa kebutuhan khusus, hubungi penginapan melalui kontak
     slug: 'rawon-nguling', category: 'kuliner', city: 'probolinggo', name: 'Rawon Nguling', hoursAgo: 3,
     title: 'Rawon Nguling, Kuliner Legendaris dari Tongas, Probolinggo',
     excerpt: 'Kenali rawon berkuah keluak yang dirintis sejak 1942 di jalur Pantura Tongas, Probolinggo, lalu rencanakan persinggahanmu.',
-    location: 'Tongas, Kab. Probolinggo', hero: img('rawon'), heroAlt: 'Ilustrasi rawon khas Jawa Timur dengan daging sapi dan tauge',
-    gallery: [
-      { src: img('rawon-kuah'), alt: 'Ilustrasi tekstur kuah keluak dan potongan daging dari atas' },
-      { src: img('rawon-sajian'), alt: 'Ilustrasi rawon disajikan dengan nasi, sambal, dan telur asin' },
-    ],
+    location: 'Tongas, Kab. Probolinggo', hero: img('rawon'), heroAlt: "Seporsi nasi rawon berkuah hitam di Rawon Nguling, Probolinggo", caption: "Nasi rawon di Rawon Nguling, Probolinggo", credit: "Foto: ESCapade / Wikimedia Commons, CC BY-SA 3.0", creditUrl: "https://commons.wikimedia.org/wiki/File:Nasi_Rawon_B.JPG",
     facts: [
       { label: 'Alamat', value: 'Jl. Raya Tambakrejo No.75, Wringinan, Tambakrejo, Tongas, Kab. Probolinggo' },
       { label: 'Berdiri', value: '1942, dirintis Mbah Karyodirejo dan Mbah Marni' },
@@ -98,7 +95,7 @@ Nama serupa muncul di banyak kota, jadi pakai alamat Jalan Raya Tambakrejo saat 
     slug: 'hotel-tugu-malang', category: 'hotel', city: 'malang', name: 'Hotel Tugu Malang', hoursAgo: 4,
     title: 'Hotel Tugu Malang: Menginap di Jantung Kota Lama',
     excerpt: 'Panduan menimbang lokasi dan tipe kamar di Hotel Tugu untuk perjalanan singkat di pusat Kota Malang.',
-    location: 'Klojen, Kota Malang', hero: img('tugu'), heroAlt: 'Ilustrasi penginapan bergaya kolonial dengan taman tropis',
+    location: 'Klojen, Kota Malang', hero: img('tugu'), heroAlt: "Taman dan Monumen Tugu di Alun-Alun Tugu Malang", caption: "Kawasan Alun-Alun Tugu Malang, lokasi Hotel Tugu (foto kawasan, bukan foto hotel)", credit: "Foto: Christophe95 / Wikimedia Commons, CC BY-SA 4.0", creditUrl: "https://commons.wikimedia.org/wiki/File:Alun-Alun_Tugu_1.jpg",
     facts: [
       { label: 'Alamat', value: 'Jl. Tugu No.3, Klojen, Kota Malang' },
       { label: 'Tarif kamar', value: 'Cek berdasarkan tanggal dan tipe kamar' },
@@ -125,7 +122,7 @@ Cek tarif untuk tanggal pasti dan baca tenggat pembatalan di halaman resmi. Konf
     slug: 'jatim-park-2', category: 'wisata', city: 'batu', name: 'Jatim Park 2', hoursAgo: 5,
     title: 'Jatim Park 2: Menyusun Kunjungan ke Batu Secret Zoo dan Museum Satwa',
     excerpt: 'Panduan sehari untuk memilih area, memeriksa tiket, dan menyesuaikan agenda keluarga di Jatim Park 2, Kota Batu.',
-    location: 'Temas, Kota Batu', hero: img('jatim'), heroAlt: 'Ilustrasi jalur pejalan kaki di taman wisata satwa tropis',
+    location: 'Temas, Kota Batu', hero: img('jatim'), heroAlt: "Paviliun pintu masuk Batu Secret Zoo berwarna merah di Jatim Park 2", caption: "Paviliun pintu masuk Batu Secret Zoo, Jatim Park 2", credit: "Foto: Rochelimit / Wikimedia Commons, CC BY-SA 4.0", creditUrl: "https://commons.wikimedia.org/wiki/File:Batu_Secret_Zoo_entrance_pavilion.jpg",
     facts: [
       { label: 'Alamat', value: 'Jl. Oro-Oro Ombo No.9, Temas, Kec. Batu, Kota Batu 65315' },
       { label: 'Jam Batu Secret Zoo', value: '08.30–16.30 WIB setiap hari; pintu masuk tutup 1 jam lebih awal' },
@@ -153,7 +150,7 @@ Kenakan sepatu nyaman dan ikuti petunjuk di dekat kandang. Jangan memberi makan 
     slug: 'bakso-president', category: 'kuliner', city: 'malang', name: 'Bakso President', hoursAgo: 6,
     title: 'Bakso President: Mampir ke Kedai Bakso di Tepi Rel Malang',
     excerpt: 'Panduan makan di cabang pusat Bakso President, dari memilih isian dalam semangkuk bakso sampai mengecek lokasi.',
-    location: 'Rampal Celaket, Kota Malang', hero: img('bakso'), heroAlt: 'Ilustrasi semangkuk bakso Malang dengan pangsit goreng dan kuah bening',
+    location: 'Rampal Celaket, Kota Malang', hero: img('bakso'), heroAlt: "Semangkuk bakso Malang dengan pangsit goreng dan tahu", caption: "Bakso Malang dengan pangsit goreng (foto ilustrasi menu, bukan di Bakso President)", credit: "Foto: Gunawan Kartapranata / Wikimedia Commons, CC BY-SA 3.0", creditUrl: "https://commons.wikimedia.org/wiki/File:Baso_Malang_Karapitan.JPG",
     budget: { label: 'Kisaran per orang', value: 'Rp22.000–Rp60.000' },
     facts: [
       { label: 'Lokasi', value: 'Jl. Batanghari No.3, Rampal Celaket, Klojen, Kota Malang' },
@@ -182,7 +179,7 @@ Nikmati suasana dari area kedai dan tetap di area yang diizinkan. Bila datang sa
     slug: 'gudeg-yu-djum', category: 'kuliner', city: 'yogyakarta', name: 'Gudeg Yu Djum', hoursAgo: 7,
     title: 'Gudeg Yu Djum: Seporsi Gudeg dan Pilihan Oleh-Oleh dari Wijilan',
     excerpt: 'Kenali pilihan nasi gudeg, besek, dan kendil sebelum mampir ke sentra kuliner Wijilan di Yogyakarta.',
-    location: 'Wijilan, Kota Yogyakarta', hero: img('gudeg'), heroAlt: 'Ilustrasi nasi gudeg dengan nangka muda, telur, ayam, dan krecek',
+    location: 'Wijilan, Kota Yogyakarta', hero: img('gudeg'), heroAlt: "Deretan warung gudeg di Sentra Gudeg Wijilan, Yogyakarta", caption: "Sentra Gudeg Wijilan, Yogyakarta (foto kawasan)", credit: "Foto: Dietrich Ayala from Portland, USA / Wikimedia Commons, CC BY 2.0", creditUrl: "https://commons.wikimedia.org/wiki/File:Sentra_Gudeg_Wijilan.jpg",
     facts: [
       { label: 'Lokasi', value: 'Sentra Gudeg Wijilan, Panembahan, Kraton, Kota Yogyakarta' },
       { label: 'Dapur asal', value: 'Karangasem, Mbarek (Jl. Kaliurang Km 4,5), Sleman' },

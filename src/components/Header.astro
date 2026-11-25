@@ -20,7 +20,7 @@ const path = Astro.url.pathname;
             <summary>Daerah</summary>
             <div class="nav-panel">
               <a href="/daerah/" aria-current={path === '/daerah/' ? 'page' : undefined}>Semua daerah</a>
-              {guideProvinces.map((province) => <a href={provincePath(province.slug)} aria-current={path === provincePath(province.slug) ? 'page' : undefined}>{province.name}</a>)}
+              {guideProvinces.filter((province) => guideCities.some((city) => city.province === province.slug && city.nav)).map((province) => <a href={provincePath(province.slug)} aria-current={path === provincePath(province.slug) ? 'page' : undefined}>{province.name}</a>)}
               {guideCities.filter((city) => city.nav).map((city) => <a href={cityPath(city.slug)} aria-current={path === cityPath(city.slug) ? 'page' : undefined}>{city.name}</a>)}
             </div>
           </details>
