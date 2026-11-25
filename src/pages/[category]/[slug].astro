@@ -6,8 +6,12 @@ import AdSlot from '../../components/AdSlot.astro';
 import Breadcrumb from '../../components/Breadcrumb.astro';
 import ShareButtons from '../../components/ShareButtons.astro';
 import Trending from '../../components/Trending.astro';
+import ReviewBox from '../../components/ReviewBox.astro';
+import RegionList from '../../components/RegionList.astro';
 import { absUrl, articlePath, formatDateTime, isoDate } from '../../utils/articles';
 import { breadcrumbLd, newsArticleLd } from '../../utils/seo';
+import { reviewLd } from '../../lib/local';
+import { isLocalCategory } from '../../config/site';
 import { applyPublicCache } from '../../lib/cache-headers';
 import { loadArticle } from '../../lib/public';
 import { DELETED_SAMPLE_SLUGS } from '../../lib/gone';
@@ -55,6 +59,16 @@ const crumbs = article
 const authorUrl = article ? `/penulis/${article.authorSlug}/` : '';
 const og = article?.heroSrc ? absUrl(article.heroSrc) : undefined;
 const sizes = '(min-width: 1240px) 780px, (min-width: 960px) 64vw, calc(100vw - 2rem)';
+const isLocal = article ? isLocalCategory(article.categorySlug) : false;
+const reviewJson = article ? reviewLd(article, pageUrl) : null;
+const placeHref = article?.daerahSlug ? (article.kotaSlug ? `/daerah/${article.daerahSlug}/${article.kotaSlug}/` : `/daerah/${article.daerahSlug}/`) : null;
+if (article && isLocal) {
+  crumbs.splice(1, 1,
+    ...(article.daerahSlug ? [{ name: article.daerahName ?? article.daerahSlug, href: `/daerah/${article.daerahSlug}/` }] : []),
+    ...(article.daerahSlug && article.kotaSlug && article.kota ? [{ name: article.kota, href: placeHref! }] : []),
+    { name: article.categoryName, href: article.daerahSlug ? `${placeHref}${article.categorySlug}/` : `/${article.categorySlug}/` },
+  );
+}
 ---
 {article ? (
   <BaseLayout
@@ -65,6 +79,8 @@ const sizes = '(min-width: 1240px) 780px, (min-width: 960px) 64vw, calc(100vw - 
     imageAlt={article.heroAlt}
     type="article"
     currentCategory={article.categorySlug}
+    currentRegion={article.daerahSlug}
+    noindex={article.isSample}
     article={{
       publishedTime: isoDate(article.publishedAt),
       modifiedTime: isoDate(article.updatedAt),
@@ -86,6 +102,7 @@ const sizes = '(min-width: 1240px) 780px, (min-width: 960px) 64vw, calc(100vw - 
         keywords: article.tags.map((tag) => tag.name),
       }),
       breadcrumbLd(crumbs),
+      ...(reviewJson ? [reviewJson] : []),
     ]}
   >
     <div class="container">
@@ -102,6 +119,16 @@ const sizes = '(min-width: 1240px) 780px, (min-width: 960px) 64vw, calc(100vw - 
               {article.updatedAt - article.publishedAt > 60 && <span>Diperbarui <time datetime={isoDate(article.updatedAt)}>{formatDateTime(article.updatedAt)}</time></span>}
               <span>{article.readingMinutes} menit baca</span>
             </p>
+            {article.daerahSlug && (
+              <p class="article-place">
+                <svg aria-hidden="true" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.2-7-11.2A7 7 0 0 1 19 9.8C19 14.8 12 21 12 21Z"/><circle cx="12" cy="10" r="2.5"/></svg>
+                <a href={placeHref!}>{article.kota ? `${article.kota}, ` : ''}{article.daerahName}</a>
+                <a class="article-place-sub" href={`${placeHref}${article.categorySlug}/`}>{article.categoryName} lain di {article.kota ?? article.daerahName} <span aria-hidden="true">→</span></a>
+              </p>
+            )}
+            {article.isSample && (
+              <p class="sample-banner" role="note"><strong>CONTOH.</strong> Halaman ini hanya placeholder untuk memperlihatkan tata letak. Tempat, harga, alamat, dan penilaian di sini bukan data nyata dan bukan ulasan.</p>
+            )}
             <ShareButtons url={pageUrl} title={article.title} />
           </header>
           {(article.heroImage || article.heroSrc) && (
@@ -122,6 +149,9 @@ const sizes = '(min-width: 1240px) 780px, (min-width: 960px) 64vw, calc(100vw - 
                 </figcaption>
               )}
             </figure>
+          )}
+          {article.review && (
+            <ReviewBox review={article.review} category={article.categorySlug} kota={article.kota} kotaSlug={article.kotaSlug} daerahName={article.daerahName} daerahSlug={article.daerahSlug} sample={article.isSample} />
           )}
           <div class="prose">
             {article.bodyHtml ? <Fragment set:html={article.bodyHtml} /> : Content && <Content />}
@@ -145,7 +175,7 @@ const sizes = '(min-width: 1240px) 780px, (min-width: 960px) 64vw, calc(100vw - 
             <p class="muted small">{article.authorBio}</p>
           </aside>
         </article>
-        <div class="sidebar"><Trending items={payload?.trending ?? []} /><AdSlot size="rectangle" /></div>
+        <div class="sidebar">{article.daerahSlug ? <RegionList current={article.daerahSlug} hrefFor={(s) => `/daerah/${s}/${article.categorySlug}/`} title={`${article.categoryName} per daerah`} /> : <Trending items={payload?.trending ?? []} />}<AdSlot size="rectangle" /></div>
       </div>
       {payload && payload.related.length > 0 && (
         <section class="deferred related" aria-labelledby="terkait-title" data-pagefind-ignore>

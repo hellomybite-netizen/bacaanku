@@ -1,0 +1,107 @@
+---
+/**
+ * Satu tampilan untuk semua halaman daerah:
+ *   /daerah/<provinsi>/                      (semua rubrik)
+ *   /daerah/<provinsi>/<rubrik>/             (hotel | wisata | kuliner)
+ *   /daerah/<provinsi>/<kota>/               (satu kota)
+ *   /daerah/<provinsi>/<kota>/<rubrik>/      (kota × rubrik)
+ */
+import BaseLayout from '../layouts/BaseLayout.astro';
+import ArticleCard from './ArticleCard.astro';
+import AdSlot from './AdSlot.astro';
+import Breadcrumb from './Breadcrumb.astro';
+import RegionChips from './RegionChips.astro';
+import { localCategories, citiesOf } from '../config/site';
+import { breadcrumbLd } from '../utils/seo';
+import type { RegionPage } from '../lib/content-types';
+
+interface Props { page: RegionPage }
+const { page } = Astro.props;
+const { region, category, city, items, counts, cities } = page;
+
+const regionBase = `/daerah/${region.slug}/`;
+const scopeBase = city ? `${regionBase}${city.slug}/` : regionBase;
+const here = category ? `${scopeBase}${category.slug}/` : scopeBase;
+const placeName = city ? city.name : region.name;
+const crumbs = [
+  { name: 'Beranda', href: '/' },
+  { name: 'Daerah', href: '/daerah/' },
+  { name: region.name, href: regionBase },
+  ...(city ? [{ name: city.name, href: scopeBase }] : []),
+  ...(category ? [{ name: category.name, href: here }] : []),
+];
+const total = Object.values(counts).reduce((a, b) => a + b, 0);
+const noun = !category ? 'Hotel, wisata, dan kuliner' : category.slug === 'hotel' ? 'Hotel dan penginapan' : category.slug === 'wisata' ? 'Tempat wisata' : 'Kuliner khas';
+const title = category ? `${noun} di ${placeName}: Ulasan dan Info Harga` : `${noun} di ${placeName}`;
+const description = category
+  ? `Ulasan ${category.name.toLowerCase()} di ${placeName}${city ? `, ${region.name}` : ''}: alamat, kisaran harga, jam buka, dan rating redaksi.`
+  : `Ulasan hotel, tempat wisata, dan kuliner lokal di ${placeName}${city ? `, ${region.name}` : ''}, lengkap dengan alamat, harga, dan jam buka.`;
+// Gabungkan kota dari config + kota yang sudah punya ulasan.
+const cityChips = [
+  ...cities,
+  ...citiesOf(region.slug).filter((c) => !cities.some((x) => x.slug === c.slug)).map((c) => ({ ...c, count: 0 })),
+];
+const realItems = items.filter((a) => !a.isSample);
+const lead = !category && !city && items.length > 3;
+---
+<BaseLayout
+  title={title}
+  description={description}
+  canonical={here}
+  jsonLd={[breadcrumbLd(crumbs)]}
+  currentRegion={region.slug}
+  currentCategory={category?.slug}
+  noindex={realItems.length === 0}
+>
+  <div class="container">
+    <Breadcrumb items={crumbs} />
+    <header class="page-head lw-page-head lw-region-head">
+      <span class="lw-region-motif" aria-hidden="true"></span>
+      <p class="section-eyebrow">{city ? region.name : category ? 'Daerah · ' + category.name : 'Daerah'}</p>
+      <h1 class="page-title">{category ? `${noun} di ${placeName}` : placeName}</h1>
+      <p class="lw-page-lead">{category ? category.description : `Ulasan hotel, wisata, dan kuliner di ${placeName}${!city && region.cities.length ? `, dari ${region.cities.slice(0, 3).join(', ')} dan sekitarnya` : ''}.`}</p>
+
+      <nav class="tabs" aria-label={`Rubrik di ${placeName}`}>
+        <ul role="list">
+          <li><a href={scopeBase} aria-current={!category ? 'page' : undefined}>Semua <span class="chip-count">{total}</span></a></li>
+          {localCategories.map((c) => (
+            <li><a href={`${scopeBase}${c.slug}/`} aria-current={category?.slug === c.slug ? 'page' : undefined}>{c.name} <span class="chip-count">{counts[c.slug] ?? 0}</span></a></li>
+          ))}
+        </ul>
+      </nav>
+
+      {cityChips.length > 0 && (
+        <nav class="city-chips" aria-label={`Kota di ${region.name}`}>
+          <span class="city-chips-label">Kota</span>
+          <ul role="list">
+            {city && <li><a class="chip chip--sm" href={category ? `${regionBase}${category.slug}/` : regionBase}>Semua kota</a></li>}
+            {cityChips.map((c) => (
+              <li>
+                <a class="chip chip--sm" href={category ? `${regionBase}${c.slug}/${category.slug}/` : `${regionBase}${c.slug}/`} aria-current={city?.slug === c.slug ? 'page' : undefined}>
+                  {c.name}{c.count > 0 && <span class="chip-count">{c.count}</span>}
+                </a>
+              </li>
+            ))}
+          </ul>
+        </nav>
+      )}
+    </header>
+
+    {items.length === 0 ? (
+      <p class="empty-note">
+        Belum ada ulasan {category ? category.name.toLowerCase() + ' ' : ''}untuk {placeName}.
+        {category ? <> Lihat <a href={`/${category.slug}/`}>semua {category.name.toLowerCase()}</a> dari daerah lain.</> : <> Sambil menunggu, coba daerah lain di bawah.</>}
+      </p>
+    ) : (
+      <div class="grid lw-grid-3">
+        {items.map((article, i) => <ArticleCard article={article} headingLevel={2} showDesc variant={lead && i === 0 ? 'hero' : 'default'} eager={i === 0} />)}
+      </div>
+    )}
+
+    <AdSlot size="leaderboard" />
+    <section class="lw-section" aria-labelledby="daerah-lain">
+      <h2 id="daerah-lain" class="section-title">{category ? `${category.name} di daerah lain` : 'Daerah lainnya'}</h2>
+      <RegionChips current={region.slug} hrefFor={category ? (s) => `/daerah/${s}/${category.slug}/` : undefined} />
+    </section>
+  </div>
+</BaseLayout>

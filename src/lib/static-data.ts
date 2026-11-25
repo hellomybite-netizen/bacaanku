@@ -1,8 +1,9 @@
 import { getCollection, getEntry, render, type CollectionEntry } from 'astro:content';
 import { getImage } from 'astro:assets';
-import { categories, trending as trendingSlugs } from '../config/site';
+import { categories, regions, getRegion, citySlug, citiesOf, isLocalCategory, localCategories, trending as trendingSlugs } from '../config/site';
+import { formatPrice } from './local';
 import { readingTime, slugify } from '../utils/articles';
-import type { ArticleCard, ArticlePayload, ArticleView, CategoryPage, Cursor } from './content-types';
+import type { ArticleCard, ArticlePayload, ArticleView, CategoryPage, Cursor, LocalHome, RegionPage } from './content-types';
 
 type Entry = CollectionEntry<'articles'>;
 
@@ -37,7 +38,18 @@ function toCard(entry: Entry, id: number): ArticleCard {
     categoryName: category?.name ?? entry.data.category,
     isHeadline: entry.data.featured,
     heroImage: entry.data.heroImage,
+    daerahSlug: entry.data.daerah,
+    daerahName: entry.data.daerah ? getRegion(entry.data.daerah)?.name : undefined,
+    kota: entry.data.kota,
+    kotaSlug: entry.data.kota ? citySlug(entry.data.kota) : undefined,
+    rating: entry.data.review?.rating,
+    priceRange: entry.data.review ? priceOf(entry.data.review) : undefined,
+    isSample: entry.data.contoh,
   };
+}
+
+function priceOf(review: NonNullable<Entry['data']['review']>) {
+  return formatPrice(review.priceMin, review.priceMax, review.priceUnit, review.priceRange);
 }
 
 function tagsOf(entry: Entry) {
@@ -106,8 +118,19 @@ export async function articlePage(category: string, slug: string): Promise<Artic
     sources: [],
     seoTitle: entry.data.seoTitle ?? null,
     canonicalUrl: entry.data.canonical ?? null,
+    review: entry.data.review
+      ? {
+          ...entry.data.review,
+          priceRange: priceOf(entry.data.review),
+          visitedAt: entry.data.review.visitedAt ? Math.floor(entry.data.review.visitedAt.valueOf() / 1000) : undefined,
+        }
+      : undefined,
   };
-  const related = cards.filter((card) => card.categorySlug === category && card.id !== article.id).slice(0, 4);
+  const sameRegion = (card: ArticleCard) => !article.daerahSlug || card.daerahSlug === article.daerahSlug;
+  const related = [
+    ...cards.filter((card) => card.categorySlug === category && card.id !== article.id && sameRegion(card)),
+    ...cards.filter((card) => card.categorySlug === category && card.id !== article.id && !sameRegion(card)),
+  ].slice(0, 4);
   return { article, related, trending: await trendingFrom(cards), Content: Content as ArticlePayload['Content'] };
 }
 
@@ -198,4 +221,96 @@ export async function tagPaths() {
 export async function authorPaths() {
   const authors = await getCollection('authors');
   return authors.map((author) => ({ params: { slug: author.data.slug } }));
+}
+
+// ---------------------------------------------------------------------------
+// Niche local wisdom: beranda, daerah, daerah × kategori
+// ---------------------------------------------------------------------------
+export async function localHome(): Promise<LocalHome> {
+  const { cards } = await load();
+  const local = cards.filter((card) => isLocalCategory(card.categorySlug));
+  const regionCounts: Record<string, number> = {};
+  for (const card of local) if (card.daerahSlug) regionCounts[card.daerahSlug] = (regionCounts[card.daerahSlug] ?? 0) + 1;
+  return {
+    latest: local.slice(0, 6),
+    byCategory: localCategories.map((category) => ({ ...category, items: local.filter((card) => card.categorySlug === category.slug).slice(0, 3) })),
+    regionCounts,
+    archive: cards.filter((card) => !isLocalCategory(card.categorySlug)).slice(0, 4),
+  };
+}
+
+export async function regionPage(regionSlug: string, categorySlug: string | null, citySlugParam: string | null = null): Promise<RegionPage | null> {
+  const region = getRegion(regionSlug);
+  if (!region) return null;
+  const category = categorySlug ? localCategories.find((item) => item.slug === categorySlug) ?? null : null;
+  if (categorySlug && !category) return null;
+  const { cards } = await load();
+  const inRegion = cards.filter((card) => card.daerahSlug === regionSlug);
+  const cityCount = new Map<string, { name: string; slug: string; count: number }>();
+  for (const card of inRegion) {
+    if (!card.kota || !card.kotaSlug) continue;
+    const hit = cityCount.get(card.kotaSlug) ?? { name: card.kota, slug: card.kotaSlug, count: 0 };
+    hit.count++;
+    cityCount.set(card.kotaSlug, hit);
+  }
+  let city: { name: string; slug: string } | null = null;
+  if (citySlugParam) {
+    city = citiesOf(regionSlug).find((c) => c.slug === citySlugParam) ?? (cityCount.get(citySlugParam) ? { name: cityCount.get(citySlugParam)!.name, slug: citySlugParam } : null);
+    if (!city) return null;
+  }
+  const scoped = city ? inRegion.filter((card) => card.kotaSlug === city!.slug) : inRegion;
+  const counts: Record<string, number> = {};
+  for (const card of scoped) counts[card.categorySlug] = (counts[card.categorySlug] ?? 0) + 1;
+  const items = category ? scoped.filter((card) => card.categorySlug === category.slug) : scoped;
+  return {
+    region,
+    category,
+    city,
+    items,
+    counts,
+    cities: [...cityCount.values()].sort((a, b) => b.count - a.count),
+  };
+}
+
+export async function categoryRegionCounts(categorySlug: string): Promise<Record<string, number>> {
+  const { cards } = await load();
+  const out: Record<string, number> = {};
+  for (const card of cards) if (card.categorySlug === categorySlug && card.daerahSlug) out[card.daerahSlug] = (out[card.daerahSlug] ?? 0) + 1;
+  return out;
+}
+
+export async function regionPaths() {
+  return regions.map((region) => ({ params: { region: region.slug } }));
+}
+
+/** /daerah/<provinsi>/<rubrik>/ dan /daerah/<provinsi>/<kota>/ (segmen kedua berbagi satu rute). */
+export async function regionSubPaths() {
+  const { cards } = await load();
+  const out = new Map<string, { params: { region: string; sub: string } }>();
+  for (const region of regions) {
+    for (const category of localCategories) out.set(`${region.slug}/${category.slug}`, { params: { region: region.slug, sub: category.slug } });
+    for (const city of citiesOf(region.slug)) out.set(`${region.slug}/${city.slug}`, { params: { region: region.slug, sub: city.slug } });
+  }
+  for (const card of cards) {
+    if (card.daerahSlug && card.kotaSlug) out.set(`${card.daerahSlug}/${card.kotaSlug}`, { params: { region: card.daerahSlug, sub: card.kotaSlug } });
+  }
+  return [...out.values()];
+}
+
+/** /daerah/<provinsi>/<kota>/<rubrik>/ — hanya kombinasi yang punya isi. */
+export async function regionCityCategoryPaths() {
+  const { cards } = await load();
+  const out = new Map<string, { params: { region: string; sub: string; category: string } }>();
+  for (const card of cards) {
+    if (!card.daerahSlug || !card.kotaSlug || !isLocalCategory(card.categorySlug)) continue;
+    out.set(`${card.daerahSlug}/${card.kotaSlug}/${card.categorySlug}`, { params: { region: card.daerahSlug, sub: card.kotaSlug, category: card.categorySlug } });
+  }
+  return [...out.values()];
+}
+
+export async function archiveCounts(): Promise<Record<string, number>> {
+  const { cards } = await load();
+  const out: Record<string, number> = {};
+  for (const card of cards) out[card.categorySlug] = (out[card.categorySlug] ?? 0) + 1;
+  return out;
 }

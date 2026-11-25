@@ -1,16 +1,18 @@
 ---
-import { SITE, categories } from '../config/site';
-interface Props { currentCategory?: string }
-const { currentCategory } = Astro.props;
+import { SITE, localCategories, regions } from '../config/site';
+interface Props { currentCategory?: string; currentRegion?: string }
+const { currentCategory, currentRegion } = Astro.props;
 const path = Astro.url.pathname;
+const inDaerah = path.startsWith('/daerah');
 ---
 <header class="site-header">
+  <div class="wastra-band" aria-hidden="true"></div>
   <div class="masthead container">
     <a class="site-logo" href="/" aria-label={`${SITE.name} — beranda`}>
       <img class="logo-img logo-img--light" src="/brand/logo-light-h96.webp" srcset="/brand/logo-light-h48.webp 1x, /brand/logo-light-h96.webp 2x, /brand/logo-light-h144.webp 3x" width="340" height="96" alt={SITE.name} decoding="async" />
       <img class="logo-img logo-img--dark" src="/brand/logo-dark-h96.webp" srcset="/brand/logo-dark-h48.webp 1x, /brand/logo-dark-h96.webp 2x, /brand/logo-dark-h144.webp 3x" width="340" height="96" alt={SITE.name} decoding="async" />
     </a>
-    <p class="brand-statement"><strong>Berita yang perlu kamu tahu.</strong><span>Jernih, ringkas, relevan.</span></p>
+    <p class="brand-statement"><strong>{SITE.subline}</strong><span>Dari warung sampai penginapan, per daerah.</span></p>
     <div class="header-actions">
       <a class="search-button" href="/cari/">
         <svg aria-hidden="true" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
@@ -29,49 +31,51 @@ const path = Astro.url.pathname;
     </div>
   </div>
 
-  <div class="nav-shell">
-    <div class="header-inner container">
-      <nav class="site-nav" aria-label="Kategori">
-        <button class="menu-button" type="button" popovertarget="site-menu" popovertargetaction="toggle" aria-controls="site-menu">
-          <svg aria-hidden="true" width="19" height="19" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M4 6h16M4 12h16M4 18h16"/></svg>
-          <span>Jelajahi</span>
-        </button>
-        <ul id="site-menu" class="site-menu" popover="auto">
-          <li><a href="/" aria-current={path === '/' ? 'page' : undefined}>Beranda</a></li>
-          {categories.map((c) => (
-            <li><a href={`/${c.slug}/`} aria-current={currentCategory === c.slug ? (path === `/${c.slug}/` ? 'page' : 'true') : undefined}>{c.name}</a></li>
-          ))}
-        </ul>
-      </nav>
-      <a class="latest-link" href="/#terbaru-title"><span aria-hidden="true"></span>Terbaru</a>
+  <nav class="lw-nav" aria-label="Menu utama">
+    <div class="container lw-nav-inner">
+      <ul class="lw-nav-list">
+        {localCategories.map((c) => (
+          <li><a href={`/${c.slug}/`} aria-current={currentCategory === c.slug ? 'page' : undefined}>{c.name}</a></li>
+        ))}
+        <li>
+          <button class="lw-daerah-btn" type="button" popovertarget="daerah-menu" popovertargetaction="toggle" aria-controls="daerah-menu" data-active={inDaerah ? 'true' : undefined}>
+            Daerah
+            <svg aria-hidden="true" width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m6 9 6 6 6-6"/></svg>
+          </button>
+        </li>
+      </ul>
+      <a class="lw-archive-link" href="/arsip-berita/">Arsip Berita</a>
+    </div>
+  </nav>
+
+  <div id="daerah-menu" class="daerah-panel" popover="auto" aria-label="Menu per daerah">
+    <div class="container">
+      <div class="daerah-panel-head">
+        <p class="section-eyebrow">Menu per daerah</p>
+        <a class="more-link" href="/daerah/">Semua daerah <span aria-hidden="true">→</span></a>
+      </div>
+      <ul class="daerah-grid" role="list">
+        {regions.map((r) => (
+          <li>
+            <a href={`/daerah/${r.slug}/`} aria-current={currentRegion === r.slug ? 'page' : undefined}>
+              <strong>{r.name}</strong>
+              <span>{r.cities.slice(0, 3).join(' · ')}</span>
+            </a>
+          </li>
+        ))}
+      </ul>
+      <p class="daerah-panel-foot"><a href="/arsip-berita/">Arsip Berita</a><span class="muted"> — berita lama, semua tautan tetap berfungsi</span></p>
     </div>
   </div>
 </header>
 
 <script>
-  // --- Navigasi responsif: inline bila muat, popover bila tidak (tanpa breakpoint tetap) ---
+  // --- Menu Daerah: posisikan panel tepat di bawah header (header sticky, tinggi bisa berubah) ---
   const header = document.querySelector<HTMLElement>('.site-header')!;
-  const inner = header.querySelector<HTMLElement>('.header-inner')!;
-  const menu = document.getElementById('site-menu')!;
-  let lastWidth = 0;
-  function layout() {
-    const width = inner.clientWidth;
-    const wide = header.classList.contains('is-wide');
-    if (!wide && width <= lastWidth) return; // saat collapsed, ukur ulang hanya jika melebar
-    const wasOpen = menu.matches(':popover-open');
-    header.classList.add('is-measuring', 'is-wide');
-    menu.removeAttribute('popover');
-    if (inner.scrollWidth > inner.clientWidth) {
-      header.classList.remove('is-wide');
-      menu.setAttribute('popover', 'auto');
-      if (wasOpen) menu.showPopover();
-    }
-    lastWidth = width;
-    requestAnimationFrame(() => header.classList.remove('is-measuring'));
-  }
-  const ro = new ResizeObserver(layout);
-  ro.observe(header);
-  ro.observe(menu);
+  const panel = document.getElementById('daerah-menu')!;
+  panel.addEventListener('beforetoggle', () => {
+    panel.style.setProperty('--panel-top', `${header.getBoundingClientRect().bottom}px`);
+  });
 
   // --- Toggle mode gelap/terang (2 state: ikut sistem <-> kebalikan sistem) ---
   const meta = document.querySelector<HTMLMetaElement>('meta[name="color-scheme"]')!;

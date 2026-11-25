@@ -67,3 +67,8 @@
 .people label { display: flex; align-items: center; gap: 0.4rem; min-block-size: 2.75rem; padding: 0.4rem 0.7rem; border: 1px solid var(--border); border-radius: var(--radius-sm); }
 .hint { margin: 0; color: var(--muted); font-size: 0.85rem; }
 .field-error { margin: 0; color: var(--brand-red-strong); font-size: 0.8rem; font-weight: 700; }
+
+/* Info ulasan (local wisdom) */
+@media (min-width: 40rem) { .split-3 { grid-template-columns: 1fr 1fr 0.8fr; } }
+.place-fields { border: 1px dashed var(--border, #d9cbb6); margin: 0 0 1rem; }
+.place-fields legend { padding-inline: 0.4rem; }

@@ -1,0 +1,23 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Breadcrumb from '../../components/Breadcrumb.astro';
+import RegionTiles from '../../components/RegionTiles.astro';
+import { breadcrumbLd } from '../../utils/seo';
+import { applyPublicCache } from '../../lib/cache-headers';
+import { loadLocalHome } from '../../lib/public';
+
+const { regionCounts } = await loadLocalHome();
+applyPublicCache(Astro, 'list', ['daerah']);
+const crumbs = [{ name: 'Beranda', href: '/' }, { name: 'Daerah', href: '/daerah/' }];
+---
+<BaseLayout title="Ulasan Hotel, Wisata, dan Kuliner per Daerah" description="Pilih daerah untuk membaca ulasan hotel, tempat wisata, dan kuliner lokal di Jawa, Bali, Sumatera, Sulawesi, Nusa Tenggara, Kalimantan, hingga Maluku dan Papua." jsonLd={[breadcrumbLd(crumbs)]} currentRegion="__index">
+  <div class="container">
+    <Breadcrumb items={crumbs} />
+    <header class="page-head lw-page-head">
+      <p class="section-eyebrow">Menu per daerah</p>
+      <h1 class="page-title">Pilih daerahmu</h1>
+      <p class="muted">Setiap daerah punya rubrik Hotel, Wisata, dan Kuliner sendiri.</p>
+    </header>
+    <RegionTiles counts={regionCounts} />
+  </div>
+</BaseLayout>

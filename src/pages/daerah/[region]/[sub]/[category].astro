@@ -1,0 +1,21 @@
+---
+/** Kota × rubrik: /daerah/jawa-timur/malang/kuliner/ */
+import RegionView from '../../../../components/RegionView.astro';
+import { isLocalCategory } from '../../../../config/site';
+import { applyPublicCache } from '../../../../lib/cache-headers';
+import { loadRegion } from '../../../../lib/public';
+
+export const prerender = __BUILD_MODE__ === 'static';
+
+export async function getStaticPaths() {
+  if (__BUILD_MODE__ !== 'static') return [];
+  const { regionCityCategoryPaths } = await import('../../../../lib/static-data');
+  return regionCityCategoryPaths();
+}
+
+const { region = '', sub = '', category = '' } = Astro.params;
+const page = isLocalCategory(sub) || !isLocalCategory(category) ? null : await loadRegion(region, category, sub);
+if (!page) return new Response(null, { status: 404, statusText: 'Not Found' });
+applyPublicCache(Astro, 'list', [`region-${page.region.slug}`, `cat-${category}`]);
+---
+<RegionView page={page} />

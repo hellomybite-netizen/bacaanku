@@ -1,5 +1,6 @@
 ---
 import '../styles/global.css';
+import '../styles/local-wisdom.css';
 import Header from '../components/Header.astro';
 import Footer from '../components/Footer.astro';
 import { SITE } from '../config/site';
@@ -34,9 +35,10 @@ interface Props {
   /** Judul utuh tanpa sufiks " | Bacaanku Network" (mis. beranda) */
   rawTitle?: boolean;
   currentCategory?: string;
+  currentRegion?: string;
 }
 
-const { title, description, canonical, image, imageAlt, type = 'website', article, jsonLd = [], noindex = false, noCanonical = false, rawTitle = false, currentCategory } = Astro.props;
+const { title, description, canonical, image, imageAlt, type = 'website', article, jsonLd = [], noindex = false, noCanonical = false, rawTitle = false, currentCategory, currentRegion } = Astro.props;
 const fullTitle = formatPageTitle(title, SITE.name, rawTitle);
 const metaDescription = truncateAtWord(description, 155);
 const canonicalUrl = noCanonical ? undefined : (canonical ? new URL(canonical, SITE.url).href : new URL(Astro.url.pathname, SITE.url).href);
@@ -60,8 +62,10 @@ const ogImage = image ?? new URL(SITE.defaultOgImage, SITE.url).href;
       </>
     )}
     {noindex ? <meta name="robots" content="noindex, follow" /> : <meta name="robots" content="index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1" />}
-    <meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)" />
-    <meta name="theme-color" content="#071827" media="(prefers-color-scheme: dark)" />
+    <meta name="theme-color" content="#fbf5ea" media="(prefers-color-scheme: light)" />
+    <meta name="theme-color" content="#1b120c" media="(prefers-color-scheme: dark)" />
+    <link rel="preload" href="/fonts/plus-jakarta-sans-latin-var.woff2" as="font" type="font/woff2" crossorigin />
+    <link rel="preload" href="/fonts/fraunces-latin-var.woff2" as="font" type="font/woff2" crossorigin />
     <link rel="icon" href="/favicon.ico" sizes="48x48" />
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png" />
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png" />
@@ -101,7 +105,7 @@ const ogImage = image ?? new URL(SITE.defaultOgImage, SITE.url).href;
   </head>
   <body>
     <a class="skip-link" href="#konten">Langsung ke konten</a>
-    <Header currentCategory={currentCategory} />
+    <Header currentCategory={currentCategory} currentRegion={currentRegion} />
     <main id="konten" tabindex="-1">
       <slot />
     </main>

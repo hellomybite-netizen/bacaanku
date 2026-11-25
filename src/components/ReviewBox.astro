@@ -1,0 +1,83 @@
+---
+/**
+ * Kotak info ulasan (hotel / wisata / kuliner) di halaman artikel.
+ * Sumber data: kolom D1 migrasi 0003 (SSR) atau frontmatter `review:` (build statis).
+ * Lihat docs/panduan-konten-local-wisdom.md.
+ */
+import type { ReviewInfo } from '../lib/content-types';
+import { formatDate } from '../utils/articles';
+
+interface Props {
+  review: ReviewInfo;
+  category: 'hotel' | 'wisata' | 'kuliner' | string;
+  kota?: string;
+  kotaSlug?: string;
+  daerahName?: string;
+  daerahSlug?: string;
+  sample?: boolean;
+}
+const { review, category, kota, kotaSlug, daerahName, daerahSlug, sample = false } = Astro.props;
+const labels: Record<string, { price: string; hours: string; place: string }> = {
+  hotel: { price: 'Tarif', hours: 'Check-in / out', place: 'Penginapan' },
+  wisata: { price: 'Tiket & biaya', hours: 'Jam buka', place: 'Tempat' },
+  kuliner: { price: 'Kisaran harga', hours: 'Jam buka', place: 'Warung / resto' },
+};
+const label = labels[category] ?? { price: 'Harga', hours: 'Jam buka', place: 'Tempat' };
+const rating = review.rating;
+const full = rating != null ? Math.floor(rating) : 0;
+const half = rating != null && rating - full >= 0.5;
+const ratingText = rating != null ? rating.toFixed(1).replace('.', ',') : null;
+const visited = review.visitedAt ? formatDate(review.visitedAt) : null;
+let host: string | null = null;
+try {
+  host = review.website ? new URL(review.website).hostname.replace(/^www\./, '') : null;
+} catch {
+  host = null;
+}
+const mapHref =
+  review.mapUrl ??
+  (review.latitude != null && review.longitude != null
+    ? `https://www.google.com/maps/search/?api=1&query=${review.latitude},${review.longitude}`
+    : undefined);
+const placeHref = daerahSlug ? (kotaSlug ? `/daerah/${daerahSlug}/${kotaSlug}/` : `/daerah/${daerahSlug}/`) : null;
+---
+<aside class="review-box" aria-labelledby="review-box-title">
+  <span class="review-box-band" aria-hidden="true"></span>
+  <div class="review-box-head">
+    <div>
+      <h2 id="review-box-title">Info singkat</h2>
+      {review.placeName && <p class="review-place-name">{review.placeName}</p>}
+    </div>
+    {sample && <span class="badge-contoh badge-contoh--inline">CONTOH</span>}
+  </div>
+  {ratingText && (
+    <p class="review-rating">
+      <span class="stars" aria-hidden="true">
+        {Array.from({ length: 5 }, (_, i) => <span class:list={['star', i < full ? 'is-full' : i === full && half ? 'is-half' : '']}>★</span>)}
+      </span>
+      <strong>{ratingText}</strong><span class="muted"><span class="visually-hidden">dari</span><span aria-hidden="true">/</span> 5 · penilaian redaksi{sample ? ' (nilai contoh)' : ''}</span>
+    </p>
+  )}
+  <dl class="review-facts">
+    {review.priceRange && <div><dt>{label.price}</dt><dd>{review.priceRange}</dd></div>}
+    <div><dt>Alamat</dt><dd>{review.address}{kota && <span class="muted">, {kota}</span>}</dd></div>
+    {review.openingHours && <div><dt>{label.hours}</dt><dd>{review.openingHours}</dd></div>}
+    {daerahName && placeHref && <div><dt>Daerah</dt><dd><a href={placeHref}>{kota ? `${kota}, ` : ''}{daerahName}</a></dd></div>}
+    {review.phone && <div><dt>Telepon</dt><dd><a href={`tel:${review.phone.replace(/[^+\d]/g, '')}`}>{review.phone}</a></dd></div>}
+    {review.website && host && <div><dt>Situs</dt><dd><a href={review.website} rel="noopener noreferrer" target="_blank">{host}<span class="visually-hidden"> (tab baru)</span></a></dd></div>}
+    {visited && <div><dt>Dikunjungi</dt><dd>{visited}</dd></div>}
+  </dl>
+  {review.facilities && review.facilities.length > 0 && (
+    <div class="review-facilities">
+      <h3 class="review-sub">Fasilitas</h3>
+      <ul role="list">{review.facilities.map((f) => <li>{f}</li>)}</ul>
+    </div>
+  )}
+  {mapHref && (
+    <a class="btn-map" href={mapHref} rel="noopener noreferrer" target="_blank">
+      <svg aria-hidden="true" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s-7-6.2-7-11.2A7 7 0 0 1 19 9.8C19 14.8 12 21 12 21Z"/><circle cx="12" cy="10" r="2.5"/></svg>
+      Buka di peta<span class="visually-hidden"> (tab baru)</span>
+    </a>
+  )}
+  <p class="review-note small muted">Harga dan jam buka bisa berubah. Cek ulang ke pengelola sebelum berangkat.</p>
+</aside>

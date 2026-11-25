@@ -1,0 +1,29 @@
+---
+/** Kisi kartu daerah untuk beranda dan /daerah/. `rail` = geser ke samping di HP. */
+import { regions } from '../config/site';
+interface Props { counts?: Record<string, number>; compact?: boolean; rail?: boolean }
+const { counts = {}, compact = false, rail = false } = Astro.props;
+// Daerah yang sudah punya ulasan tampil lebih dulu.
+const ordered = [...regions].sort((a, b) => (counts[b.slug] ?? 0) - (counts[a.slug] ?? 0));
+---
+<ul
+  class:list={['region-tiles', { 'region-tiles--compact': compact, 'lw-rail': rail }]}
+  role="list"
+  aria-label={rail ? 'Daftar daerah, geser ke samping' : undefined}
+  tabindex={rail ? 0 : undefined}
+>
+  {ordered.map((r) => {
+    const n = counts[r.slug] ?? 0;
+    return (
+      <li class:list={['region-tile', `tone-${r.tone}`, { 'is-soon': n === 0 }]}>
+        <a href={`/daerah/${r.slug}/`}>
+          <span class="region-tile-motif" aria-hidden="true"></span>
+          <span class="region-tile-short" aria-hidden="true">{r.short}</span>
+          <strong>{r.name}</strong>
+          <span class="region-tile-cities">{r.cities.slice(0, 3).join(' · ')}</span>
+          <span class="region-tile-count">{n > 0 ? `${n} ulasan` : 'Segera hadir'}</span>
+        </a>
+      </li>
+    );
+  })}
+</ul>

@@ -1,0 +1,13 @@
+---
+/** Kotak sidebar "Jelajahi per daerah". */
+import { regions } from '../config/site';
+interface Props { current?: string; hrefFor?: (slug: string) => string; title?: string }
+const { current, hrefFor = (s: string) => `/daerah/${s}/`, title = 'Jelajahi per daerah' } = Astro.props;
+---
+<section class="region-list" aria-labelledby="region-list-title">
+  <p class="section-eyebrow">Menu per daerah</p>
+  <h2 id="region-list-title" class="section-title">{title}</h2>
+  <ul role="list">
+    {regions.map((r) => <li><a href={hrefFor(r.slug)} aria-current={current === r.slug ? 'page' : undefined}>{r.name}</a></li>)}
+  </ul>
+</section>

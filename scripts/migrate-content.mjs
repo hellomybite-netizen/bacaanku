@@ -110,7 +110,8 @@ async function collectImages(dir, body, heroImage) {
 
 const articleDir = join(root, 'src/content/articles');
 const authorDir = join(root, 'src/content/authors');
-const articleFiles = (await readdir(articleDir)).filter((name) => /\.mdx?$/.test(name));
+// contoh-*.md = artikel CONTOH local wisdom (butuh migrasi 0003); di-seed terpisah oleh scripts/preview/seed-local-d1.mjs.
+const articleFiles = (await readdir(articleDir)).filter((name) => /\.mdx?$/.test(name) && !name.startsWith('contoh-'));
 const authorFiles = (await readdir(authorDir)).filter((name) => name.endsWith('.json'));
 const articles = [];
 for (const name of articleFiles) {

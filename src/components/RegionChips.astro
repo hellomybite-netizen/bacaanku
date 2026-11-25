@@ -1,0 +1,23 @@
+---
+/** Deretan chip daerah (untuk halaman kategori & daerah). */
+import { regions } from '../config/site';
+interface Props {
+  /** href per daerah, default /daerah/<slug>/ */
+  hrefFor?: (slug: string) => string;
+  counts?: Record<string, number>;
+  current?: string;
+  label?: string;
+}
+const { hrefFor = (slug: string) => `/daerah/${slug}/`, counts = {}, current, label = 'Pilih daerah' } = Astro.props;
+---
+<nav class="chips" aria-label={label}>
+  <ul role="list">
+    {regions.map((r) => (
+      <li>
+        <a class="chip" href={hrefFor(r.slug)} aria-current={current === r.slug ? 'page' : undefined}>
+          {r.name}{counts[r.slug] ? <span class="chip-count">{counts[r.slug]}</span> : null}
+        </a>
+      </li>
+    ))}
+  </ul>
+</nav>

@@ -1,0 +1,18 @@
+---
+import RegionView from '../../../components/RegionView.astro';
+import { applyPublicCache } from '../../../lib/cache-headers';
+import { loadRegion } from '../../../lib/public';
+
+export const prerender = __BUILD_MODE__ === 'static';
+
+export async function getStaticPaths() {
+  if (__BUILD_MODE__ !== 'static') return [];
+  const { regionPaths } = await import('../../../lib/static-data');
+  return regionPaths();
+}
+
+const page = await loadRegion(Astro.params.region ?? '', null);
+if (!page) return new Response(null, { status: 404, statusText: 'Not Found' });
+applyPublicCache(Astro, 'list', [`region-${page.region.slug}`]);
+---
+<RegionView page={page} />

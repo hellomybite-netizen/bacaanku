@@ -1,6 +1,126 @@
 import { slugify } from '../utils/articles';
 import { isResolvableHero, rewriteWikimediaOriginal } from './media';
 import { renderMarkdown } from './markdown.mjs';
+import { citySlug, getRegion, isLocalCategory, priceUnits } from '../config/site';
+
+/** Info ulasan (niche local wisdom). Semua string mentah dari form; kosong = tidak diisi. */
+export type PlaceValues = {
+  province: string;
+  city: string;
+  placeName: string;
+  placeType: string;
+  address: string;
+  priceMin: string;
+  priceMax: string;
+  priceUnit: string;
+  priceNote: string;
+  openingHours: string;
+  rating: string;
+  latitude: string;
+  longitude: string;
+  mapsUrl: string;
+  phone: string;
+  website: string;
+  facilities: string;
+  visitedDate: string;
+};
+
+/** Baris kolom D1 migrasi 0003 (dibaca untuk form edit). */
+export type PlaceRecord = {
+  province_slug: string | null; city_name: string | null; place_name: string | null; place_type: string | null;
+  address: string | null; price_min: number | null; price_max: number | null; price_unit: string | null; price_note: string | null;
+  opening_hours: string | null; rating: number | null; latitude: number | null; longitude: number | null; maps_url: string | null;
+  phone: string | null; website: string | null; facilities_json: string | null; visited_at: number | null;
+};
+
+export function emptyPlace(): PlaceValues {
+  return {
+    province: '', city: '', placeName: '', placeType: '', address: '', priceMin: '', priceMax: '', priceUnit: '', priceNote: '',
+    openingHours: '', rating: '', latitude: '', longitude: '', mapsUrl: '', phone: '', website: '', facilities: '', visitedDate: '',
+  };
+}
+
+export function placeFromRecord(row: PlaceRecord | null | undefined): PlaceValues {
+  if (!row) return emptyPlace();
+  const str = (v: unknown) => (v == null ? '' : String(v));
+  let facilities = '';
+  try {
+    const parsed = row.facilities_json ? JSON.parse(row.facilities_json) : [];
+    if (Array.isArray(parsed)) facilities = parsed.join(', ');
+  } catch {
+    facilities = '';
+  }
+  return {
+    province: str(row.province_slug), city: str(row.city_name), placeName: str(row.place_name), placeType: str(row.place_type),
+    address: str(row.address), priceMin: str(row.price_min), priceMax: str(row.price_max), priceUnit: str(row.price_unit),
+    priceNote: str(row.price_note), openingHours: str(row.opening_hours), rating: str(row.rating), latitude: str(row.latitude),
+    longitude: str(row.longitude), mapsUrl: str(row.maps_url), phone: str(row.phone), website: str(row.website), facilities,
+    visitedDate: row.visited_at ? new Date(row.visited_at * 1000).toISOString().slice(0, 10) : '',
+  };
+}
+
+const hasAnyPlace = (place: PlaceValues) => Object.values(place).some((v) => v !== '');
+
+/**
+ * Kolom D1 yang ditulis untuk info ulasan, atau null bila tidak perlu menulis apa pun
+ * (artikel berita lama tanpa isian info ulasan → query lama saja, tidak menyentuh kolom baru).
+ */
+export function placeColumns(values: ArticleValues): Record<string, string | number | null> | null {
+  const place = values.place;
+  if (!isLocalCategory(values.category) && !hasAnyPlace(place)) return null;
+  const num = (v: string) => (v === '' ? null : Number(v.replace(/[^\d.-]/g, '')));
+  const txt = (v: string) => (v === '' ? null : v);
+  const facilities = place.facilities.split(',').map((f) => f.trim()).filter(Boolean);
+  return {
+    province_slug: txt(place.province),
+    city_name: txt(place.city),
+    city_slug: place.city ? citySlug(place.city) : null,
+    place_name: txt(place.placeName),
+    place_type: txt(place.placeType),
+    address: txt(place.address),
+    latitude: num(place.latitude),
+    longitude: num(place.longitude),
+    maps_url: txt(place.mapsUrl),
+    phone: txt(place.phone),
+    website: txt(place.website),
+    price_min: num(place.priceMin),
+    price_max: num(place.priceMax),
+    price_unit: txt(place.priceUnit),
+    price_note: txt(place.priceNote),
+    opening_hours: txt(place.openingHours),
+    rating: num(place.rating),
+    facilities_json: facilities.length ? JSON.stringify(facilities) : null,
+    visited_at: place.visitedDate ? Math.floor(Date.parse(`${place.visitedDate}T12:00:00+07:00`) / 1000) : null,
+  };
+}
+
+function validatePlace(values: ArticleValues, strict: boolean, errors: Record<string, string>) {
+  const place = values.place;
+  const local = isLocalCategory(values.category);
+  if (!local && !hasAnyPlace(place)) return;
+  if (place.province && !getRegion(place.province)) errors.placeProvince = 'Provinsi tidak dikenal. Pilih dari daftar.';
+  if (place.priceMin && !/^\d{1,9}$/.test(place.priceMin.replace(/\./g, ''))) errors.placePriceMin = 'Harga minimum: angka rupiah tanpa titik, mis. 25000.';
+  if (place.priceMax && !/^\d{1,9}$/.test(place.priceMax.replace(/\./g, ''))) errors.placePriceMax = 'Harga maksimum: angka rupiah tanpa titik.';
+  if (place.priceUnit && !(priceUnits as readonly string[]).includes(place.priceUnit)) errors.placePriceUnit = 'Satuan harga tidak dikenal.';
+  if (place.rating) {
+    const r = Number(place.rating.replace(',', '.'));
+    if (!(r >= 1 && r <= 5) || Math.round(r * 2) !== r * 2) errors.placeRating = 'Rating 1–5, kelipatan 0,5 (mis. 4,5).';
+    else place.rating = String(r);
+  }
+  if (place.latitude && !(Math.abs(Number(place.latitude)) <= 90)) errors.placeLat = 'Latitude tidak valid (−90 s.d. 90).';
+  if (place.longitude && !(Math.abs(Number(place.longitude)) <= 180)) errors.placeLng = 'Longitude tidak valid (−180 s.d. 180).';
+  for (const [key, label] of [['mapsUrl', 'Tautan peta'], ['website', 'Situs resmi']] as const) {
+    if (place[key] && !/^https:\/\/\S+$/.test(place[key])) errors[`place-${key}`] = `${label} harus diawali https://.`;
+  }
+  if (place.visitedDate && !/^\d{4}-\d{2}-\d{2}$/.test(place.visitedDate)) errors.placeVisited = 'Tanggal kunjungan tidak valid.';
+  if (strict && local) {
+    if (!place.province) errors.placeProvince = 'Ulasan Hotel/Wisata/Kuliner wajib memilih provinsi.';
+    if (!place.city) errors.placeCity = 'Ulasan wajib mengisi kota/kabupaten.';
+    if (!place.placeName) errors.placeName = 'Ulasan wajib mengisi nama tempat.';
+    if (place.address.length < 8) errors.placeAddress = 'Ulasan wajib mengisi alamat lengkap.';
+    if (!place.priceMin && !place.priceNote) errors.placePriceMin = 'Isi harga minimum, atau catatan harga (mis. "Gratis").';
+  }
+}
 
 export type Source = { name: string; title: string; url: string };
 export type ArticleAction = 'draft' | 'review' | 'schedule' | 'publish' | 'archive';
@@ -26,6 +146,8 @@ export type ArticleValues = {
   isHeadline: boolean;
   publishWib: string;
   body: string;
+  /** Info ulasan (opsional; wajib sebagian untuk kategori hotel/wisata/kuliner saat tayang). */
+  place: PlaceValues;
 };
 
 export type PreparedArticle = {
@@ -65,6 +187,7 @@ export function emptyValues(): ArticleValues {
     isHeadline: false,
     publishWib: '',
     body: '',
+    place: emptyPlace(),
   };
 }
 
@@ -93,6 +216,7 @@ export function valuesFromRecord(record: {
   published_at: number | null;
   body_markdown: string;
   tags: { name: string }[];
+  place?: PlaceRecord | null;
 }): ArticleValues {
   let sources: Source[] = [];
   try {
@@ -123,6 +247,7 @@ export function valuesFromRecord(record: {
     isHeadline: record.is_headline === 1,
     publishWib: epochToWibInput(record.published_at),
     body: record.body_markdown || '',
+    place: placeFromRecord(record.place),
   };
 }
 
@@ -189,6 +314,26 @@ export function parseArticleForm(form: FormData, mediaBase?: string | null): Pre
     isHeadline: form.get('is_headline') === '1',
     publishWib: field(form, 'publish_wib'),
     body: typeof form.get('body') === 'string' ? String(form.get('body')) : '',
+    place: {
+      province: field(form, 'place_province'),
+      city: field(form, 'place_city'),
+      placeName: field(form, 'place_name'),
+      placeType: field(form, 'place_type'),
+      address: field(form, 'place_address'),
+      priceMin: field(form, 'place_price_min').replace(/\./g, ''),
+      priceMax: field(form, 'place_price_max').replace(/\./g, ''),
+      priceUnit: field(form, 'place_price_unit'),
+      priceNote: field(form, 'place_price_note'),
+      openingHours: field(form, 'place_hours'),
+      rating: field(form, 'place_rating'),
+      latitude: field(form, 'place_lat'),
+      longitude: field(form, 'place_lng'),
+      mapsUrl: field(form, 'place_maps_url'),
+      phone: field(form, 'place_phone'),
+      website: field(form, 'place_website'),
+      facilities: field(form, 'place_facilities'),
+      visitedDate: field(form, 'place_visited'),
+    },
   };
 
   const errors: Record<string, string> = {};
@@ -212,6 +357,8 @@ export function parseArticleForm(form: FormData, mediaBase?: string | null): Pre
     const tagList = splitTags(values.tags);
     if (!tagList.length) errors.tags = 'Isi minimal satu tag.';
   }
+
+  validatePlace(values, strict, errors);
 
   if (values.seoTitle && values.seoTitle.length > 70) errors.seoTitle = 'Judul SEO maksimal 70 karakter.';
   if (values.seoDescription && (values.seoDescription.length < 50 || values.seoDescription.length > 170)) {

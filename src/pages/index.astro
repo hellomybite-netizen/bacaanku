@@ -2,88 +2,136 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import ArticleCard from '../components/ArticleCard.astro';
 import AdSlot from '../components/AdSlot.astro';
-import Trending from '../components/Trending.astro';
-import { SITE } from '../config/site';
+import RegionTiles from '../components/RegionTiles.astro';
+import { SITE, localCategories } from '../config/site';
 import { organizationLd, websiteLd } from '../utils/seo';
 import { applyPublicCache } from '../lib/cache-headers';
-import { loadHome } from '../lib/public';
+import { loadLocalHome } from '../lib/public';
 
-const { headline, secondary, latest, byCategory, trending } = await loadHome();
+const { latest, byCategory, regionCounts, archive } = await loadLocalHome();
 applyPublicCache(Astro, 'home', ['home']);
+const icons: Record<string, string> = {
+  hotel: 'M3 20V8m0 6h18m0 6v-8a3 3 0 0 0-3-3h-7v6M7 11.5h.01',
+  wisata: 'm3 19 6-10 4 6 2-3 6 7H3Zm13-12a2 2 0 1 0 0-.01',
+  kuliner: 'M6 3v8a2 2 0 0 0 2 2v8M10 3v6M6 7h4M17 21V3c-2 1.5-3 4-3 7 0 2 1 3 3 3',
+};
+const blurb: Record<string, string> = {
+  hotel: 'Penginapan & homestay',
+  wisata: 'Alam, budaya, sejarah',
+  kuliner: 'Warung & jajanan khas',
+};
+const feature = latest.find((a) => a.isHeadline) ?? latest[0] ?? null;
+const fresh = latest.filter((a) => a.id !== feature?.id).slice(0, 4);
+const shown = new Set([feature?.id, ...fresh.map((a) => a.id)]);
+const sections = byCategory.map((c) => ({ ...c, rest: c.items.filter((a) => !shown.has(a.id)) }));
+const catCount = (slug: string) => byCategory.find((c) => c.slug === slug)?.items.length ?? 0;
 ---
 <BaseLayout
-  title="bacaankunetwork.com — Berita Terkini Hari Ini yang Jernih dan Ringkas"
+  title="Bacaanku Network — Ulasan Hotel, Wisata & Kuliner Lokal Nusantara"
   rawTitle
   description={SITE.description}
   jsonLd={[organizationLd(), websiteLd()]}
 >
-  <h1 class="visually-hidden">bacaankunetwork.com — berita terkini hari ini</h1>
-  <div class="container">
-    <nav class="topic-strip" aria-label="Topik pilihan">
-      <strong>Topik Pilihan</strong>
-      <div>
-        <a href="/news/">Kabar hari ini</a>
-        <a href="/teknologi/">Dunia digital</a>
-        <a href="/ekonomi/">Ekonomi rakyat</a>
-        <a href="/sains/">Sains & lingkungan</a>
-      </div>
-    </nav>
-
-    {headline ? (
-      <>
-        <div class="home-intro">
-          <div>
-            <p class="section-eyebrow">Pilihan redaksi</p>
-            <h2>Kabar utama hari ini</h2>
-          </div>
-          <p>Ringkasan peristiwa penting, disusun agar cepat dipahami dan mudah ditelusuri.</p>
-        </div>
-        <section class="top-stories" aria-label="Berita utama">
-          <div class="top-main"><ArticleCard article={headline} variant="hero" headingLevel={2} /></div>
-          <ul class="top-side" role="list">
-            {secondary.map((article, index) => (
+  <section class="lw-hero" aria-labelledby="hero-title">
+    <div class="container lw-hero-grid">
+      <div class="lw-hero-copy">
+        <p class="section-eyebrow">Local wisdom · Nusantara</p>
+        <h1 id="hero-title">Jelajahi Nusantara lewat ulasan hotel, wisata, dan kuliner lokal</h1>
+        <p class="lw-hero-lead">Dari warung legendaris sampai penginapan di kaki gunung. Setiap ulasan mencantumkan alamat, harga, dan jam buka, dan dikelompokkan per daerah.</p>
+        <nav class="lw-rubrik" aria-label="Rubrik">
+          <ul role="list">
+            {localCategories.map((c) => (
               <li>
-                <span class="story-index" aria-hidden="true">{String(index + 1).padStart(2, '0')}</span>
-                <ArticleCard article={article} variant="compact" />
+                <a href={`/${c.slug}/`} class={`lw-rubrik-${c.slug}`}>
+                  <svg aria-hidden="true" width="26" height="26" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d={icons[c.slug]} /></svg>
+                  <strong>{c.name}</strong>
+                  <span>{blurb[c.slug]}</span>
+                </a>
               </li>
             ))}
           </ul>
-        </section>
-      </>
-    ) : (
-      <header class="page-head"><h2 class="page-title">Belum ada berita terbit</h2></header>
+        </nav>
+      </div>
+      {feature && (
+        <div class="lw-hero-feature">
+          <p class="lw-hero-feature-label"><span aria-hidden="true">✦</span> Ulasan pilihan</p>
+          <ArticleCard article={feature} variant="hero" headingLevel={2} />
+        </div>
+      )}
+    </div>
+  </section>
+
+  <div class="container">
+    <section class="lw-section" aria-labelledby="daerah-title">
+      <div class="section-head">
+        <div>
+          <p class="section-eyebrow">Menu per daerah</p>
+          <h2 id="daerah-title" class="section-title">Mau ke mana?</h2>
+        </div>
+        <a class="more-link" href="/daerah/">Semua daerah <span aria-hidden="true">→</span></a>
+      </div>
+      <RegionTiles counts={regionCounts} rail />
+    </section>
+
+    {fresh.length > 0 && (
+      <section class="lw-section" aria-labelledby="terbaru-title">
+        <div class="section-head">
+          <div>
+            <p class="section-eyebrow">Ulasan terbaru</p>
+            <h2 id="terbaru-title" class="section-title">Baru dari redaksi</h2>
+          </div>
+        </div>
+        <div class="lw-rail grid grid--4" role="region" aria-label="Ulasan terbaru, geser ke samping" tabindex="0">
+          {fresh.map((article) => <ArticleCard article={article} />)}
+        </div>
+      </section>
     )}
 
     <AdSlot size="leaderboard" />
 
-    <div class="with-sidebar">
-      <section aria-labelledby="terbaru-title">
-        <div class="section-head latest-head">
-          <div>
-            <p class="section-eyebrow">Update pilihan redaksi</p>
-            <h2 id="terbaru-title" class="section-title">Berita Terbaru</h2>
-          </div>
-          <a class="more-link" href="/news/">Semua berita <span aria-hidden="true">→</span></a>
-        </div>
-        <div class="latest-list">{latest.map((article) => <ArticleCard article={article} variant="list" showDesc />)}</div>
-      </section>
-      <div class="sidebar">
-        <Trending items={trending} />
-        <AdSlot size="rectangle" />
-      </div>
-    </div>
-
-    {byCategory.map((category) => (
-      <section class="cat-section deferred" aria-labelledby={`sec-${category.slug}`}>
+    {sections.map((category) => (
+      <section class="lw-section lw-rubrik-section" aria-labelledby={`sec-${category.slug}`}>
         <div class="section-head">
           <div>
-            <p class="section-eyebrow">Jelajahi topik</p>
+            <p class="section-eyebrow">Rubrik</p>
             <h2 id={`sec-${category.slug}`} class="section-title">{category.name}</h2>
+            <p class="muted lw-section-desc">{category.description}</p>
           </div>
-          <a class="more-link" href={`/${category.slug}/`}>Lihat semua<span class="visually-hidden"> berita {category.name}</span> <span aria-hidden="true">→</span></a>
+          <a class="more-link" href={`/${category.slug}/`}>Lihat semua<span class="visually-hidden"> ulasan {category.name}</span> <span aria-hidden="true">→</span></a>
         </div>
-        <div class="grid grid--4 category-grid">{category.items.map((article) => <ArticleCard article={article} />)}</div>
+        {category.rest.length > 0
+          ? <div class="lw-rail grid lw-grid-3" role="region" aria-label={`Ulasan ${category.name}, geser ke samping`} tabindex="0">{category.rest.map((article) => <ArticleCard article={article} showDesc />)}</div>
+          : catCount(category.slug) > 0
+            ? <p class="empty-note">Ulasan {category.name.toLowerCase()} terbaru sudah tampil di atas. <a href={`/${category.slug}/`}>Buka rubrik {category.name}</a>.</p>
+            : <p class="empty-note">Ulasan {category.name.toLowerCase()} pertama sedang disiapkan.</p>}
       </section>
     ))}
+
+    <section class="lw-promise" aria-labelledby="janji-title">
+      <span class="lw-promise-motif" aria-hidden="true"></span>
+      <h2 id="janji-title" class="section-title">Cara kami menulis</h2>
+      <ul role="list">
+        <li><strong>Ada alamat dan harga.</strong> Setiap ulasan punya kotak info: kisaran harga, alamat, jam buka, dan tautan peta.</li>
+        <li><strong>Foto jelas sumbernya.</strong> Foto milik sendiri atau berlisensi terbuka, lengkap dengan kredit dan lisensinya.</li>
+        <li><strong>Per daerah.</strong> Cari ulasan menurut provinsi dan kota, lalu saring menurut hotel, wisata, atau kuliner.</li>
+      </ul>
+    </section>
+
+    {archive.length > 0 && (
+      <section class="lw-section lw-archive" aria-labelledby="arsip-title">
+        <div class="section-head">
+          <div>
+            <p class="section-eyebrow">Arsip</p>
+            <h2 id="arsip-title" class="section-title">Dari Arsip Berita</h2>
+          </div>
+          <a class="more-link" href="/arsip-berita/">Buka arsip <span aria-hidden="true">→</span></a>
+        </div>
+        <ul class="lw-archive-list" role="list">
+          {archive.map((article) => (
+            <li><ArticleCard article={article} variant="compact" /></li>
+          ))}
+        </ul>
+      </section>
+    )}
   </div>
 </BaseLayout>

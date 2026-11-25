@@ -1,7 +1,7 @@
-import { trending as trendingSlugs, categories as siteCategories } from '../config/site';
+import { trending as trendingSlugs, categories as siteCategories, isLocalCategory } from '../config/site';
 import { resolveHero } from './media';
 import type { ArticleCard, ArticlePayload, ArticleView, CategoryPage, Cursor, HomeBundle, SourceItem } from './content-types';
-import type { PreparedArticle } from './editorial';
+import { placeColumns, type PreparedArticle, type PlaceRecord } from './editorial';
 import {
   sqlAdminByStatus,
   sqlArticle,
@@ -127,7 +127,8 @@ export async function categoryPage(db: D1Database, slug: string, cursor: Cursor 
   const rows = cursor
     ? await allCards(db, sqlByCategoryBefore, [category.id, stamp, cursor.publishedAt, cursor.publishedAt, cursor.id, limit + 1], mediaBase)
     : await allCards(db, sqlByCategory, [category.id, stamp, limit + 1], mediaBase);
-  const items = rows.slice(0, limit);
+  let items = rows.slice(0, limit);
+  if (isLocalCategory(category.slug)) items = await (await import('./local-repo')).decorateCards(db, items);
   const last = items.at(-1);
   return {
     category: { slug: category.slug, name: category.name, description: category.description },
@@ -189,6 +190,13 @@ export async function articlePage(db: D1Database, category: string, slug: string
     canonicalUrl: (row.canonical_url as string | null) ?? null,
     isHeadline: row.is_headline === 1,
   };
+  if (isLocalCategory(article.categorySlug)) {
+    // Kolom lokasi/ulasan (migrasi 0003) dibaca terpisah dan aman bila belum ada.
+    const { articlePlace, decorateCards } = await import('./local-repo');
+    const [place, related] = await Promise.all([articlePlace(db, article.id), decorateCards(db, relatedRows)]);
+    if (place) Object.assign(article, place);
+    return { article, related, trending };
+  }
   return { article, related: relatedRows, trending };
 }
 
@@ -364,6 +372,7 @@ export type EditorRecord = {
   published_at: number | null;
   status: string;
   tags: { slug: string; name: string }[];
+  place?: PlaceRecord | null;
 };
 
 export async function adminArticle(db: D1Database, id: number): Promise<EditorRecord | null> {
@@ -379,10 +388,20 @@ export async function adminArticle(db: D1Database, id: number): Promise<EditorRe
        WHERE a.id = ?`,
     )
     .bind(id)
-    .first<Omit<EditorRecord, 'tags'>>();
+    .first<Omit<EditorRecord, 'tags' | 'place'>>();
   if (!row) return null;
   const tags = await db.prepare(sqlArticleTags).bind(id).all<{ slug: string; name: string }>();
-  return { ...row, tags: tags.results };
+  let place: PlaceRecord | null = null;
+  try {
+    place = await db
+      .prepare(`SELECT province_slug, city_name, place_name, place_type, address, price_min, price_max, price_unit, price_note,
+        opening_hours, rating, latitude, longitude, maps_url, phone, website, facilities_json, visited_at FROM articles WHERE id = ?`)
+      .bind(id)
+      .first<PlaceRecord>();
+  } catch {
+    place = null; // sebelum migrasi 0003
+  }
+  return { ...row, tags: tags.results, place };
 }
 
 export async function listAuthors(db: D1Database) {
@@ -493,6 +512,13 @@ export async function saveArticle(db: D1Database, prepared: PreparedArticle, sel
       db.prepare(`INSERT INTO slug_redirects (old_path, new_path) VALUES (?, ?) ON CONFLICT(old_path) DO UPDATE SET new_path = excluded.new_path`).bind(oldPath, newPath),
       db.prepare(`UPDATE slug_redirects SET new_path = ? WHERE new_path = ?`).bind(newPath, oldPath),
     );
+  }
+  // Info ulasan (kolom migrasi 0003). Hanya ditulis untuk kategori hotel/wisata/kuliner atau bila diisi;
+  // artikel berita biasa (alur Jenny & Rere saat ini) tidak menyentuh kolom baru sama sekali.
+  const place = placeColumns(prepared.values);
+  if (place) {
+    const cols = Object.keys(place);
+    linkWrites.push(db.prepare(`UPDATE articles SET ${cols.map((c) => `${c} = ?`).join(', ')} WHERE id = ?`).bind(...Object.values(place), id));
   }
   await db.batch(linkWrites);
   return { id, oldPath, newPath };

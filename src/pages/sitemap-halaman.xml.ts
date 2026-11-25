@@ -2,20 +2,20 @@ import type { APIRoute } from 'astro';
 import { SITE, categories } from '../config/site';
 import { applyResponseCache } from '../lib/cache-headers';
 import { IS_STATIC } from '../lib/mode';
-import { loadSitemapPageMeta } from '../lib/public';
+import { loadSitemapPageMeta, loadSitemapRegions } from '../lib/public';
 import { xmlEscape } from '../utils/xml';
 
 export const prerender = IS_STATIC;
 
 const BUILD_LASTMOD = new Date().toISOString();
-const staticPages = ['/tentang/', '/pedoman-media-siber/', '/kebijakan-privasi/', '/kontak/', '/redaksi/'];
+const staticPages = ['/daerah/', '/arsip-berita/', '/tentang/', '/pedoman-media-siber/', '/kebijakan-privasi/', '/kontak/', '/redaksi/'];
 
 function isoOrFallback(epoch: number | null | undefined, fallback: string): string {
   return epoch && Number.isFinite(epoch) ? new Date(epoch * 1000).toISOString() : fallback;
 }
 
 export const GET: APIRoute = async (context) => {
-  const meta = await loadSitemapPageMeta();
+  const [meta, regionEntries] = await Promise.all([loadSitemapPageMeta(), loadSitemapRegions()]);
   const fallback = isoOrFallback(meta?.latestAt, BUILD_LASTMOD);
   const entries: { path: string; lastmod: string }[] = [
     { path: '/', lastmod: fallback },
@@ -28,6 +28,8 @@ export const GET: APIRoute = async (context) => {
       path: `/penulis/${author.slug}/`,
       lastmod: isoOrFallback(author.lastAt, fallback),
     })),
+    // Halaman daerah/kota yang punya ulasan nyata (bukan CONTOH).
+    ...regionEntries.map((entry) => ({ path: entry.path, lastmod: isoOrFallback(entry.lastAt, fallback) })),
   ];
 
   const body = `<?xml version="1.0" encoding="UTF-8"?>

@@ -1,5 +1,6 @@
 import { IS_STATIC } from './mode';
-import type { ArticlePayload, CategoryPage, Cursor, HomeBundle } from './content-types';
+import type { ArticlePayload, CategoryPage, Cursor, HomeBundle, LocalHome, RegionPage } from './content-types';
+import { citiesOf, getRegion, isLocalCategory, localCategories } from '../config/site';
 
 async function serverDb() {
   const { getDb, getEnv } = await import('./db');
@@ -81,4 +82,74 @@ export async function loadSitemapPageMeta() {
   const { sitemapPageMeta } = await import('./repo');
   const { db } = await serverDb();
   return sitemapPageMeta(db);
+}
+
+/**
+ * Beranda niche local wisdom.
+ * Build statis (preview GitHub Pages): dari frontmatter Markdown.
+ * SSR (D1): dari kolom lokasi/ulasan (docs/migrations/0003_local_wisdom.sql). Sebelum migrasi dijalankan,
+ * bagian ulasan kosong dan beranda tetap tampil dengan arsip berita.
+ */
+export async function loadLocalHome(): Promise<LocalHome> {
+  if (IS_STATIC) return (await import('./static-data')).localHome();
+  const { localHome } = await import('./local-repo');
+  const { db, mediaBase } = await serverDb();
+  const [local, bundle] = await Promise.all([localHome(db, mediaBase), loadHome()]);
+  return {
+    latest: local.latest,
+    byCategory: localCategories.map((c) => ({
+      slug: c.slug,
+      name: c.name,
+      description: c.description,
+      items: local.byCategory.find((x) => x.slug === c.slug)?.items ?? [],
+    })),
+    regionCounts: local.regionCounts,
+    archive: [bundle.headline, ...bundle.secondary, ...bundle.latest]
+      .filter((a): a is NonNullable<typeof a> => Boolean(a) && !isLocalCategory(a!.categorySlug))
+      .slice(0, 4),
+  };
+}
+
+export async function loadRegion(
+  regionSlug: string,
+  categorySlug: string | null,
+  citySlugParam: string | null = null,
+): Promise<RegionPage | null> {
+  if (IS_STATIC) return (await import('./static-data')).regionPage(regionSlug, categorySlug, citySlugParam);
+  const region = getRegion(regionSlug);
+  if (!region) return null;
+  const category = categorySlug ? localCategories.find((c) => c.slug === categorySlug) ?? null : null;
+  if (categorySlug && !category) return null;
+  const { regionListing } = await import('./local-repo');
+  const { db, mediaBase } = await serverDb();
+  const listing = await regionListing(db, region.slug, { categorySlug: category?.slug, citySlug: citySlugParam }, mediaBase);
+  let city: { name: string; slug: string } | null = null;
+  if (citySlugParam) {
+    const known = citiesOf(region.slug).find((c) => c.slug === citySlugParam);
+    const fromDb = listing.cities.find((c) => c.slug === citySlugParam);
+    city = known ?? (fromDb ? { name: fromDb.name, slug: fromDb.slug } : null);
+    if (!city) return null;
+  }
+  return { region, category, city, items: listing.items, counts: listing.counts, cities: listing.cities };
+}
+
+export async function loadCategoryRegionCounts(categorySlug: string): Promise<Record<string, number>> {
+  if (IS_STATIC) return (await import('./static-data')).categoryRegionCounts(categorySlug);
+  const { categoryRegionCounts } = await import('./local-repo');
+  const { db } = await serverDb();
+  return categoryRegionCounts(db, categorySlug);
+}
+
+export async function loadArchiveCounts(): Promise<Record<string, number>> {
+  if (IS_STATIC) return (await import('./static-data')).archiveCounts();
+  const { categoryCounts } = await import('./local-repo');
+  const { db } = await serverDb();
+  return categoryCounts(db);
+}
+
+export async function loadSitemapRegions(): Promise<{ path: string; lastAt: number }[]> {
+  if (IS_STATIC) return [];
+  const { sitemapRegionEntries } = await import('./local-repo');
+  const { db } = await serverDb();
+  return sitemapRegionEntries(db);
 }

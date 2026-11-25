@@ -1,5 +1,6 @@
 ---
 import type { ArticleValues } from '../../lib/editorial';
+import { regions, placeTypes, priceUnits, localCategorySlugs } from '../../config/site';
 interface Author { slug: string; name: string; role: string }
 interface Category { slug: string; name: string }
 interface Props {
@@ -13,6 +14,10 @@ interface Props {
 }
 const { values, errors, categories, authors, csrf, saved = false, status } = Astro.props;
 const errorList = Object.values(errors);
+const p = values.place;
+const isLocal = localCategorySlugs.includes(values.category);
+const allTypes = [...new Set(Object.values(placeTypes).flat())];
+const allCities = [...new Set(regions.flatMap((r) => r.cities))];
 ---
 {saved && <p class="admin-ok" role="status">Tersimpan.</p>}
 {errorList.length > 0 && (
@@ -56,6 +61,63 @@ const errorList = Object.values(errors);
       <span>Tag, dipisah koma</span>
       <input name="tags" value={values.tags} placeholder="hujan meteor, astronomi" />
     </label>
+    <fieldset class="panel place-fields" data-place-fields>
+      <legend class="admin-kicker">Info ulasan — wajib untuk Hotel, Wisata, Kuliner</legend>
+      <p class="hint">Kosongkan untuk artikel berita biasa. Panduan: docs/panduan-konten-local-wisdom.md{isLocal ? '' : ' (kategori sekarang bukan Hotel/Wisata/Kuliner)'}.</p>
+      <div class="split split-2">
+        <label class="field"><span>Provinsi</span>
+          <select name="place_province">
+            <option value="">— pilih —</option>
+            {regions.map((r) => <option value={r.slug} selected={r.slug === p.province}>{r.name}</option>)}
+          </select>
+          {errors.placeProvince && <small class="field-error">{errors.placeProvince}</small>}
+        </label>
+        <label class="field"><span>Kota / kabupaten</span>
+          <input name="place_city" list="place-cities" value={p.city} placeholder="Malang" />
+          {errors.placeCity && <small class="field-error">{errors.placeCity}</small>}
+        </label>
+      </div>
+      <datalist id="place-cities">{allCities.map((c) => <option value={c} />)}</datalist>
+      <div class="split split-2">
+        <label class="field"><span>Nama tempat</span><input name="place_name" value={p.placeName} placeholder="Warung Rawon Setan" />
+          {errors.placeName && <small class="field-error">{errors.placeName}</small>}</label>
+        <label class="field"><span>Jenis tempat (schema.org)</span>
+          <select name="place_type">
+            <option value="">Otomatis dari kategori</option>
+            {allTypes.map((t) => <option value={t} selected={t === p.placeType}>{t}</option>)}
+          </select>
+        </label>
+      </div>
+      <label class="field"><span>Alamat lengkap</span><input name="place_address" value={p.address} placeholder="Jl. Embong Malang No. 78/I, Kedungdoro" />
+        {errors.placeAddress && <small class="field-error">{errors.placeAddress}</small>}</label>
+      <div class="split split-3">
+        <label class="field"><span>Harga min (Rp)</span><input name="place_price_min" inputmode="numeric" value={p.priceMin} placeholder="25000" />
+          {errors.placePriceMin && <small class="field-error">{errors.placePriceMin}</small>}</label>
+        <label class="field"><span>Harga maks (Rp)</span><input name="place_price_max" inputmode="numeric" value={p.priceMax} placeholder="45000" /></label>
+        <label class="field"><span>Per</span>
+          <select name="place_price_unit"><option value="">—</option>{priceUnits.map((u) => <option value={u} selected={u === p.priceUnit}>{u}</option>)}</select>
+        </label>
+      </div>
+      <label class="field"><span>Catatan harga (opsional, menggantikan angka)</span><input name="place_price_note" value={p.priceNote} placeholder="Gratis, parkir Rp5.000" /></label>
+      <div class="split split-2">
+        <label class="field"><span>Jam buka / check-in</span><input name="place_hours" value={p.openingHours} placeholder="Setiap hari 07.00–21.00" /></label>
+        <label class="field"><span>Rating redaksi (1–5)</span><input name="place_rating" inputmode="decimal" value={p.rating} placeholder="4,5" />
+          {errors.placeRating && <small class="field-error">{errors.placeRating}</small>}</label>
+      </div>
+      <label class="field"><span>Fasilitas, dipisah koma</span><input name="place_facilities" value={p.facilities} placeholder="Wi-Fi, Parkir, Musala" /></label>
+      <div class="split split-2">
+        <label class="field"><span>Tautan Google Maps</span><input name="place_maps_url" type="url" value={p.mapsUrl} placeholder="https://maps.app.goo.gl/…" /></label>
+        <label class="field"><span>Tanggal kunjungan</span><input name="place_visited" type="date" value={p.visitedDate} /></label>
+      </div>
+      <div class="split split-2">
+        <label class="field"><span>Latitude (opsional)</span><input name="place_lat" inputmode="decimal" value={p.latitude} placeholder="-7.9666" /></label>
+        <label class="field"><span>Longitude (opsional)</span><input name="place_lng" inputmode="decimal" value={p.longitude} placeholder="112.6326" /></label>
+      </div>
+      <div class="split split-2">
+        <label class="field"><span>Telepon (opsional)</span><input name="place_phone" value={p.phone} /></label>
+        <label class="field"><span>Situs resmi (opsional)</span><input name="place_website" type="url" value={p.website} /></label>
+      </div>
+    </fieldset>
     <label class="field">
       <span>Isi (Markdown)</span>
       <textarea name="body" id="body-md">{values.body}</textarea>

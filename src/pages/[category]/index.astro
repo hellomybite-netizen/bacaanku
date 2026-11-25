@@ -4,10 +4,12 @@ import ArticleCard from '../../components/ArticleCard.astro';
 import AdSlot from '../../components/AdSlot.astro';
 import Breadcrumb from '../../components/Breadcrumb.astro';
 import Trending from '../../components/Trending.astro';
-import { SITE } from '../../config/site';
+import RegionList from '../../components/RegionList.astro';
+import RegionChips from '../../components/RegionChips.astro';
+import { SITE, isLocalCategory } from '../../config/site';
 import { breadcrumbLd } from '../../utils/seo';
 import { applyPublicCache } from '../../lib/cache-headers';
-import { loadCategory } from '../../lib/public';
+import { loadCategory, loadCategoryRegionCounts } from '../../lib/public';
 
 export const prerender = __BUILD_MODE__ === 'static';
 
@@ -27,30 +29,38 @@ if (!page) {
   return new Response(null, { status: 404, statusText: 'Not Found' });
 }
 const { category, items, next, trending } = page;
+const isLocal = isLocalCategory(category.slug);
+const regionCounts = isLocal ? await loadCategoryRegionCounts(category.slug) : {};
 applyPublicCache(Astro, 'list', [`cat-${category.slug}`]);
 const base = `/${category.slug}/`;
 const crumbs = [{ name: 'Beranda', href: '/' }, { name: category.name, href: base }];
-const title = cursor ? `Berita ${category.name} — sebelumnya` : category.slug === 'news' ? 'News — Berita Terkini Hari Ini' : `Berita ${category.name} Terkini`;
+const localTitle = category.slug === 'hotel' ? 'Ulasan Hotel dan Penginapan Lokal' : category.slug === 'wisata' ? 'Ulasan Tempat Wisata di Nusantara' : 'Ulasan Kuliner Khas Daerah';
+const title = isLocal ? (cursor ? `${localTitle} — sebelumnya` : localTitle) : cursor ? `Berita ${category.name} — sebelumnya` : category.slug === 'news' ? 'News — Berita Terkini Hari Ini' : `Berita ${category.name} Terkini`;
 ---
-<BaseLayout title={title} description={`${category.description} Kumpulan berita ${category.name} terbaru di ${SITE.domain}.`} jsonLd={[breadcrumbLd(crumbs)]} currentCategory={category.slug}>
+<BaseLayout title={title} description={isLocal ? `${category.description} Pilih daerah untuk menyaring ulasan di ${SITE.domain}.` : `${category.description} Kumpulan berita ${category.name} terbaru di ${SITE.domain}.`} jsonLd={[breadcrumbLd(crumbs)]} currentCategory={category.slug}>
   <div class="container">
     <Breadcrumb items={crumbs} />
-    <header class="page-head">
+    <header class:list={['page-head', { 'lw-page-head': isLocal }]}>
+      {isLocal && <p class="section-eyebrow">Rubrik</p>}
       <h1 class="page-title">{category.name}</h1>
       <p class="muted">{category.description}</p>
-      <p class="small"><a href={`/rss/${category.slug}.xml`}>RSS {category.name}</a></p>
+      {isLocal ? (
+        <RegionChips label={`Saring ${category.name} per daerah`} hrefFor={(s) => `/daerah/${s}/${category.slug}/`} counts={regionCounts} />
+      ) : (
+        <p class="small"><a href={`/rss/${category.slug}.xml`}>RSS {category.name}</a></p>
+      )}
     </header>
     <div class="with-sidebar">
       <div>
-        {items.length === 0 ? <p>Belum ada berita di kategori ini.</p> : (
-          <div class="grid">{items.map((article, index) => <ArticleCard article={article} variant={index === 0 && !cursor ? 'hero' : 'default'} headingLevel={2} showDesc />)}</div>
+        {items.length === 0 ? <p class="empty-note">{isLocal ? `Ulasan ${category.name.toLowerCase()} pertama sedang disiapkan.` : 'Belum ada berita di kategori ini.'}</p> : (
+          <div class:list={['grid', { 'lw-grid-2': isLocal }]}>{items.map((article, index) => <ArticleCard article={article} variant={index === 0 && !cursor && !isLocal ? 'hero' : 'default'} eager={index === 0 && !cursor} headingLevel={2} showDesc />)}</div>
         )}
-        <nav class="pagination" aria-label="Halaman">
+        {(cursor || next) && <nav class="pagination" aria-label="Halaman">
           {cursor ? <a href={base}>‹ Terbaru</a> : <span aria-disabled="true">‹ Terbaru</span>}
           {next ? <a href={`${base}?before=${next.publishedAt}&id=${next.id}`} rel="next">Berikutnya ›</a> : <span aria-disabled="true">Berikutnya ›</span>}
-        </nav>
+        </nav>}
       </div>
-      <div class="sidebar"><Trending items={trending} /><AdSlot size="rectangle" /></div>
+      <div class="sidebar">{isLocal ? <RegionList hrefFor={(s) => `/daerah/${s}/${category.slug}/`} title={`${category.name} per daerah`} /> : <Trending items={trending} />}<AdSlot size="rectangle" /></div>
     </div>
   </div>
 </BaseLayout>

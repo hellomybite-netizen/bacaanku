@@ -1,33 +1,39 @@
 ---
-import { SITE, categories, footerLinks } from '../config/site';
+import { SITE, localCategories, regions, footerLinks } from '../config/site';
 import { SHOW_PROTOTYPE_NOTE } from '../lib/mode';
 const year = new Date().getFullYear();
 ---
 <footer class="site-footer">
+  <div class="wastra-band wastra-band--footer" aria-hidden="true"></div>
   <div class="container footer-grid">
     <div class="footer-brand">
       <p class="site-logo footer-logo"><img class="logo-img" src="/brand/logo-dark-h96.webp" srcset="/brand/logo-dark-h48.webp 1x, /brand/logo-dark-h96.webp 2x, /brand/logo-dark-h144.webp 3x" width="340" height="96" alt="Bacaanku Network" decoding="async" loading="lazy" /></p>
-      <p>{SITE.tagline} Kami merangkum kabar penting agar lebih cepat dipahami.</p>
-      {SHOW_PROTOTYPE_NOTE && <p class="footer-note">Pratinjau — artikel contoh di build statis ini fiktif. Situs tayang memakai ruang redaksi.</p>}
+      <p>{SITE.subline}. Kami menulis dari pengalaman dan data yang bisa dicek: alamat, harga, jam buka, dan foto yang jelas sumbernya.</p>
+      {SHOW_PROTOTYPE_NOTE && <p class="footer-note">Pratinjau desain — artikel berlabel CONTOH hanyalah placeholder tata letak, bukan ulasan nyata.</p>}
     </div>
-    <nav aria-label="Kategori (footer)">
-      <h2 class="footer-title">Kategori</h2>
-      <ul class="footer-list">{categories.map((c) => <li><a href={`/${c.slug}/`}>{c.name}</a></li>)}</ul>
+    <nav aria-label="Rubrik (footer)">
+      <h2 class="footer-title">Rubrik</h2>
+      <ul class="footer-list">
+        {localCategories.map((c) => <li><a href={`/${c.slug}/`}>{c.name}</a></li>)}
+        <li><a href="/daerah/">Semua daerah</a></li>
+        <li><a href="/arsip-berita/">Arsip Berita</a></li>
+      </ul>
+    </nav>
+    <nav aria-label="Daerah (footer)">
+      <h2 class="footer-title">Daerah</h2>
+      <ul class="footer-list footer-list--cols">{regions.map((r) => <li><a href={`/daerah/${r.slug}/`}>{r.name}</a></li>)}</ul>
     </nav>
     <nav aria-label="Informasi">
       <h2 class="footer-title">Informasi</h2>
-      <ul class="footer-list">{footerLinks.map((l) => <li><a href={l.href}>{l.label}</a></li>)}</ul>
-    </nav>
-    <div>
-      <h2 class="footer-title">Ikuti</h2>
       <ul class="footer-list">
-        <li><a href="/rss.xml">RSS semua berita</a></li>
+        {footerLinks.map((l) => <li><a href={l.href}>{l.label}</a></li>)}
+        <li><a href="/rss.xml">RSS</a></li>
         <li><a href="/sitemap.xml">Sitemap</a></li>
       </ul>
-    </div>
+    </nav>
   </div>
   <div class="container footer-bottom">
     <span>© {year} {SITE.name} ({SITE.domain}). Hak cipta dilindungi.</span>
-    <span>Jernih · Ringkas · Relevan</span>
+    <span>Jernih · Jujur · Lokal</span>
   </div>
 </footer>

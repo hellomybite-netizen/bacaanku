@@ -1,0 +1,33 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Breadcrumb from '../components/Breadcrumb.astro';
+import { archiveCategories } from '../config/site';
+import { breadcrumbLd } from '../utils/seo';
+import { applyPublicCache } from '../lib/cache-headers';
+import { loadArchiveCounts } from '../lib/public';
+
+const counts = await loadArchiveCounts();
+applyPublicCache(Astro, 'list', ['arsip']);
+const crumbs = [{ name: 'Beranda', href: '/' }, { name: 'Arsip Berita', href: '/arsip-berita/' }];
+---
+<BaseLayout title="Arsip Berita" description="Arsip berita bacaankunetwork.com: news, teknologi, otomotif, sains, ekonomi, olahraga, dan hiburan. Semua tautan lama tetap bisa dibuka." jsonLd={[breadcrumbLd(crumbs)]}>
+  <div class="container">
+    <Breadcrumb items={crumbs} />
+    <header class="page-head lw-page-head">
+      <p class="section-eyebrow">Arsip</p>
+      <h1 class="page-title">Arsip Berita</h1>
+      <p class="muted">Bacaanku kini fokus pada ulasan hotel, wisata, dan kuliner lokal. Berita yang sudah terbit tetap tersimpan di sini dan semua tautan lamanya tetap berfungsi.</p>
+    </header>
+    <ul class="archive-list" role="list">
+      {archiveCategories.map((c) => (
+        <li>
+          <a href={`/${c.slug}/`}>
+            <strong>{c.name}</strong>
+            <span class="muted">{c.description}</span>
+            {counts[c.slug] != null && <span class="chip-count">{counts[c.slug]} artikel</span>}
+          </a>
+        </li>
+      ))}
+    </ul>
+  </div>
+</BaseLayout>

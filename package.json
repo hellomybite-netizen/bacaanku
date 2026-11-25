@@ -13,7 +13,9 @@
     "db:migrate": "node scripts/migrate-content.mjs",
     "db:migrate:dry": "node scripts/migrate-content.mjs --dry-run",
     "db:explain": "node scripts/explain-queries.mjs",
-    "db:verify-markdown": "node scripts/verify-markdown.mjs"
+    "db:verify-markdown": "node scripts/verify-markdown.mjs",
+    "preview:db": "node scripts/preview/seed-local-d1.mjs --apply",
+    "preview:images": "node scripts/generate-local-placeholders.mjs"
   },
   "dependencies": {
     "@astrojs/cloudflare": "^14.4.7",
