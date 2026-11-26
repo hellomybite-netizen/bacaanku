@@ -1,0 +1,15 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 80 80" role="img" aria-labelledby="title">
+  <title id="title">Bacaanku</title>
+  <!-- Square mark from the live header symbol (sun over mountains) in logo-local-wisdom.svg. Same paths and colors; no new brand. Source bbox 6,8,77,71 fitted into a 80×80 canvas with ~5% padding. -->
+  <g transform="translate(40 40) scale(0.935) translate(-44.5 -43.5)">
+    <g transform="translate(4 4)">
+      <g fill="#facc15" stroke="#f5a900" stroke-width="2.4" stroke-linecap="round">
+        <circle cx="37" cy="29" r="13"/>
+        <path d="M37 4v7M19 10l5 6M8 27h8M55 11l-5 6M66 28h-8M11 43l8-3M55 40l9 4"/>
+      </g>
+      <path d="M2 67Q24 23 48 56Q59 37 79 66V75H2Z" fill="#0d9488"/>
+      <path d="M2 73Q27 56 49 69L65 75H2Z" fill="#48a847"/>
+      <path d="M2 65Q26 43 48 57" stroke="#fff" stroke-width="3.5" fill="none"/>
+    </g>
+  </g>
+</svg>
