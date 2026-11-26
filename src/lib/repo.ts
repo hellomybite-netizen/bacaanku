@@ -1,3 +1,4 @@
+import { publicAuthor } from './authors';
 import { trending as trendingSlugs, categories as siteCategories } from '../config/site';
 import { resolveHero } from './media';
 import type { ArticleCard, ArticlePayload, ArticleView, CategoryPage, Cursor, HomeBundle, SourceItem } from './content-types';
@@ -179,10 +180,10 @@ export async function articlePage(db: D1Database, category: string, slug: string
     heroCreditUrl: (row.hero_credit_url as string | null) ?? null,
     categorySlug: String(row.category_slug),
     categoryName: String(row.category_name),
-    authorSlug: String(row.author_slug),
-    authorName: String(row.author_name),
-    authorRole: String(row.author_role || ''),
-    authorBio: String(row.author_bio || ''),
+    authorSlug: publicAuthor(row.author_slug as string, row.author_name as string).slug,
+    authorName: publicAuthor(row.author_slug as string, row.author_name as string).name,
+    authorRole: publicAuthor(row.author_slug as string, row.author_name as string).retired ? 'Tim Redaksi' : String(row.author_role || ''),
+    authorBio: publicAuthor(row.author_slug as string, row.author_name as string).retired ? '' : String(row.author_bio || ''),
     tags: tagsResult.results,
     sources: parseSources(String(row.sources_json || '[]')),
     seoTitle: (row.seo_title as string | null) ?? null,

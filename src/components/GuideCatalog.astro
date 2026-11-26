@@ -42,7 +42,7 @@ const { guides, filter, search = false } = Astro.props;
   </div>
   {search && <noscript><p>Semua panduan ditampilkan. Aktifkan JavaScript untuk mencari berdasarkan kata kunci.</p></noscript>}
   <p class="guide-result-count" data-count aria-live="polite">{guides.length} panduan</p>
-  <p class="guide-empty" data-empty hidden>Belum ada panduan yang cocok. Coba kata kunci atau filter lain.</p>
+  <p class="guide-empty" data-empty hidden></p>
   <div class="guide-grid" data-grid>
     {guides.map((guide) => (
       <div data-entry data-topic={guide.category} data-area={guide.citySlug ?? ''} data-name={guide.name}
@@ -95,6 +95,7 @@ const { guides, filter, search = false } = Astro.props;
         }
 
         count.textContent = query ? `${total} panduan untuk “${search?.value.trim()}”` : `${total} panduan`;
+        empty.textContent = total > 0 ? '' : 'Belum ada panduan yang cocok. Coba kata kunci atau filter lain.';
         empty.hidden = total > 0;
       };
 

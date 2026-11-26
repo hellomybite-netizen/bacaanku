@@ -20,9 +20,12 @@
   // tombol unggah /admin nonaktif + POST /api/admin/media/ → 503, /media/r2/* → 404.
   // Setelah Rizal mengaktifkan R2 dan bucket `bacaanku-media` dibuat, buka komentar baris ini lalu deploy:
   // "r2_buckets": [{ "binding": "MEDIA", "bucket_name": "bacaanku-media" }],
-  // Gambar disajikan Worker di https://bacaankunetwork.com/media/r2/<kunci> (cache 1 tahun, immutable).
+  // Gambar disajikan Worker di https://bacaankunetwork.com/media/r2/<kunci> (cache 1 tahun, immutable);
+  // tidak ada aset statis di /media/r2/, jadi permintaan itu selalu jatuh ke Worker.
   // MEDIA_BASE opsional, hanya bila nanti memakai domain media khusus (R2 custom domain).
-  "assets": { "run_worker_first": true },
+  // Aset statis dilayani langsung; worker hanya didahulukan untuk halaman prerender tanpa garis miring
+  // supaya /tentang → /tentang/ menjadi 301 (bukan 307 bawaan aset).
+  "assets": { "run_worker_first": ["/tentang", "/redaksi", "/kontak", "/kebijakan-privasi", "/pedoman-media-siber", "/kredit-foto", "/cari", "/privasi"] },
   "triggers": { "crons": ["*/5 * * * *"] },
   // Secrets (jangan di file ini):
   //   npx wrangler secret put ADMIN_PASSWORD

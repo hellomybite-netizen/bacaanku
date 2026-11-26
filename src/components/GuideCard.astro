@@ -8,7 +8,7 @@ const Heading = `h${headingLevel}` as 'h2' | 'h3';
 ---
 <article class="guide-card">
   <a class="guide-card-link" href={guidePath(guide)}>
-    <img class="guide-card-image" src={guide.cardSrc || guide.heroSrc} alt="" width="640" height="360" loading="lazy" decoding="async" />
+    <img class="guide-card-image" src={guide.cardSrc || guide.heroSrc} alt={guide.imageAlt || guide.name} width="640" height="360" loading="lazy" decoding="async" />
     <div class="guide-card-copy">
       <span class:list={['guide-badge', `guide-color-${guide.category}`]}>{guide.categoryName}</span>
       <Heading>{guide.name}</Heading>

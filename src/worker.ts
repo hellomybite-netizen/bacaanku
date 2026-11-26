@@ -5,6 +5,7 @@ import { MEDIA_PREFIX, serveMedia } from './lib/r2-media';
 type CronContext = { waitUntil(promise: Promise<unknown>): void };
 
 const HSTS_HEADER = 'max-age=31536000; includeSubDomains';
+const RETIRED_AUTHOR_PATH = /^\/penulis\/(ayu-lestari|dimas-saputra|rina-pratiwi|rizal)\/?$/;
 
 function withHsts(response: Response, isHttps: boolean): Response {
   if (!isHttps) return response;
@@ -62,7 +63,8 @@ export default {
         url.pathname === '/rss' ||
         url.pathname === '/rss/' ||
         url.pathname === '/feed' ||
-        url.pathname === '/feed/'
+        url.pathname === '/feed/' ||
+        url.pathname === '/feed.xml'
       ) {
         url.pathname = '/rss.xml';
         return new Response(null, {
@@ -70,6 +72,19 @@ export default {
           headers: {
             Location: url.toString(),
             'Cache-Control': 'private, no-store',
+            ...(!isHttp ? { 'Strict-Transport-Security': HSTS_HEADER } : {}),
+          },
+        });
+      }
+      // Profil penulis contoh/fiktif dihapus: arahkan permanen ke halaman Redaksi.
+      if (RETIRED_AUTHOR_PATH.test(url.pathname)) {
+        url.pathname = '/redaksi/';
+        url.search = '';
+        return new Response(null, {
+          status: 301,
+          headers: {
+            Location: url.toString(),
+            'Cache-Control': 'public, max-age=3600',
             ...(!isHttp ? { 'Strict-Transport-Security': HSTS_HEADER } : {}),
           },
         });

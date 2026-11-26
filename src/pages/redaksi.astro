@@ -1,14 +1,15 @@
 ---
-import { getCollection } from 'astro:content';
 import PageLayout from '../layouts/PageLayout.astro';
 export const prerender = true;
-const authors = (await getCollection('authors')).sort((a, b) => a.data.name.localeCompare(b.data.name, 'id'));
 ---
-<PageLayout title="Redaksi" path="/redaksi/" description="Susunan redaksi bacaankunetwork.com: pemimpin redaksi, redaktur, dan reporter yang bertanggung jawab atas isi pemberitaan.">
-  <p>Susunan redaksi bacaankunetwork.com. Profil yang masih bertanda contoh di halaman penulis perlu diganti sebelum tayang penuh. Penulis yang baru ditambahkan lewat ruang redaksi muncul di halaman masing-masing; halaman ini ikut build.</p>
-  <dl class="redaksi">
-    <dt>Pemimpin Redaksi</dt><dd>(nama contoh)</dd>
-    <dt>Penanggung Jawab</dt><dd>(nama contoh)</dd>
-    {authors.map((a) => (<><dt>{a.data.role}</dt><dd><a href={`/penulis/${a.data.slug}/`}>{a.data.name}</a></dd></>))}
-  </dl>
+<PageLayout title="Redaksi" path="/redaksi/" description="Informasi redaksi Bacaanku Network: siapa yang menulis artikel, cara kami menyunting, dan bagaimana menyampaikan koreksi atau hak jawab.">
+  <p>Konten Bacaanku Network disusun dan disunting oleh <strong>Redaksi Bacaanku</strong>. Nama penulis atau penyunting tercantum pada setiap artikel; artikel tanpa nama perorangan diterbitkan atas nama Redaksi.</p>
+  <h2>Standar penulisan</h2>
+  <ul>
+    <li>Fakta penting dicek ke sumber resmi atau sumber tepercaya, dan sumber rujukan dicantumkan di akhir artikel.</li>
+    <li>Artikel panduan (wisata, kuliner, hotel) memuat informasi praktis yang dapat berubah; tanggal pembaruan ditampilkan bila isinya diperbarui.</li>
+    <li>Iklan dipisahkan dari isi redaksi.</li>
+  </ul>
+  <h2>Koreksi dan hak jawab</h2>
+  <p>Bila Anda menemukan kekeliruan atau ingin menggunakan hak jawab, sampaikan melalui halaman <a href="/kontak/">Kontak</a>. Ralat dan koreksi ditautkan pada artikel yang bersangkutan, sesuai <a href="/pedoman-media-siber/">Pedoman Pemberitaan Media Siber</a>.</p>
 </PageLayout>

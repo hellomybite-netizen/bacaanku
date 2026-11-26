@@ -1,3 +1,4 @@
+import { publicAuthor } from './authors';
 // Baca artikel local wisdom (tipe Hotel/Wisata/Kuliner + kota) dari D1.
 // Semua query memakai index (kategori / kota / provinsi / slug), tanpa SCAN articles.
 // Mode statis (pratinjau GitHub Pages) memakai data awal scripts/preview/local-wisdom-seed.mjs.
@@ -92,8 +93,8 @@ export function mapGuide(row: Row, mediaBase?: string): Guide {
     readingMinutes: Number(row.reading_minutes) || 1,
     publishedAt: Number(row.published_at) || 0,
     updatedAt: Number(row.updated_at) || Number(row.published_at) || 0,
-    authorName: str(row.author_name) || 'Redaksi Bacaanku',
-    authorSlug: str(row.author_slug) || 'redaksi',
+    authorName: publicAuthor(str(row.author_slug), str(row.author_name)).name,
+    authorSlug: publicAuthor(str(row.author_slug), str(row.author_name)).slug,
     seoTitle: (row.seo_title as string | null) || null,
     canonicalUrl: (row.canonical_url as string | null) || null,
   };

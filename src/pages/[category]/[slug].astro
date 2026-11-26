@@ -80,6 +80,8 @@ const sizes = '(min-width: 1240px) 780px, (min-width: 960px) 64vw, calc(100vw - 
     canonical={article.canonicalUrl ?? path}
     image={og}
     imageAlt={article.heroAlt}
+    imageWidth={og ? article.heroWidth : null}
+    imageHeight={og ? article.heroHeight : null}
     type="article"
     currentCategory={article.categorySlug}
     article={{
@@ -95,6 +97,8 @@ const sizes = '(min-width: 1240px) 780px, (min-width: 960px) 64vw, calc(100vw - 
         headline: article.title,
         description: article.excerpt,
         image: og || absUrl('/og-default.png'),
+        imageWidth: og ? article.heroWidth : 1200,
+        imageHeight: og ? article.heroHeight : 630,
         datePublished: new Date(article.publishedAt * 1000),
         dateModified: new Date(article.updatedAt * 1000),
         authorName: article.authorName,

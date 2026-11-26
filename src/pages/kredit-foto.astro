@@ -13,7 +13,7 @@ const rows = Object.entries(photoCredits) as [Parameters<typeof guideImage>[0], 
     <tbody>
       {rows.map(([key, c]) => (
         <tr>
-          <td><img src={guideImage(key, 'card')} alt="" width="640" height="360" loading="lazy" /></td>
+          <td><img src={guideImage(key, 'card')} alt={c.title} width="640" height="360" loading="lazy" /></td>
           <td><a href={c.source} rel="noopener noreferrer">{c.title}</a></td>
           <td>{c.author}<br />{c.licenseUrl ? <a href={c.licenseUrl} rel="noopener noreferrer license">{c.license}</a> : c.license}</td>
         </tr>

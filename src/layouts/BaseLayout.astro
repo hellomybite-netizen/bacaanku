@@ -25,6 +25,9 @@ interface Props {
   canonical?: string;
   image?: string; // URL absolut gambar OG
   imageAlt?: string;
+  /** Dimensi gambar OG (px). Default = og-default.png 1200×630. */
+  imageWidth?: number | null;
+  imageHeight?: number | null;
   type?: 'website' | 'article';
   article?: { publishedTime: string; modifiedTime: string; section: string; tags: string[]; author: string };
   jsonLd?: Record<string, unknown>[];
@@ -36,11 +39,13 @@ interface Props {
   currentCategory?: string;
 }
 
-const { title, description, canonical, image, imageAlt, type = 'website', article, jsonLd = [], noindex = false, noCanonical = false, rawTitle = false, currentCategory } = Astro.props;
+const { title, description, canonical, image, imageAlt, imageWidth, imageHeight, type = 'website', article, jsonLd = [], noindex = false, noCanonical = false, rawTitle = false, currentCategory } = Astro.props;
 const fullTitle = formatPageTitle(title, SITE.name, rawTitle);
 const metaDescription = truncateAtWord(description, 155);
 const canonicalUrl = noCanonical ? undefined : (canonical ? new URL(canonical, SITE.url).href : new URL(Astro.url.pathname, SITE.url).href);
 const ogImage = image ?? new URL(SITE.defaultOgImage, SITE.url).href;
+const ogWidth = image ? (imageWidth || undefined) : 1200;
+const ogHeight = image ? (imageHeight || undefined) : 630;
 ---
 <!doctype html>
 <html lang={SITE.lang}>
@@ -48,6 +53,7 @@ const ogImage = image ?? new URL(SITE.defaultOgImage, SITE.url).href;
     {analyticsSnippet && <Fragment set:html={analyticsSnippet} />}
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <link rel="preload" href="/fonts/inter-latin-var.woff2" as="font" type="font/woff2" crossorigin />
     <meta name="color-scheme" content="light dark" />
     <script is:inline>try{document.querySelector('meta[name="color-scheme"]').content=localStorage.getItem("color-scheme")??"light dark"}catch(e){}</script>
     <title>{fullTitle}</title>
@@ -79,6 +85,7 @@ const ogImage = image ?? new URL(SITE.defaultOgImage, SITE.url).href;
     <meta property="og:description" content={metaDescription} />
     {canonicalUrl && <meta property="og:url" content={canonicalUrl} />}
     <meta property="og:image" content={ogImage} />
+    {ogWidth && ogHeight && (<><meta property="og:image:width" content={String(ogWidth)} /><meta property="og:image:height" content={String(ogHeight)} /></>)}
     {imageAlt && <meta property="og:image:alt" content={imageAlt} />}
     {article && (
       <>
