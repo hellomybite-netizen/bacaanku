@@ -82,8 +82,16 @@ function parseJsonList(raw: string): unknown[] | null {
 export function parseLocal(form: FormData, category: string, strict: boolean, errors: Record<string, string>): { values: LocalValues; prepared: PreparedLocal } {
   const factsText = get(form, 'facts');
   const factsJsonRaw = get(form, 'facts_json');
-  const galleryText = get(form, 'gallery');
   const galleryJsonRaw = get(form, 'gallery_json');
+  // Form /admin baru: baris berulang gallery_src + gallery_alt (alt per foto). API lama: `gallery` teks / gallery_json.
+  const rowSrc = form.getAll('gallery_src').map((v) => String(v).trim());
+  const rowAlt = form.getAll('gallery_alt').map((v) => String(v).trim());
+  const hasRows = rowSrc.length > 0 || rowAlt.length > 0;
+  const rows: { src: string; alt: string }[] = [];
+  for (let i = 0; i < Math.max(rowSrc.length, rowAlt.length); i++) {
+    if (rowSrc[i] || rowAlt[i]) rows.push({ src: rowSrc[i] || '', alt: rowAlt[i] || '' });
+  }
+  const galleryText = hasRows && !galleryJsonRaw ? rows.map((r) => `${r.src} | ${r.alt}`).join('\n') : get(form, 'gallery');
   const values: LocalValues = {
     city: (get(form, 'kota') || get(form, 'city_slug')).toLowerCase(),
     placeName: get(form, 'place_name'),
@@ -142,6 +150,13 @@ export function parseLocal(form: FormData, category: string, strict: boolean, er
     if (!list) errors.gallery = 'gallery_json harus array JSON [{"src":"…","alt":"…"}].';
     else gallery = list.map((g) => ({ src: String((g as { src?: unknown }).src ?? '').trim(), alt: String((g as { alt?: unknown }).alt ?? '').trim() }));
     if (!values.gallery) values.gallery = gallery.map((g) => `${g.src} | ${g.alt}`).join('\n');
+  } else if (hasRows) {
+    gallery = rows.map((r) => ({ src: r.src, alt: r.alt }));
+    // Indeks = urutan baris terisi (sama dengan urutan baris yang dirender ulang di form).
+    rows.forEach((r, i) => {
+      if (!/^(https:\/\/\S+|\/\S+)$/.test(r.src)) errors[`gallery-${i}`] = `Foto galeri ${i + 1}: isi URL https:// atau /media/…, atau unggah foto.`;
+      else if (r.alt.length < 5) errors[`gallery-${i}`] = `Foto galeri ${i + 1}: teks alternatif wajib, minimal 5 karakter.`;
+    });
   } else if (galleryText) {
     gallery = galleryText.split(/\r?\n/).map((line) => line.trim()).filter(Boolean).map((line) => {
       const [src, ...rest] = line.split('|');
@@ -149,7 +164,7 @@ export function parseLocal(form: FormData, category: string, strict: boolean, er
     });
   }
   if (gallery.length > 6) errors.gallery = 'Galeri maksimal 6 gambar tambahan.';
-  if (gallery.some((g) => !/^(https:\/\/\S+|\/\S+)$/.test(g.src) || g.alt.length < 5)) {
+  if (!hasRows && gallery.some((g) => !/^(https:\/\/\S+|\/\S+)$/.test(g.src) || g.alt.length < 5)) {
     errors.gallery = errors.gallery || 'Setiap baris galeri: "URL https:// atau /media/… | teks alternatif (min. 5 karakter)".';
   }
 

@@ -184,6 +184,10 @@ Dengan ini jumlah invocation Worker tetap jauh di bawah 100 rb/hari, walau trafi
 
 ## 7. Gambar di R2 (WebP/AVIF)
 
+> **Status 27 Nov 2026:** yang diimplementasikan adalah versi sederhana — satu berkas WebP ≤1.600 px per unggahan,
+> `POST /api/admin/media/` (maks 5 MB), disajikan Worker di `/media/r2/<kunci>`. Kontrak & aktivasi: `docs/api-unggah-gambar-dan-aturan-panjang.md`.
+> Rancangan multi-lebar di bawah ini belum dipakai.
+
 Kendala: Worker Free (CPU 10 ms, tanpa Sharp/native) tidak bisa resize gambar di server. Solusi:
 
 **Opsi utama — resize di browser admin (biaya 0, tanpa kuota transformasi):**

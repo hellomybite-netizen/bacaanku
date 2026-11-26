@@ -1,6 +1,7 @@
 ---
 import type { ArticleValues } from '../../lib/editorial';
 import { guideCities, guideProvince, isGuideCategory } from '../../lib/local-guide';
+import { lengthRuleFor } from '../../lib/length-rules';
 interface Author { slug: string; name: string; role: string }
 interface Category { slug: string; name: string }
 interface Props {
@@ -11,20 +12,37 @@ interface Props {
   csrf: string;
   saved?: boolean;
   status?: string;
+  /** true bila binding R2 `MEDIA` ada. false → tombol unggah dinonaktifkan dengan catatan. */
+  uploadEnabled?: boolean;
 }
-const { values, errors, categories, authors, csrf, saved = false, status } = Astro.props;
+const { values, errors, categories, authors, csrf, saved = false, status, uploadEnabled = false } = Astro.props;
 const errorList = Object.values(errors);
 const local = values.local;
 const localOpen = isGuideCategory(values.category) || Object.values(local).some(Boolean);
+const rule = lengthRuleFor(values.category);
+const galleryRows = local.gallery
+  .split(/\r?\n/)
+  .map((line) => line.trim())
+  .filter(Boolean)
+  .map((line) => {
+    const [src, ...rest] = line.split('|');
+    return { src: (src ?? '').trim(), alt: rest.join('|').trim() };
+  });
+if (galleryRows.length === 0) galleryRows.push({ src: '', alt: '' });
+const uploadNote = 'Unggah belum aktif: penyimpanan R2 belum dinyalakan. Sementara tempel URL https:// atau path /media/….';
+const accept = 'image/jpeg,image/png,image/webp,image/avif';
+const lengthWarn = Astro.url.searchParams.get('panjang') === '1';
+const bodyErrors = [errors.body, errors.bodyHeadings, errors.bodyFaq].filter(Boolean);
 ---
 {saved && <p class="admin-ok" role="status">Tersimpan.</p>}
+{saved && lengthWarn && <p class="admin-error" role="status">Tersimpan, tetapi isi belum memenuhi aturan panjang (lihat penghitung di bawah kolom Isi). Aturan ini akan ditegakkan.</p>}
 {errorList.length > 0 && (
   <div class="admin-error" role="alert">
     <strong>Periksa isian berikut.</strong>
     <ul>{errorList.map((message) => <li>{message}</li>)}</ul>
   </div>
 )}
-<form method="post" class="editor-grid">
+<form method="post" class="editor-grid" data-upload-enabled={uploadEnabled ? '1' : '0'}>
   <input type="hidden" name="csrf" value={csrf} />
   <div class="panel">
     <label class="field">
@@ -34,7 +52,7 @@ const localOpen = isGuideCategory(values.category) || Object.values(local).some(
     </label>
     <label class="field">
       <span>Slug URL</span>
-      <input name="slug" pattern="[a-z0-9-]+" value={values.slug} data-slug />
+      <input name="slug" pattern="[a-z0-9\-]+" value={values.slug} data-slug />
       <small class="hint">/{values.category || 'kategori'}/{values.slug || 'slug'}/</small>
     </label>
     <label class="field">
@@ -44,7 +62,7 @@ const localOpen = isGuideCategory(values.category) || Object.values(local).some(
     <div class="split split-2">
       <label class="field">
         <span>Kategori</span>
-        <select name="category" required>
+        <select name="category" id="category" required>
           {categories.map((category) => <option value={category.slug} selected={category.slug === values.category}>{category.name}</option>)}
         </select>
       </label>
@@ -93,17 +111,52 @@ const localOpen = isGuideCategory(values.category) || Object.values(local).some(
         <label class="field"><span>Teks tombol aksi</span><input name="action_label" maxlength="60" value={local.actionLabel} placeholder="Lihat Situs Resmi" />{errors.actionLabel && <small class="field-error">{errors.actionLabel}</small>}</label>
         <label class="field"><span>URL tombol aksi (https)</span><input name="action_url" type="url" value={local.actionUrl} placeholder="https://" />{errors.actionUrl && <small class="field-error">{errors.actionUrl}</small>}</label>
       </div>
-      <label class="field">
-        <span>Galeri tambahan, satu baris "URL | teks alternatif"</span>
-        <textarea name="gallery" rows="3" placeholder="/media/local-wisdom/rawon-wide.webp | Semangkuk rawon dengan tauge">{local.gallery}</textarea>
+      <fieldset class="gallery-field">
+        <legend>Galeri tambahan <small class="hint">maks. 6 foto · tiap foto wajib teks alternatif</small></legend>
+        {!uploadEnabled && <p class="hint upload-off">{uploadNote}</p>}
+        <div id="gallery-rows">
+          {galleryRows.map((row, index) => (
+            <div class="gallery-row" data-gallery-row>
+              {row.src ? <img class="upload-thumb" src={row.src} alt={`Pratinjau foto galeri ${index + 1}`} width="96" height="54" loading="lazy" decoding="async" /> : <span class="upload-thumb upload-thumb-empty" aria-hidden="true"></span>}
+              <div class="gallery-fields">
+                <label class="field">
+                  <span data-num-label="URL foto">URL foto {index + 1}</span>
+                  <input name="gallery_src" type="text" inputmode="url" value={row.src} placeholder="https:// atau /media/…" data-gallery-src aria-describedby={`gallery-error-${index}`} />
+                </label>
+                <label class="field">
+                  <span data-num-label="Teks alternatif foto">Teks alternatif foto {index + 1}</span>
+                  <input name="gallery_alt" maxlength="200" value={row.alt} placeholder="Jelaskan isi foto, mis. Semangkuk rawon dengan tauge" data-gallery-alt aria-describedby={`gallery-error-${index}`} />
+                </label>
+                <div class="gallery-actions">
+                  <label class="field upload-field">
+                    <span data-num-label="Unggah foto">Unggah foto {index + 1}</span>
+                    <input type="file" accept={accept} data-upload="gallery" disabled={!uploadEnabled} />
+                  </label>
+                  <button type="button" data-remove-gallery>Hapus foto</button>
+                </div>
+                <p class="upload-status" role="status" aria-live="polite" data-upload-status></p>
+                <small class="field-error" id={`gallery-error-${index}`} data-gallery-error>{errors[`gallery-${index}`] || ''}</small>
+              </div>
+            </div>
+          ))}
+        </div>
+        <button type="button" id="add-gallery">Tambah foto galeri</button>
         {errors.gallery && <small class="field-error">{errors.gallery}</small>}
-      </label>
+      </fieldset>
       {errors.local && <small class="field-error">{errors.local}</small>}
     </details>
-    <label class="field">
-      <span>Isi (Markdown)</span>
-      <textarea name="body" id="body-md">{values.body}</textarea>
-    </label>
+    <div class="field">
+      <label class="field-label" for="body-md">Isi (Markdown)</label>
+      <p class="hint" id="body-rule" data-body-rule>
+        <span data-rule-text>{rule.kind === 'guide'
+          ? 'Aturan panduan: 600–1.800 kata, 4–10 subjudul "## ", dan bagian "## FAQ" berisi minimal 2 pertanyaan.'
+          : 'Aturan berita: 450–900 kata.'}</span>
+        {' '}Dicek saat Ke review, Jadwalkan, atau Terbitkan (draf bebas).
+      </p>
+      <textarea name="body" id="body-md" aria-describedby="body-rule body-stats body-error" aria-invalid={bodyErrors.length ? 'true' : undefined}>{values.body}</textarea>
+      <p class="body-stats" id="body-stats" aria-live="polite" data-body-stats></p>
+      <div id="body-error">{bodyErrors.map((message) => <small class="field-error">{message}</small>)}</div>
+    </div>
     <div class="preview-pane panel">
       <p class="hint">Pratinjau</p>
       <div id="preview" class="prose"><p class="hint">Pratinjau muncul setelah Anda mengetik.</p></div>
@@ -111,9 +164,26 @@ const localOpen = isGuideCategory(values.category) || Object.values(local).some(
   </div>
   <div class="panel">
     <p class="admin-kicker">Gambar</p>
-    <p class="hint">Pakai gambar ≤1.600 piksel dan ≤1,5 MB. Tempel URL https:// atau path situs /media/…. Jangan tempel file asli Wikimedia (pilih thumbnail) dan jangan pakai gambar placeholder.</p>
-    <label class="field"><span>URL gambar utama</span><input name="hero_url" type="text" inputmode="url" pattern="https://.+|/.*" value={values.heroUrl} placeholder="https:// atau /media/…" /></label>
-    <label class="field"><span>Teks alternatif</span><input name="hero_alt" value={values.heroAlt} /></label>
+    <p class="hint">Unggah foto (otomatis diperkecil ke ≤1.600 px dan diubah ke WebP), atau tempel URL https:// / path situs /media/…. Jangan tempel file asli Wikimedia (pilih thumbnail) dan jangan pakai gambar placeholder.</p>
+    <div class="hero-upload">
+      {values.heroUrl ? <img class="upload-thumb upload-thumb-hero" src={values.heroUrl} alt="Pratinjau gambar utama" width="160" height="90" decoding="async" data-hero-thumb /> : <span class="upload-thumb upload-thumb-hero upload-thumb-empty" aria-hidden="true" data-hero-thumb></span>}
+      <label class="field upload-field">
+        <span>Unggah gambar utama</span>
+        <input type="file" accept={accept} data-upload="hero" disabled={!uploadEnabled} aria-describedby="hero-upload-status" />
+      </label>
+    </div>
+    {!uploadEnabled && <p class="hint upload-off">{uploadNote}</p>}
+    <p class="upload-status" id="hero-upload-status" role="status" aria-live="polite" data-upload-status-hero></p>
+    <label class="field">
+      <span>URL gambar utama</span>
+      <input name="hero_url" type="text" inputmode="url" pattern="https://.+|/.*" value={values.heroUrl} placeholder="https:// atau /media/…" aria-describedby="hero-url-error" />
+      <small class="field-error" id="hero-url-error">{errors.heroUrl || ''}</small>
+    </label>
+    <label class="field">
+      <span>Teks alternatif gambar utama</span>
+      <input name="hero_alt" value={values.heroAlt} maxlength="200" aria-describedby="hero-alt-error" />
+      <small class="field-error" id="hero-alt-error">{errors.heroAlt || ''}</small>
+    </label>
     <label class="field"><span>Keterangan</span><input name="hero_caption" value={values.heroCaption} /></label>
     <label class="field"><span>Kredit</span><input name="hero_credit" value={values.heroCredit} placeholder="Foto: Nama, CC BY 4.0" /></label>
     <label class="field"><span>URL kredit</span><input name="hero_credit_url" type="url" value={values.heroCreditUrl} /></label>
@@ -158,7 +228,8 @@ const localOpen = isGuideCategory(values.category) || Object.values(local).some(
   </div>
 </form>
 <script>
-  const form = document.querySelector('form');
+  import { bodyStats, lengthRuleFor } from '../../lib/length-rules';
+  const form = document.querySelector<HTMLFormElement>('form.editor-grid');
   const title = form?.querySelector<HTMLInputElement>('[name="title"]');
   const slug = form?.querySelector<HTMLInputElement>('[data-slug]');
   let slugTouched = Boolean(slug?.value);
@@ -206,4 +277,254 @@ const localOpen = isGuideCategory(values.category) || Object.values(local).some(
     timer = window.setTimeout(() => { void render(); }, 280);
   });
   if (body?.value) void render();
+
+  // ---- Penghitung aturan panjang (berita 450–900; panduan 600–1.800 kata, 4–10 ##, FAQ) ----
+  const category = document.getElementById('category') as HTMLSelectElement | null;
+  const statsEl = document.querySelector<HTMLElement>('[data-body-stats]');
+  const ruleEl = document.querySelector<HTMLElement>('[data-rule-text]');
+  const fmt = (n: number) => n.toLocaleString('id-ID');
+  const paintStats = () => {
+    if (!body || !statsEl) return;
+    const rule = lengthRuleFor(category?.value || '');
+    const stats = bodyStats(body.value);
+    const parts: string[] = [];
+    const wordsOk = stats.words >= rule.minWords && stats.words <= rule.maxWords;
+    parts.push(`${fmt(stats.words)} kata (target ${fmt(rule.minWords)}–${fmt(rule.maxWords)}) ${wordsOk ? '✓' : '✗'}`);
+    let ok = wordsOk;
+    if (rule.kind === 'guide') {
+      const h2Ok = stats.h2.length >= rule.minH2 && stats.h2.length <= rule.maxH2;
+      const faqOk = stats.faq && stats.faqQuestions >= 2;
+      parts.push(`${stats.h2.length} subjudul ## (target ${rule.minH2}–${rule.maxH2}) ${h2Ok ? '✓' : '✗'}`);
+      parts.push(faqOk ? `FAQ ${stats.faqQuestions} pertanyaan ✓` : stats.faq ? `FAQ baru ${stats.faqQuestions} pertanyaan (min. 2) ✗` : 'Belum ada "## FAQ" ✗');
+      ok = ok && h2Ok && faqOk;
+    }
+    statsEl.textContent = parts.join(' · ');
+    statsEl.classList.toggle('warn', !ok);
+    if (ruleEl) {
+      ruleEl.textContent = rule.kind === 'guide'
+        ? 'Aturan panduan: 600–1.800 kata, 4–10 subjudul "## ", dan bagian "## FAQ" berisi minimal 2 pertanyaan.'
+        : 'Aturan berita: 450–900 kata.';
+    }
+  };
+  let statsTimer = 0;
+  body?.addEventListener('input', () => { window.clearTimeout(statsTimer); statsTimer = window.setTimeout(paintStats, 150); });
+  category?.addEventListener('change', paintStats);
+  paintStats();
+
+  // ---- Unggah gambar ke R2: perkecil ≤1.600 px + WebP (q 0,8) di browser, lalu POST /api/admin/media/ ----
+  const uploadEnabled = form?.dataset.uploadEnabled === '1';
+  const MAX_SIDE = 1600;
+  const MAX_UPLOAD = 5 * 1024 * 1024;
+  const kb = (n: number) => `${fmt(Math.round(n / 1024))} KB`;
+
+  const toBlob = (canvas: HTMLCanvasElement, type: string, quality: number) =>
+    new Promise<Blob | null>((resolve) => canvas.toBlob(resolve, type, quality));
+
+  async function decode(file: File): Promise<{ source: CanvasImageSource; width: number; height: number; close?: () => void }> {
+    if ('createImageBitmap' in window) {
+      try {
+        const bitmap = await createImageBitmap(file, { imageOrientation: 'from-image' });
+        return { source: bitmap, width: bitmap.width, height: bitmap.height, close: () => bitmap.close() };
+      } catch { /* jatuh ke <img> */ }
+    }
+    const url = URL.createObjectURL(file);
+    try {
+      const img = new Image();
+      img.decoding = 'async';
+      img.src = url;
+      await img.decode();
+      return { source: img, width: img.naturalWidth, height: img.naturalHeight };
+    } finally {
+      URL.revokeObjectURL(url);
+    }
+  }
+
+  async function compress(file: File): Promise<{ blob: Blob; width: number; height: number }> {
+    const decoded = await decode(file);
+    const scale = Math.min(1, MAX_SIDE / Math.max(decoded.width, decoded.height));
+    const width = Math.max(1, Math.round(decoded.width * scale));
+    const height = Math.max(1, Math.round(decoded.height * scale));
+    const canvas = document.createElement('canvas');
+    canvas.width = width;
+    canvas.height = height;
+    const ctx = canvas.getContext('2d');
+    if (!ctx) throw new Error('Browser tidak mendukung kompres gambar.');
+    ctx.imageSmoothingQuality = 'high';
+    ctx.drawImage(decoded.source, 0, 0, width, height);
+    decoded.close?.();
+    let blob = await toBlob(canvas, 'image/webp', 0.8);
+    // Browser lama (mis. Safari < 17) tidak bisa menyandikan WebP → JPEG 0,82.
+    if (!blob || blob.type !== 'image/webp') blob = await toBlob(canvas, 'image/jpeg', 0.82);
+    if (!blob) throw new Error('Gagal mengompres gambar.');
+    // Berkas asli yang sudah kecil & tidak perlu diperkecil dipakai apa adanya bila lebih hemat.
+    if (scale === 1 && /^image\/(webp|jpeg)$/.test(file.type) && file.size < blob.size) return { blob: file, width, height };
+    return { blob, width, height };
+  }
+
+  async function upload(file: File, alt: string, status: HTMLElement): Promise<{ url: string; width: number | null; height: number | null } | null> {
+    status.classList.remove('is-error');
+    if (!/^image\//.test(file.type)) { status.textContent = 'Pilih berkas gambar (JPEG, PNG, WebP, atau AVIF).'; status.classList.add('is-error'); return null; }
+    if (file.size > 40 * 1024 * 1024) { status.textContent = 'Berkas lebih dari 40 MB. Perkecil dulu sebelum diunggah.'; status.classList.add('is-error'); return null; }
+    status.textContent = 'Memperkecil dan mengubah ke WebP…';
+    try {
+      const { blob } = await compress(file);
+      if (blob.size > MAX_UPLOAD) { status.textContent = `Hasil kompres ${kb(blob.size)} masih lebih dari 5 MB.`; status.classList.add('is-error'); return null; }
+      status.textContent = `Mengunggah ${kb(blob.size)}…`;
+      const ext = blob.type === 'image/webp' ? 'webp' : blob.type === 'image/png' ? 'png' : 'jpg';
+      const slugValue = slug?.value || '';
+      const data = new FormData();
+      data.set('csrf', csrf);
+      data.set('slug', slugValue);
+      data.set('alt', alt);
+      data.set('file', blob, `${slugValue || file.name.replace(/\.[^.]+$/, '') || 'gambar'}.${ext}`);
+      const response = await fetch('/api/admin/media/', { method: 'POST', body: data, credentials: 'same-origin' });
+      const json = await response.json().catch(() => ({})) as { url?: string; width?: number | null; height?: number | null; bytes?: number; contentType?: string; message?: string };
+      if (!response.ok || !json.url) {
+        status.textContent = json.message || `Unggah gagal (HTTP ${response.status}).`;
+        status.classList.add('is-error');
+        return null;
+      }
+      status.textContent = `Terunggah: ${json.width ?? '?'}×${json.height ?? '?'} px, ${kb(json.bytes || blob.size)} (${(json.contentType || blob.type).replace('image/', '').toUpperCase()}).`;
+      return { url: json.url, width: json.width ?? null, height: json.height ?? null };
+    } catch (error) {
+      status.textContent = error instanceof Error ? error.message : 'Unggah gagal.';
+      status.classList.add('is-error');
+      return null;
+    }
+  }
+
+  function setThumb(holder: Element | null, url: string, alt: string): HTMLImageElement | null {
+    if (!holder) return null;
+    let img: HTMLImageElement;
+    if (holder instanceof HTMLImageElement) img = holder;
+    else {
+      img = document.createElement('img');
+      img.className = holder.className.replace('upload-thumb-empty', '').trim();
+      for (const [k, v] of Object.entries((holder as HTMLElement).dataset)) img.dataset[k] = v || '';
+      holder.replaceWith(img);
+    }
+    img.src = url;
+    img.alt = alt;
+    img.decoding = 'async';
+    return img;
+  }
+
+  // Gambar utama
+  const heroInput = form?.querySelector<HTMLInputElement>('[data-upload="hero"]');
+  heroInput?.addEventListener('change', async () => {
+    const file = heroInput.files?.[0];
+    const status = document.querySelector<HTMLElement>('[data-upload-status-hero]');
+    if (!file || !status || !uploadEnabled) return;
+    heroInput.disabled = true;
+    const alt = form?.querySelector<HTMLInputElement>('[name="hero_alt"]')?.value || '';
+    const result = await upload(file, alt, status);
+    heroInput.disabled = false;
+    heroInput.value = '';
+    if (!result) return;
+    const set = (name: string, value: string) => { const el = form?.querySelector<HTMLInputElement>(`[name="${name}"]`); if (el) el.value = value; };
+    set('hero_url', result.url);
+    if (result.width) set('hero_width', String(result.width));
+    if (result.height) set('hero_height', String(result.height));
+    setThumb(document.querySelector('[data-hero-thumb]'), result.url, 'Pratinjau gambar utama');
+    const heroAlt = form?.querySelector<HTMLInputElement>('[name="hero_alt"]');
+    if (heroAlt && heroAlt.value.trim().length < 5) {
+      const err = document.getElementById('hero-alt-error');
+      if (err) err.textContent = 'Isi teks alternatif (min. 5 karakter): jelaskan apa yang tampak di foto.';
+      heroAlt.focus();
+    }
+  });
+
+  form?.querySelector<HTMLInputElement>('[name="hero_alt"]')?.addEventListener('input', (event) => {
+    const err = document.getElementById('hero-alt-error');
+    if (err && (event.target as HTMLInputElement).value.trim().length >= 5) err.textContent = '';
+  });
+
+  // Galeri: baris URL + alt per foto
+  const rowsWrap = document.getElementById('gallery-rows');
+  const MAX_GALLERY = 6;
+  const renumber = () => {
+    rowsWrap?.querySelectorAll<HTMLElement>('[data-gallery-row]').forEach((row, index) => {
+      row.querySelectorAll<HTMLElement>('[data-num-label]').forEach((label) => { label.textContent = `${label.dataset.numLabel} ${index + 1}`; });
+      const err = row.querySelector<HTMLElement>('[data-gallery-error]');
+      if (err) err.id = `gallery-error-${index}`;
+      row.querySelectorAll<HTMLInputElement>('[data-gallery-src],[data-gallery-alt]').forEach((input) => input.setAttribute('aria-describedby', `gallery-error-${index}`));
+      const thumb = row.querySelector<HTMLImageElement>('img.upload-thumb');
+      if (thumb) thumb.alt = `Pratinjau foto galeri ${index + 1}`;
+    });
+    const count = rowsWrap?.querySelectorAll('[data-gallery-row]').length ?? 0;
+    const add = document.getElementById('add-gallery') as HTMLButtonElement | null;
+    if (add) add.disabled = count >= MAX_GALLERY;
+  };
+  const validateRow = (row: HTMLElement) => {
+    const src = row.querySelector<HTMLInputElement>('[data-gallery-src]');
+    const alt = row.querySelector<HTMLInputElement>('[data-gallery-alt]');
+    const err = row.querySelector<HTMLElement>('[data-gallery-error]');
+    if (!src || !alt || !err) return;
+    let message = '';
+    if (src.value.trim() && !/^(https:\/\/\S+|\/\S+)$/.test(src.value.trim())) message = 'URL harus https:// atau path /media/….';
+    else if (src.value.trim() && alt.value.trim().length < 5) message = 'Teks alternatif wajib, minimal 5 karakter.';
+    else if (!src.value.trim() && alt.value.trim()) message = 'Isi URL foto atau unggah foto, atau kosongkan teks alternatif.';
+    err.textContent = message;
+    src.toggleAttribute('aria-invalid', Boolean(message) && !src.value.trim().match(/^(https:\/\/\S+|\/\S+)$/));
+    alt.toggleAttribute('aria-invalid', Boolean(message) && alt.value.trim().length < 5);
+  };
+  rowsWrap?.addEventListener('focusout', (event) => {
+    const row = (event.target as HTMLElement).closest<HTMLElement>('[data-gallery-row]');
+    if (row) validateRow(row);
+  });
+  rowsWrap?.addEventListener('input', (event) => {
+    const row = (event.target as HTMLElement).closest<HTMLElement>('[data-gallery-row]');
+    if (row && row.querySelector('[data-gallery-error]')?.textContent) validateRow(row);
+  });
+  rowsWrap?.addEventListener('click', (event) => {
+    const button = (event.target as HTMLElement).closest('[data-remove-gallery]');
+    if (!button) return;
+    const row = button.closest<HTMLElement>('[data-gallery-row]');
+    const rows = rowsWrap.querySelectorAll('[data-gallery-row]');
+    if (!row) return;
+    if (rows.length <= 1) {
+      row.querySelectorAll<HTMLInputElement>('input[type="text"], input:not([type])').forEach((input) => { input.value = ''; });
+      const thumb = row.querySelector('img.upload-thumb');
+      if (thumb) { const span = document.createElement('span'); span.className = 'upload-thumb upload-thumb-empty'; span.setAttribute('aria-hidden', 'true'); thumb.replaceWith(span); }
+      validateRow(row);
+    } else {
+      row.remove();
+      renumber();
+      (rowsWrap.querySelector('[data-gallery-src]') as HTMLInputElement | null)?.focus();
+    }
+  });
+  rowsWrap?.addEventListener('change', async (event) => {
+    const input = event.target as HTMLInputElement;
+    if (input.dataset.upload !== 'gallery' || !uploadEnabled) return;
+    const row = input.closest<HTMLElement>('[data-gallery-row]');
+    const file = input.files?.[0];
+    const status = row?.querySelector<HTMLElement>('[data-upload-status]');
+    if (!row || !file || !status) return;
+    input.disabled = true;
+    const altInput = row.querySelector<HTMLInputElement>('[data-gallery-alt]');
+    const result = await upload(file, altInput?.value || '', status);
+    input.disabled = false;
+    input.value = '';
+    if (!result) return;
+    const src = row.querySelector<HTMLInputElement>('[data-gallery-src]');
+    if (src) src.value = result.url;
+    const index = Array.from(rowsWrap.querySelectorAll('[data-gallery-row]')).indexOf(row);
+    setThumb(row.querySelector('.upload-thumb'), result.url, `Pratinjau foto galeri ${index + 1}`);
+    validateRow(row);
+    if (altInput && altInput.value.trim().length < 5) altInput.focus();
+  });
+  document.getElementById('add-gallery')?.addEventListener('click', () => {
+    if (!rowsWrap) return;
+    const rows = rowsWrap.querySelectorAll<HTMLElement>('[data-gallery-row]');
+    if (rows.length >= MAX_GALLERY) return;
+    const clone = rows[rows.length - 1].cloneNode(true) as HTMLElement;
+    clone.querySelectorAll<HTMLInputElement>('input').forEach((input) => { input.value = ''; input.removeAttribute('aria-invalid'); });
+    clone.querySelectorAll<HTMLElement>('[data-upload-status],[data-gallery-error]').forEach((el) => { el.textContent = ''; el.classList.remove('is-error'); });
+    const thumb = clone.querySelector('img.upload-thumb');
+    if (thumb) { const span = document.createElement('span'); span.className = 'upload-thumb upload-thumb-empty'; span.setAttribute('aria-hidden', 'true'); thumb.replaceWith(span); }
+    rowsWrap.appendChild(clone);
+    renumber();
+    clone.querySelector<HTMLInputElement>('[data-gallery-src]')?.focus();
+  });
+  renumber();
 </script>

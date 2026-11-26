@@ -16,10 +16,12 @@
       "database_id": "a214341b-4997-4f9a-95d5-a129d484b99e"
     }
   ],
-  // R2 sengaja belum diikat supaya situs bisa tayang tanpa verifikasi kartu.
-  // Nanti tambahkan:
+  // R2 belum diikat (R2 belum diaktifkan di akun). Kode unggah sudah siap & aman tanpa binding:
+  // tombol unggah /admin nonaktif + POST /api/admin/media/ → 503, /media/r2/* → 404.
+  // Setelah Rizal mengaktifkan R2 dan bucket `bacaanku-media` dibuat, buka komentar baris ini lalu deploy:
   // "r2_buckets": [{ "binding": "MEDIA", "bucket_name": "bacaanku-media" }],
-  // lalu secret/var: MEDIA_BASE = "https://media.bacaankunetwork.com"
+  // Gambar disajikan Worker di https://bacaankunetwork.com/media/r2/<kunci> (cache 1 tahun, immutable).
+  // MEDIA_BASE opsional, hanya bila nanti memakai domain media khusus (R2 custom domain).
   "assets": { "run_worker_first": true },
   "triggers": { "crons": ["*/5 * * * *"] },
   // Secrets (jangan di file ini):
@@ -29,6 +31,9 @@
   // Vars opsional saat Zero Trust / R2 siap:
   //   CF_ACCESS_TEAM_DOMAIN, CF_ACCESS_AUD, MEDIA_BASE
   // Zona produksi untuk purge cache (bukan secret).
-  "vars": { "CF_ZONE_ID": "59edbd70449f300ca5f906d8649603ad" },
+  // LENGTH_RULES: "warn" = aturan panjang isi (berita 450–900 kata; panduan 600–1.800 kata, 4–10 ##, FAQ)
+  // hanya jadi peringatan `warnings` di respons API. Hapus/ubah ke "enforce" setelah panduan Jenny & Rere
+  // diperbarui — saat ini artikel Jenny rata-rata 230–435 kata dan akan ditolak bila langsung ditegakkan.
+  "vars": { "CF_ZONE_ID": "59edbd70449f300ca5f906d8649603ad", "LENGTH_RULES": "warn" },
   "observability": { "enabled": false }
 }

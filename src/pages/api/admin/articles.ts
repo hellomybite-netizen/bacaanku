@@ -17,5 +17,5 @@ export const POST: APIRoute = async (context) => {
     waitUntil: (promise) => context.locals.cfContext.waitUntil(promise),
   });
   if (!result.ok) return Response.json({ errors: result.errors }, { status: 400, headers: { 'Cache-Control': 'no-store' } });
-  return Response.json({ id: result.id, redirect: result.redirect }, { headers: { 'Cache-Control': 'no-store' } });
+  return Response.json({ id: result.id, redirect: result.redirect, ...(result.warnings ? { warnings: result.warnings } : {}) }, { headers: { 'Cache-Control': 'no-store' } });
 };
