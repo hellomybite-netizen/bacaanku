@@ -6,6 +6,9 @@ import AdSlot from '../../components/AdSlot.astro';
 import Breadcrumb from '../../components/Breadcrumb.astro';
 import ShareButtons from '../../components/ShareButtons.astro';
 import Trending from '../../components/Trending.astro';
+import GuideArticle from '../../components/GuideArticle.astro';
+import { loadGuide, loadGuidesByCity, loadGuidesByCategory } from '../../lib/guide-repo';
+import { isGuideCategory } from '../../lib/local-guide';
 import { absUrl, articlePath, formatDateTime, isoDate } from '../../utils/articles';
 import { breadcrumbLd, newsArticleLd } from '../../utils/seo';
 import { applyPublicCache } from '../../lib/cache-headers';
@@ -16,20 +19,34 @@ export const prerender = __BUILD_MODE__ === 'static';
 
 export async function getStaticPaths() {
   if (__BUILD_MODE__ !== 'static') return [];
-  const { articlePaths } = await import('../../lib/static-data');
-  return articlePaths();
+  const [{ articlePaths }, { loadAllGuides }] = await Promise.all([
+    import('../../lib/static-data'),
+    import('../../lib/guide-repo'),
+  ]);
+  return [...await articlePaths(), ...(await loadAllGuides()).map((guide) => ({ params: { category: guide.category, slug: guide.slug } }))];
 }
 
 const category = Astro.params.category ?? '';
 const slug = Astro.params.slug ?? '';
-const isGone = DELETED_SAMPLE_SLUGS.has(slug);
-const result = isGone ? null : await loadArticle(category, slug);
+const guide = isGuideCategory(category) ? await loadGuide(category, slug) : null;
+let guideRelated: Awaited<ReturnType<typeof loadGuidesByCity>> = [];
+if (guide) {
+  const [sameCity, sameType] = await Promise.all([
+    guide.citySlug ? loadGuidesByCity(guide.citySlug, 6) : Promise.resolve([]),
+    loadGuidesByCategory(guide.category, 6),
+  ]);
+  const seen = new Set<number>([guide.id]);
+  guideRelated = [...sameCity, ...sameType].filter((item) => !seen.has(item.id) && (seen.add(item.id), true)).slice(0, 3);
+  applyPublicCache(Astro, 'article', [`article-${guide.id}`, `cat-${guide.category}`, `author-${guide.authorSlug}`, ...(guide.citySlug ? [`kota-${guide.citySlug}`] : [])]);
+}
+const isGone = !guide && DELETED_SAMPLE_SLUGS.has(slug);
+const result = guide || isGone ? null : await loadArticle(category, slug);
 if (result && 'redirect' in result) return Astro.redirect(result.redirect, 301);
 if (isGone) {
   Astro.response.status = 410;
   Astro.response.headers.set('Cache-Control', 'public, max-age=3600, s-maxage=86400');
   Astro.response.headers.set('X-Robots-Tag', 'noindex');
-} else if (!result) {
+} else if (!guide && !result) {
   Astro.response.status = 404;
 }
 const payload = result && !('redirect' in result) ? result : null;
@@ -56,7 +73,7 @@ const authorUrl = article ? `/penulis/${article.authorSlug}/` : '';
 const og = article?.heroSrc ? absUrl(article.heroSrc) : undefined;
 const sizes = '(min-width: 1240px) 780px, (min-width: 960px) 64vw, calc(100vw - 2rem)';
 ---
-{article ? (
+{guide ? <GuideArticle guide={guide} related={guideRelated} /> : article ? (
   <BaseLayout
     title={article.seoTitle ?? article.title}
     description={article.excerpt}
@@ -93,8 +110,13 @@ const sizes = '(min-width: 1240px) 780px, (min-width: 960px) 64vw, calc(100vw - 
       <div class="with-sidebar">
         <article class="article" data-pagefind-body>
           <header class="article-head">
-            <a class="kicker" href={`/${article.categorySlug}/`}>{article.categoryName}</a>
-            <h1 class="article-title">{article.title}</h1>
+            <div class="article-heading-row">
+              <div>
+                <a class="kicker" href={`/${article.categorySlug}/`}>{article.categoryName}</a>
+                <h1 class="article-title">{article.title}</h1>
+              </div>
+              <div class="article-topic-badge"><span>Topik</span><strong>{article.categoryName}</strong></div>
+            </div>
             <p class="article-dek">{article.excerpt}</p>
             <p class="article-meta">
               <span>Oleh <a href={authorUrl} rel="author">{article.authorName}</a></span>
@@ -145,7 +167,19 @@ const sizes = '(min-width: 1240px) 780px, (min-width: 960px) 64vw, calc(100vw - 
             <p class="muted small">{article.authorBio}</p>
           </aside>
         </article>
-        <div class="sidebar"><Trending items={payload?.trending ?? []} /><AdSlot size="rectangle" /></div>
+        <div class="sidebar article-sidebar">
+          <aside class="article-facts" aria-labelledby="info-singkat-title">
+            <h2 id="info-singkat-title">Info Singkat</h2>
+            <dl>
+              <div><dt>Topik</dt><dd><a href={`/${article.categorySlug}/`}>{article.categoryName}</a></dd></div>
+              <div><dt>Penulis</dt><dd><a href={authorUrl}>{article.authorName}</a></dd></div>
+              <div><dt>Terbit</dt><dd><time datetime={isoDate(article.publishedAt)}>{formatDateTime(article.publishedAt)}</time></dd></div>
+              <div><dt>Waktu baca</dt><dd>{article.readingMinutes} menit</dd></div>
+            </dl>
+          </aside>
+          <Trending items={payload?.trending ?? []} />
+          <AdSlot size="rectangle" />
+        </div>
       </div>
       {payload && payload.related.length > 0 && (
         <section class="deferred related" aria-labelledby="terkait-title" data-pagefind-ignore>

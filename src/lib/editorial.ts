@@ -1,6 +1,8 @@
 import { slugify } from '../utils/articles';
 import { isResolvableHero, rewriteWikimediaOriginal } from './media';
 import { renderMarkdown } from './markdown.mjs';
+import { emptyLocal, parseLocal, type LocalValues, type PreparedLocal } from './local-fields';
+import { isGuideCategory } from './local-guide';
 
 export type Source = { name: string; title: string; url: string };
 export type ArticleAction = 'draft' | 'review' | 'schedule' | 'publish' | 'archive';
@@ -26,6 +28,8 @@ export type ArticleValues = {
   isHeadline: boolean;
   publishWib: string;
   body: string;
+  /** Field opsional local wisdom (kota & info panduan). */
+  local: LocalValues;
 };
 
 export type PreparedArticle = {
@@ -38,6 +42,7 @@ export type PreparedArticle = {
   sources: Source[];
   bodyHtml: string;
   readingMinutes: number;
+  local: PreparedLocal;
   errors: Record<string, string>;
 };
 
@@ -65,6 +70,7 @@ export function emptyValues(): ArticleValues {
     isHeadline: false,
     publishWib: '',
     body: '',
+    local: emptyLocal(),
   };
 }
 
@@ -93,6 +99,7 @@ export function valuesFromRecord(record: {
   published_at: number | null;
   body_markdown: string;
   tags: { name: string }[];
+  local?: LocalValues;
 }): ArticleValues {
   let sources: Source[] = [];
   try {
@@ -123,6 +130,7 @@ export function valuesFromRecord(record: {
     isHeadline: record.is_headline === 1,
     publishWib: epochToWibInput(record.published_at),
     body: record.body_markdown || '',
+    local: record.local ?? emptyLocal(),
   };
 }
 
@@ -172,7 +180,7 @@ export function parseArticleForm(form: FormData, mediaBase?: string | null): Pre
     title,
     slug: field(form, 'slug'),
     excerpt: field(form, 'excerpt'),
-    category: field(form, 'category'),
+    category: field(form, 'category') || field(form, 'tipe'),
     author: field(form, 'author'),
     tags: field(form, 'tags'),
     heroUrl: rewriteWikimediaOriginal(field(form, 'hero_url')),
@@ -189,6 +197,7 @@ export function parseArticleForm(form: FormData, mediaBase?: string | null): Pre
     isHeadline: form.get('is_headline') === '1',
     publishWib: field(form, 'publish_wib'),
     body: typeof form.get('body') === 'string' ? String(form.get('body')) : '',
+    local: emptyLocal(),
   };
 
   const errors: Record<string, string> = {};
@@ -199,6 +208,11 @@ export function parseArticleForm(form: FormData, mediaBase?: string | null): Pre
   if (values.slug && !/^[a-z0-9-]+$/.test(values.slug)) errors.slug = 'Slug hanya huruf kecil, angka, dan tanda hubung.';
 
   if (!values.category) errors.category = 'Pilih kategori.';
+  const tipe = field(form, 'tipe');
+  if (tipe && !isGuideCategory(tipe)) errors.category = 'Tipe wisata harus hotel, wisata, atau kuliner.';
+  else if (tipe && field(form, 'category') && field(form, 'category') !== tipe) errors.category = 'Kategori dan tipe wisata berbeda. Isi salah satu saja.';
+  const local = parseLocal(form, values.category, strict, errors);
+  values.local = local.values;
   if (!values.author) errors.author = 'Pilih penulis.';
 
   if (strict) {
@@ -223,7 +237,8 @@ export function parseArticleForm(form: FormData, mediaBase?: string | null): Pre
 
   const filledSources = sources.filter((source) => source.name || source.title || source.url);
   if (strict) {
-    if (filledSources.length < 3) errors.sources = 'Minimal 3 sumber.';
+    const minSources = isGuideCategory(values.category) ? 2 : 3;
+    if (filledSources.length < minSources) errors.sources = `Minimal ${minSources} sumber.`;
     filledSources.forEach((source, index) => {
       if (!source.name || !source.title || !/^https:\/\/\S+$/.test(source.url)) {
         errors[`source-${index}`] = `Sumber ${index + 1} perlu nama, judul, dan URL https://.`;
@@ -271,6 +286,7 @@ export function parseArticleForm(form: FormData, mediaBase?: string | null): Pre
     sources: filledSources,
     bodyHtml: rendered.html,
     readingMinutes: rendered.minutes,
+    local: local.prepared,
     errors,
   };
 }

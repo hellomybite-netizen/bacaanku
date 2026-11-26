@@ -1,0 +1,41 @@
+---
+import GuideListing from '../../components/GuideListing.astro';
+import { loadGuidesByProvince } from '../../lib/guide-repo';
+import { cityPath, guideCities, guideCity, guideProvince, guideProvinces, MIN_INDEXABLE, provincePath } from '../../lib/local-guide';
+import { applyPublicCache } from '../../lib/cache-headers';
+
+export const prerender = __BUILD_MODE__ === 'static';
+
+export async function getStaticPaths() {
+  const { loadAllGuides } = await import('../../lib/guide-repo');
+  const guides = await loadAllGuides();
+  return guideProvinces.filter((province) => guides.some((guide) => guide.provinceSlug === province.slug)).map((province) => ({ params: { province: province.slug } }));
+}
+
+const slug = Astro.params.province ?? '';
+// URL lama desain GPT (/daerah/{kota}/) → halaman kota di menu Artikel.
+const asCity = guideCity(slug);
+if (asCity) return Astro.redirect(cityPath(asCity.slug), 301);
+const province = guideProvince(slug);
+if (!province) {
+  Astro.response.status = 404;
+  return new Response(null, { status: 404, statusText: 'Not Found' });
+}
+const guides = await loadGuidesByProvince(province.slug);
+if (!guides.length) {
+  Astro.response.status = 404;
+  return new Response(null, { status: 404, statusText: 'Not Found' });
+}
+applyPublicCache(Astro, 'list', [`prov-${province.slug}`]);
+const crumbs = [{ name: 'Beranda', href: '/' }, { name: 'Daerah', href: '/daerah/' }, { name: province.name, href: provincePath(province.slug) }];
+const cities = guideCities.filter((city) => city.province === province.slug && guides.some((guide) => guide.citySlug === city.slug));
+---
+<GuideListing title={province.name} description={province.description} image={province.image} region="Indonesia" guides={guides} crumbs={crumbs}
+  seoTitle={`${province.name}: Hotel, Wisata, dan Kuliner`} noindex={guides.length < MIN_INDEXABLE}>
+  {cities.length > 0 && (
+    <nav class="guide-city-links" aria-label={`Kota di ${province.name}`}>
+      <span>Kota:</span>
+      {cities.map((city) => <a href={cityPath(city.slug)}>{city.name}</a>)}
+    </nav>
+  )}
+</GuideListing>

@@ -1,0 +1,48 @@
+---
+import type { Guide } from '../lib/local-guide';
+
+interface Props { guide: Guide }
+const { guide } = Astro.props;
+const photos = [{ src: guide.heroSrc, cardSrc: guide.cardSrc, alt: guide.imageAlt }, ...guide.gallery];
+const main = photos[0];
+---
+<guide-gallery class="guide-article-photo">
+  <figure>
+    <img data-main-image src={main.src} srcset={main.cardSrc !== main.src ? `${main.cardSrc} 640w, ${main.src} 1600w` : undefined} sizes="(min-width: 1240px) 740px, (min-width: 760px) 65vw, calc(100vw - 2rem)" alt={main.alt} width="1600" height="900" fetchpriority="high" />
+    <figcaption>{guide.heroCaption}{guide.heroCredit && <span class="guide-photo-credit">{guide.heroCaption ? ' · ' : ''}{guide.heroCreditUrl ? <a href={guide.heroCreditUrl} rel="noopener noreferrer" target="_blank">{guide.heroCredit}</a> : guide.heroCredit}</span>}</figcaption>
+  </figure>
+  {photos.length > 1 && (
+    <div class="guide-thumbnails" data-thumbnails role="group" aria-label="Galeri foto" hidden>
+      {photos.map((photo, index) => (
+        <button type="button" aria-label={photo.alt} aria-pressed={index === 0 ? 'true' : 'false'} data-full={photo.src} data-card={photo.cardSrc}>
+          <img src={photo.cardSrc} alt="" width="640" height="360" loading="lazy" />
+        </button>
+      ))}
+    </div>
+  )}
+</guide-gallery>
+
+<script>
+  class GuideGallery extends HTMLElement {
+    connectedCallback() {
+      const main = this.querySelector<HTMLImageElement>('[data-main-image]');
+      const thumbnails = this.querySelector<HTMLElement>('[data-thumbnails]');
+      if (!main || !thumbnails) return;
+      const buttons = [...thumbnails.querySelectorAll('button')];
+      for (const button of buttons) {
+        button.addEventListener('click', () => {
+          const card = button.dataset.card;
+          const wide = button.dataset.full;
+          const alt = button.getAttribute('aria-label');
+          if (!card || !wide || alt == null) return;
+          if (card !== wide) main.srcset = `${card} 640w, ${wide} 1600w`; else main.removeAttribute('srcset');
+          main.src = wide;
+          main.alt = alt;
+          for (const item of buttons) item.setAttribute('aria-pressed', String(item === button));
+        });
+      }
+      thumbnails.hidden = false;
+    }
+  }
+  if (!customElements.get('guide-gallery')) customElements.define('guide-gallery', GuideGallery);
+</script>

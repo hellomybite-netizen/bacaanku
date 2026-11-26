@@ -1,0 +1,76 @@
+---
+import BaseLayout from '../layouts/BaseLayout.astro';
+import Breadcrumb from './Breadcrumb.astro';
+import AdSlot from './AdSlot.astro';
+import GuideCard from './GuideCard.astro';
+import GuideGallery from './GuideGallery.astro';
+import GuideIcon from './GuideIcon.astro';
+import { cityPath, guidePath, provincePath, type Guide } from '../lib/local-guide';
+import { absUrl } from '../utils/articles';
+import { breadcrumbLd } from '../utils/seo';
+import '../styles/local-wisdom.css';
+
+interface Props { guide: Guide; related?: Guide[] }
+const { guide, related: relatedAll = [] } = Astro.props;
+const categoryName = guide.categoryName;
+const path = guidePath(guide);
+const crumbs = [
+  { name: 'Beranda', href: '/' },
+  ...(guide.provinceSlug ? [{ name: guide.provinceName ?? 'Daerah', href: provincePath(guide.provinceSlug) }] : []),
+  ...(guide.citySlug && guide.cityName ? [{ name: guide.cityName, href: cityPath(guide.citySlug) }] : []),
+  { name: categoryName, href: `/${guide.category}/` },
+  { name: guide.name, href: path },
+];
+const related = relatedAll.filter((item) => item.id !== guide.id).slice(0, 3);
+const map = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponent(guide.mapQuery)}`;
+const iso = (epoch: number) => new Date(epoch * 1000).toISOString();
+const dateLabel = new Intl.DateTimeFormat('id-ID', { dateStyle: 'medium', timeZone: 'Asia/Jakarta' }).format(new Date(guide.publishedAt * 1000));
+const image = guide.heroSrc;
+const locationHref = guide.citySlug ? cityPath(guide.citySlug) : `/${guide.category}/`;
+---
+<BaseLayout title={guide.seoTitle ?? guide.title} description={guide.description} canonical={guide.canonicalUrl ?? path} image={image ? absUrl(image) : undefined} imageAlt={guide.imageAlt} type="article" currentCategory={guide.category}
+  article={{ publishedTime: iso(guide.publishedAt), modifiedTime: iso(guide.updatedAt), section: categoryName, tags: [categoryName, guide.cityName ?? 'Indonesia'], author: guide.authorName }}
+  jsonLd={[breadcrumbLd(crumbs)]}>
+  <article class="container guide-article">
+    <Breadcrumb items={crumbs} />
+    <header class="guide-article-head">
+      <div>
+        <h1>{guide.title}</h1>
+        <p class="guide-byline"><a class="guide-byline-author" href={`/penulis/${guide.authorSlug}/`} rel="author">{guide.authorName}</a><span><GuideIcon name="calendar" /><time datetime={iso(guide.publishedAt)}>{dateLabel}</time></span><span><GuideIcon name="clock" />{guide.readingMinutes} menit baca</span></p>
+      </div>
+      <a class="guide-article-location" href={locationHref}><GuideIcon name="pin" /><span>{guide.location}</span></a>
+    </header>
+
+    <div class="guide-article-layout">
+      <GuideGallery guide={guide} />
+
+      <aside class="guide-article-sidebar" aria-label="Informasi tempat">
+        {guide.mapQuery || guide.facts.length > 0 ? <details class="guide-facts" open>
+          <summary>Info Singkat</summary>
+          <dl>
+            {guide.facts.map((fact) => <div><dt>{fact.label}</dt><dd>{fact.value}</dd></div>)}
+            {guide.mapQuery && <div><dt>Peta</dt><dd><a href={map} rel="noopener noreferrer" target="_blank">Lihat di Google Maps<span class="visually-hidden"> (tab baru)</span></a></dd></div>}
+          </dl>
+        </details> : null}
+        {guide.action && <a class="guide-action" href={guide.action.url} rel="noopener noreferrer" target="_blank">{guide.action.label}<span class="visually-hidden"> (tab baru)</span></a>}
+      </aside>
+
+      <div class="guide-article-body">
+        <p class="guide-article-intro">{guide.description}</p>
+        <Fragment set:html={guide.bodyHtml} />
+        {guide.sources.length > 0 && <section class="guide-sources">
+          <h2>Sumber</h2>
+          <ul>{guide.sources.map((source) => <li><a href={source.url} rel="noopener noreferrer" target="_blank">{source.label}<span class="visually-hidden"> (tab baru)</span></a></li>)}</ul>
+        </section>}
+        <AdSlot size="inarticle" />
+      </div>
+    </div>
+
+    {related.length > 0 && (
+      <section class="guide-home-section" aria-labelledby="artikel-terkait">
+        <div class="guide-section-head"><h2 id="artikel-terkait">Jelajahi Juga</h2></div>
+        <div class="guide-grid">{related.map((item) => <GuideCard guide={item} />)}</div>
+      </section>
+    )}
+  </article>
+</BaseLayout>

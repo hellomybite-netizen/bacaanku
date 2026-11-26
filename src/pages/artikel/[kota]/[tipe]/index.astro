@@ -1,0 +1,36 @@
+---
+import GuideListing from '../../../../components/GuideListing.astro';
+import { loadGuidesByCity } from '../../../../lib/guide-repo';
+import { cityPath, guideCategories, guideCategory, guideCities, guideCity, guideProvince, MIN_INDEXABLE } from '../../../../lib/local-guide';
+import { applyPublicCache } from '../../../../lib/cache-headers';
+
+export const prerender = __BUILD_MODE__ === 'static';
+export async function getStaticPaths() {
+  const { loadCityCounts } = await import('../../../../lib/guide-repo');
+  const counts = await loadCityCounts();
+  return guideCities.flatMap((city) => guideCategories
+    .filter((type) => (counts.get(city.slug)?.[type.slug] ?? 0) > 0)
+    .map((type) => ({ params: { kota: city.slug, tipe: type.slug } })));
+}
+
+const city = guideCity(Astro.params.kota);
+const type = guideCategory(Astro.params.tipe ?? '');
+const all = city && type ? await loadGuidesByCity(city.slug) : [];
+const guides = all.filter((guide) => guide.category === type?.slug);
+if (!city || !type || !guides.length) {
+  Astro.response.status = 404;
+  return new Response(null, { status: 404, statusText: 'Not Found' });
+}
+applyPublicCache(Astro, 'list', [`kota-${city.slug}`, `cat-${type.slug}`]);
+const province = guideProvince(city.province);
+// Halaman tipis (< MIN_INDEXABLE) atau isinya sama persis dengan halaman kota → noindex, follow.
+const noindex = guides.length < MIN_INDEXABLE || guides.length === all.length;
+const crumbs = [
+  { name: 'Beranda', href: '/' },
+  { name: 'Artikel', href: '/artikel/' },
+  { name: city.name, href: cityPath(city.slug) },
+  { name: type.name, href: `/artikel/${city.slug}/${type.slug}/` },
+];
+---
+<GuideListing title={`${type.name} di ${city.name}`} description={`${type.description} Pilihan ${type.name.toLowerCase()} di ${city.name}, ${province?.name ?? 'Indonesia'}.`} image={city.image}
+  region={`${province?.name ?? 'Indonesia'}, Indonesia`} guides={guides} crumbs={crumbs} category={type.slug} filter="none" noindex={noindex} />

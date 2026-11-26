@@ -1,0 +1,23 @@
+---
+import GuideListing from '../../components/GuideListing.astro';
+import { loadAllGuides, loadCityCounts } from '../../lib/guide-repo';
+import { cityPath, guideCategories, guideCities } from '../../lib/local-guide';
+import { applyPublicCache } from '../../lib/cache-headers';
+
+export const prerender = __BUILD_MODE__ === 'static';
+applyPublicCache(Astro, 'list', ['artikel']);
+const [guides, counts] = await Promise.all([loadAllGuides(), loadCityCounts()]);
+const cities = guideCities.filter((city) => (counts.get(city.slug)?._all ?? 0) > 0);
+const crumbs = [{ name: 'Beranda', href: '/' }, { name: 'Artikel', href: '/artikel/' }];
+---
+<GuideListing title="Artikel" description="Semua artikel hotel, wisata, dan kuliner Bacaanku, dikelompokkan per kota dan tipe wisata." image="malang" guides={guides} crumbs={crumbs}
+  seoTitle="Artikel Hotel, Wisata, dan Kuliner per Kota" filter="category">
+  <nav class="guide-city-links" aria-label="Artikel per kota">
+    <span>Kota:</span>
+    {cities.map((city) => <a href={cityPath(city.slug)}>{city.name} <small>{counts.get(city.slug)?._all}</small></a>)}
+  </nav>
+  <nav class="guide-city-links" aria-label="Artikel per tipe wisata">
+    <span>Tipe:</span>
+    {guideCategories.map((type) => <a href={`/${type.slug}/`}>{type.name}</a>)}
+  </nav>
+</GuideListing>

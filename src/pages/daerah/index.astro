@@ -1,0 +1,33 @@
+---
+import BaseLayout from '../../layouts/BaseLayout.astro';
+import Breadcrumb from '../../components/Breadcrumb.astro';
+import { cityPath, guideCities, guideImage, guideProvince, guideProvinces, provincePath } from '../../lib/local-guide';
+import { photoCreditText } from '../../lib/photo-credits';
+import { loadCityCounts } from '../../lib/guide-repo';
+import { applyPublicCache } from '../../lib/cache-headers';
+import '../../styles/local-wisdom.css';
+
+export const prerender = __BUILD_MODE__ === 'static';
+applyPublicCache(Astro, 'list', ['daerah']);
+const counts = await loadCityCounts();
+const cities = guideCities.filter((city) => (counts.get(city.slug)?._all ?? 0) > 0);
+const provinces = guideProvinces.filter((province) => cities.some((city) => city.province === province.slug));
+---
+<BaseLayout title="Jelajahi Daerah" description={`Jelajahi panduan hotel, wisata, dan kuliner dari ${provinces.map((p) => p.name).join(' dan ')}.`}>
+  <div class="container guide-list-content">
+    <Breadcrumb items={[{ name: 'Beranda', href: '/' }, { name: 'Daerah' }]} />
+    <header class="guide-search-heading"><h1>Jelajahi Daerah</h1><p>{provinces.map((p) => p.name).join(' dan ')}</p></header>
+    <nav class="guide-city-links" aria-label="Provinsi">
+      <span>Provinsi:</span>
+      {provinces.map((province) => <a href={provincePath(province.slug)}>{province.name}</a>)}
+    </nav>
+    <div class="guide-grid">
+      {cities.map((region, index) => (
+        <a class="guide-region-card" href={cityPath(region.slug)}>
+          <img src={guideImage(region.image, 'card')} title={photoCreditText(region.image)} alt="" width="640" height="360" loading={index < 3 ? undefined : 'lazy'} fetchpriority={index === 0 ? 'high' : undefined} />
+          <span><strong>{region.name}</strong><small>{guideProvince(region.province)?.name}</small></span>
+        </a>
+      ))}
+    </div>
+  </div>
+</BaseLayout>

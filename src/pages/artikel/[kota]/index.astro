@@ -1,0 +1,39 @@
+---
+import GuideListing from '../../../components/GuideListing.astro';
+import { loadCityCounts, loadGuidesByCity } from '../../../lib/guide-repo';
+import { cityTypePath, guideCategories, guideCities, guideCity, guideProvince, MIN_INDEXABLE, provincePath } from '../../../lib/local-guide';
+import { applyPublicCache } from '../../../lib/cache-headers';
+
+export const prerender = __BUILD_MODE__ === 'static';
+export async function getStaticPaths() {
+  const { loadCityCounts } = await import('../../../lib/guide-repo');
+  const counts = await loadCityCounts();
+  return guideCities.filter((city) => counts.has(city.slug)).map((city) => ({ params: { kota: city.slug } }));
+}
+
+const city = guideCity(Astro.params.kota);
+const guides = city ? await loadGuidesByCity(city.slug) : [];
+if (!city || !guides.length) {
+  Astro.response.status = 404;
+  return new Response(null, { status: 404, statusText: 'Not Found' });
+}
+applyPublicCache(Astro, 'list', [`kota-${city.slug}`]);
+const province = guideProvince(city.province);
+const counts = (await loadCityCounts()).get(city.slug) ?? {};
+const types = guideCategories.filter((type) => (counts[type.slug] ?? 0) > 0);
+const crumbs = [
+  { name: 'Beranda', href: '/' },
+  { name: 'Artikel', href: '/artikel/' },
+  ...(province ? [{ name: province.name, href: provincePath(province.slug) }] : []),
+  { name: city.name, href: `/artikel/${city.slug}/` },
+];
+---
+<GuideListing title={city.name} description={city.description} image={city.image} region={`${province?.name ?? 'Indonesia'}, Indonesia`} guides={guides} crumbs={crumbs}
+  seoTitle={`Hotel, Wisata, dan Kuliner di ${city.name}`} noindex={guides.length < MIN_INDEXABLE}>
+  {types.length > 1 && (
+    <nav class="guide-city-links" aria-label={`Tipe wisata di ${city.name}`}>
+      <span>Tipe:</span>
+      {types.map((type) => <a href={cityTypePath(city.slug, type.slug)}>{type.name} <small>{counts[type.slug]}</small></a>)}
+    </nav>
+  )}
+</GuideListing>
