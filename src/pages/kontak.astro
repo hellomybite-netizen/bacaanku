@@ -1,14 +1,15 @@
 ---
 import PageLayout from '../layouts/PageLayout.astro';
-import { SITE } from '../config/site';
 export const prerender = true;
 ---
-<PageLayout title="Kontak" path="/kontak/" description="Hubungi redaksi bacaankunetwork.com untuk koreksi, hak jawab, kerja sama iklan, atau kiriman tulisan.">
-  <p>Kami senang mendengar dari Anda. Pilih saluran yang sesuai:</p>
+<PageLayout title="Kontak" path="/kontak/" description="Cara menghubungi Redaksi Bacaanku Network untuk koreksi, hak jawab, atau pertanyaan tentang isi situs.">
+  <p>Halaman ini memuat cara menghubungi Redaksi Bacaanku Network untuk koreksi, hak jawab, pertanyaan tentang data pribadi, atau kerja sama.</p>
+  <p>Saluran kontak resmi redaksi sedang disiapkan dan akan dicantumkan di halaman ini.</p>
+  <h2>Yang perlu disertakan</h2>
   <ul>
-    <li>Redaksi, koreksi &amp; hak jawab: <a href={`mailto:${SITE.email}`}>{SITE.email}</a></li>
-    <li>Iklan &amp; kerja sama: <a href="mailto:iklan@bacaankunetwork.com">iklan@bacaankunetwork.com</a></li>
+    <li>Tautan (URL) artikel yang dimaksud.</li>
+    <li>Bagian yang perlu dikoreksi beserta data atau sumber pendukung.</li>
+    <li>Untuk hak jawab: identitas pihak yang dirugikan dan tanggapan yang ingin dimuat.</li>
   </ul>
-  <p>Alamat redaksi: <em>(alamat contoh — isi sebelum live)</em></p>
-  <p class="muted">Catatan: alamat email di atas adalah contoh dan belum aktif.</p>
+  <p>Ketentuan ralat, koreksi, dan hak jawab mengikuti <a href="/pedoman-media-siber/">Pedoman Pemberitaan Media Siber</a>. Penggunaan data pribadi dijelaskan di <a href="/kebijakan-privasi/">Kebijakan Privasi</a>.</p>
 </PageLayout>

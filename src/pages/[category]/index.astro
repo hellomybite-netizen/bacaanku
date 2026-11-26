@@ -43,20 +43,22 @@ const base = `/${category.slug}/`;
 const crumbs = [{ name: 'Beranda', href: '/' }, { name: category.name, href: base }];
 const title = cursor ? `Berita ${category.name} — sebelumnya` : category.slug === 'news' ? 'News — Berita Terkini Hari Ini' : `Berita ${category.name} Terkini`;
 const categoryLead = items[0];
+/** Halaman lanjutan (?before=…&id=…) memakai canonical ke dirinya sendiri, bukan ke halaman 1. */
+const selfCanonical = cursor ? `${base}?before=${cursor.publishedAt}&id=${cursor.id}` : undefined;
 ---
 {guide ? (
   <GuideListing title={`${guide.name} Indonesia`} description={guide.description} image={guide.image} crumbs={crumbs}
     guides={guides} category={guide.slug} />
-) : <BaseLayout title={title} description={`${category.description} Kumpulan berita ${category.name} terbaru di ${SITE.domain}.`} jsonLd={[breadcrumbLd(crumbs)]} currentCategory={category.slug}>
+) : <BaseLayout title={title} description={`${category.description} Kumpulan berita ${category.name} terbaru di ${SITE.domain}.`} canonical={selfCanonical} jsonLd={[breadcrumbLd(crumbs)]} currentCategory={category.slug}>
   <div class="container category-shell">
     <Breadcrumb items={crumbs} />
     <header class="category-hero">
       {categoryLead && (
-        <div class="category-hero-media" aria-hidden="true">
+        <div class="category-hero-media">
           {categoryLead.heroImage ? (
-            <Picture src={categoryLead.heroImage} alt="" formats={['avif', 'webp']} widths={[640, 960, 1440]} sizes="(min-width: 1240px) 1180px, calc(100vw - 2rem)" quality={70} loading="eager" fetchpriority="high" />
+            <Picture src={categoryLead.heroImage} alt={categoryLead.heroAlt || categoryLead.title} formats={['avif', 'webp']} widths={[640, 960, 1440]} sizes="(min-width: 1240px) 1180px, calc(100vw - 2rem)" quality={70} loading="eager" fetchpriority="high" />
           ) : categoryLead.heroSrc && (
-            <img src={categoryLead.heroSrc} srcset={categoryLead.heroSrcset} alt="" width={categoryLead.heroWidth ?? undefined} height={categoryLead.heroHeight ?? undefined} fetchpriority="high" />
+            <img src={categoryLead.heroSrc} srcset={categoryLead.heroSrcset} alt={categoryLead.heroAlt || categoryLead.title} width={categoryLead.heroWidth ?? undefined} height={categoryLead.heroHeight ?? undefined} fetchpriority="high" />
           )}
         </div>
       )}

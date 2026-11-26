@@ -2,7 +2,7 @@
 import BaseLayout from '../../layouts/BaseLayout.astro';
 import Breadcrumb from '../../components/Breadcrumb.astro';
 import { cityPath, guideCities, guideImage, guideProvince, guideProvinces, provincePath } from '../../lib/local-guide';
-import { photoCreditText } from '../../lib/photo-credits';
+import { photoCredits, photoCreditText } from '../../lib/photo-credits';
 import { loadCityCounts } from '../../lib/guide-repo';
 import { applyPublicCache } from '../../lib/cache-headers';
 import '../../styles/local-wisdom.css';
@@ -24,7 +24,7 @@ const provinces = guideProvinces.filter((province) => cities.some((city) => city
     <div class="guide-grid">
       {cities.map((region, index) => (
         <a class="guide-region-card" href={cityPath(region.slug)}>
-          <img src={guideImage(region.image, 'card')} title={photoCreditText(region.image)} alt="" width="640" height="360" loading={index < 3 ? undefined : 'lazy'} fetchpriority={index === 0 ? 'high' : undefined} />
+          <img src={guideImage(region.image, 'card')} title={photoCreditText(region.image)} alt={photoCredits[region.image].title} width="640" height="360" loading={index < 3 ? undefined : 'lazy'} fetchpriority={index === 0 ? 'high' : undefined} />
           <span><strong>{region.name}</strong><small>{guideProvince(region.province)?.name}</small></span>
         </a>
       ))}

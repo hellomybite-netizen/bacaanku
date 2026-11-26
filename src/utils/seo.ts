@@ -9,7 +9,6 @@ export const organizationLd = () => ({
   alternateName: SITE.domain,
   url: `${SITE.url}/`,
   logo: { '@type': 'ImageObject', url: absUrl(SITE.logo), width: SITE.logoWidth, height: SITE.logoHeight },
-  email: SITE.email,
   publishingPrinciples: absUrl('/pedoman-media-siber/'),
   sameAs: [`https://x.com/${SITE.twitter.replace('@', '')}`],
 });
@@ -36,8 +35,44 @@ export const breadcrumbLd = (items: { name: string; href: string }[]) => ({
   itemListElement: items.map((it, i) => ({ '@type': 'ListItem', position: i + 1, name: it.name, item: absUrl(it.href) })),
 });
 
+const imageObject = (url: string, width?: number | null, height?: number | null) => ({
+  '@type': 'ImageObject',
+  url,
+  ...(width && height ? { width, height } : {}),
+});
+
+const publisherLd = () => ({
+  '@type': 'Organization',
+  '@id': `${SITE.url}/#organization`,
+  name: SITE.name,
+  url: `${SITE.url}/`,
+  logo: { '@type': 'ImageObject', url: absUrl(SITE.logo), width: SITE.logoWidth, height: SITE.logoHeight },
+});
+
+/** JSON-LD panduan lokal (wisata/kuliner/hotel): Article + publisher berlogo + gambar berdimensi. */
+export const guideArticleLd = (o: {
+  url: string; headline: string; description: string; image: string; imageWidth: number; imageHeight: number;
+  imageAlt?: string; datePublished: Date; dateModified: Date; authorName: string; authorUrl: string;
+  section: string; placeName?: string; location?: string;
+}) => ({
+  '@context': 'https://schema.org',
+  '@type': 'Article',
+  mainEntityOfPage: { '@type': 'WebPage', '@id': o.url },
+  headline: o.headline.length > 110 ? truncateAtWord(o.headline, 110) : o.headline,
+  description: o.description,
+  image: [{ ...imageObject(o.image, o.imageWidth, o.imageHeight), ...(o.imageAlt ? { caption: o.imageAlt } : {}) }],
+  datePublished: o.datePublished.toISOString(),
+  dateModified: o.dateModified.toISOString(),
+  author: [{ '@type': o.authorUrl.endsWith('/penulis/redaksi/') ? 'Organization' : 'Person', name: o.authorName, url: o.authorUrl }],
+  publisher: publisherLd(),
+  articleSection: o.section,
+  ...(o.placeName ? { about: { '@type': 'Place', name: o.placeName, ...(o.location ? { address: o.location } : {}) } } : {}),
+  inLanguage: SITE.hreflang,
+  isAccessibleForFree: true,
+});
+
 export const newsArticleLd = (o: {
-  url: string; headline: string; description: string; image: string; datePublished: Date; dateModified: Date;
+  url: string; headline: string; description: string; image: string; imageWidth?: number | null; imageHeight?: number | null; datePublished: Date; dateModified: Date;
   authorName: string; authorUrl: string; section: string; keywords: string[];
 }) => ({
   '@context': 'https://schema.org',
@@ -45,7 +80,7 @@ export const newsArticleLd = (o: {
   mainEntityOfPage: { '@type': 'WebPage', '@id': o.url },
   headline: o.headline,
   description: o.description,
-  image: [o.image],
+  image: [imageObject(o.image, o.imageWidth, o.imageHeight)],
   datePublished: o.datePublished.toISOString(),
   dateModified: o.dateModified.toISOString(),
   author: [{ '@type': 'Person', name: o.authorName, url: o.authorUrl }],

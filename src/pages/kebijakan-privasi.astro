@@ -1,13 +1,44 @@
 ---
 import PageLayout from '../layouts/PageLayout.astro';
 export const prerender = true;
+const updated = '27 November 2026';
 ---
-<PageLayout title="Kebijakan Privasi" path="/kebijakan-privasi/" description="Kebijakan privasi bacaankunetwork.com: data apa yang dikumpulkan, cookie, iklan, dan hak Anda sesuai UU Pelindungan Data Pribadi.">
-  <p class="muted"><strong>Draf contoh</strong> — tinjau bersama penasihat hukum sebelum live (mengacu UU No. 27 Tahun 2022 tentang Pelindungan Data Pribadi).</p>
+<PageLayout title="Kebijakan Privasi" path="/kebijakan-privasi/" description="Kebijakan privasi Bacaanku Network: data yang dikumpulkan, cookie Google Analytics (via Google Tag Manager) dan Google AdSense, cara menolak, serta hak Anda.">
+  <p class="muted">Terakhir diperbarui: {updated}</p>
+  <p>Kebijakan ini menjelaskan data apa yang diproses saat Anda membuka bacaankunetwork.com, untuk apa, dan pilihan yang Anda miliki. Kebijakan ini disusun dengan memperhatikan Undang-Undang Nomor 27 Tahun 2022 tentang Pelindungan Data Pribadi.</p>
+
   <h2>Data yang kami kumpulkan</h2>
-  <p>Prototipe ini tidak memasang cookie pelacak. Preferensi mode gelap/terang disimpan di perangkat Anda (localStorage) dan tidak dikirim ke server.</p>
-  <h2>Iklan dan analitik</h2>
-  <p>Bila nanti memasang iklan atau analitik, kebijakan ini wajib diperbarui dan, bila perlu, meminta persetujuan pengguna.</p>
+  <p>Pembaca tidak perlu mendaftar atau masuk untuk membaca situs ini, dan kami tidak meminta nama, alamat email, atau nomor telepon pembaca. Data yang diproses berasal dari layanan pihak ketiga berikut serta dari perangkat Anda sendiri:</p>
+  <ul>
+    <li><strong>Data teknis kunjungan</strong> seperti alamat IP, jenis peramban dan perangkat, halaman yang dibuka, dan waktu kunjungan.</li>
+    <li><strong>Preferensi tampilan</strong> (mode terang/gelap) yang disimpan di <em>localStorage</em> perangkat Anda dan tidak dikirim ke server kami.</li>
+  </ul>
+
+  <h2>Google Tag Manager dan Google Analytics</h2>
+  <p>Situs ini memasang <strong>Google Tag Manager</strong> (kontainer GTM-T62FKJQ9) untuk memuat <strong>Google Analytics 4</strong>. Google Analytics memakai cookie pihak pertama (misalnya <code>_ga</code> dan <code>_ga_*</code>) untuk menghitung kunjungan dan memahami cara halaman digunakan, termasuk tampilan halaman, gulir, klik tautan keluar, pencarian di situs, dan unduhan berkas. Data ini kami pakai dalam bentuk statistik agregat untuk memperbaiki isi dan kinerja situs, bukan untuk mengenali Anda secara pribadi.</p>
+  <p>Penjelasan Google: <a href="https://policies.google.com/technologies/partner-sites?hl=id" rel="noopener noreferrer">Cara Google menggunakan informasi dari situs atau aplikasi yang menggunakan layanannya</a>.</p>
+
+  <h2>Google AdSense (iklan)</h2>
+  <p>Situs ini menampilkan iklan dari <strong>Google AdSense</strong>. Google dan mitranya sebagai vendor pihak ketiga menggunakan cookie (misalnya cookie DoubleClick/<code>IDE</code>, <code>__gads</code>, dan <code>__gpi</code>) atau pengenal serupa untuk menayangkan iklan berdasarkan kunjungan Anda sebelumnya ke situs ini dan situs lain, membatasi frekuensi iklan, mengukur kinerja iklan, dan mencegah penipuan. Penggunaan cookie iklan oleh Google memungkinkan Google dan mitranya menayangkan iklan kepada Anda berdasarkan kunjungan Anda ke situs ini dan/atau situs lain di internet.</p>
+  <p>Informasi lebih lanjut: <a href="https://policies.google.com/technologies/ads?hl=id" rel="noopener noreferrer">Cara Google menggunakan cookie dalam iklan</a>.</p>
+
+  <h2>Cara menolak atau mengatur cookie</h2>
+  <ul>
+    <li>Iklan yang dipersonalisasi dari Google: <a href="https://myadcenter.google.com/" rel="noopener noreferrer">Pusat Iklan Saya / Setelan Iklan Google</a>.</li>
+    <li>Iklan berbasis minat dari vendor pihak ketiga lain: <a href="https://optout.aboutads.info/" rel="noopener noreferrer">aboutads.info</a> dan <a href="https://www.youronlinechoices.com/" rel="noopener noreferrer">youronlinechoices.com</a>.</li>
+    <li>Google Analytics: pasang <a href="https://tools.google.com/dlpage/gaoptout?hl=id" rel="noopener noreferrer">Add-on Pengecualian Google Analytics untuk Browser</a>.</li>
+    <li>Semua cookie: hapus atau blokir cookie melalui pengaturan peramban Anda. Situs tetap dapat dibaca, tetapi iklan yang tampil mungkin menjadi kurang relevan.</li>
+  </ul>
+
+  <h2>Hosting dan keamanan</h2>
+  <p>Situs ini dihosting di Cloudflare. Cloudflare memproses data teknis seperti alamat IP untuk mengirimkan halaman dan melindungi situs dari lalu lintas berbahaya. Ruang editor (<code>/admin/</code>) memakai cookie sesi khusus editor yang login; cookie ini tidak dipasang untuk pembaca.</p>
+
+  <h2>Tautan ke situs lain</h2>
+  <p>Artikel dapat memuat tautan ke situs pihak ketiga (misalnya sumber berita, peta, atau situs resmi tempat wisata). Kebijakan privasi situs tersebut berlaku saat Anda membukanya.</p>
+
   <h2>Hak Anda</h2>
-  <p>Anda dapat menghubungi kami melalui halaman <a href="/kontak/">Kontak</a> untuk pertanyaan terkait data pribadi.</p>
+  <p>Sesuai UU Pelindungan Data Pribadi, Anda berhak meminta informasi, akses, perbaikan, atau penghapusan data pribadi Anda, serta menarik persetujuan pemrosesan. Karena kami tidak menyimpan data identitas pembaca, sebagian besar data di atas dikelola oleh Google dan Cloudflare; gunakan tautan pengaturan di atas atau hubungi kami melalui halaman <a href="/kontak/">Kontak</a>.</p>
+
+  <h2>Perubahan kebijakan</h2>
+  <p>Kebijakan ini dapat diperbarui bila layanan yang kami pakai berubah. Tanggal pembaruan terakhir tercantum di bagian atas halaman.</p>
 </PageLayout>

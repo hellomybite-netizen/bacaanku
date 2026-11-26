@@ -7,7 +7,8 @@ import GuideGallery from './GuideGallery.astro';
 import GuideIcon from './GuideIcon.astro';
 import { cityPath, guidePath, provincePath, type Guide } from '../lib/local-guide';
 import { absUrl } from '../utils/articles';
-import { breadcrumbLd } from '../utils/seo';
+import { breadcrumbLd, guideArticleLd } from '../utils/seo';
+import mediaDims from '../lib/media-dims.json';
 import '../styles/local-wisdom.css';
 
 interface Props { guide: Guide; related?: Guide[] }
@@ -26,11 +27,19 @@ const map = `https://www.google.com/maps/search/?api=1&query=${encodeURIComponen
 const iso = (epoch: number) => new Date(epoch * 1000).toISOString();
 const dateLabel = new Intl.DateTimeFormat('id-ID', { dateStyle: 'medium', timeZone: 'Asia/Jakarta' }).format(new Date(guide.publishedAt * 1000));
 const image = guide.heroSrc;
+const [imageWidth, imageHeight] = ((mediaDims as Record<string, number[]>)[image] ?? [1600, 900]) as [number, number];
+const articleLd = guideArticleLd({
+  url: absUrl(path), headline: guide.title, description: guide.description, image: image ? absUrl(image) : absUrl('/og-default.png'),
+  imageWidth: image ? imageWidth : 1200, imageHeight: image ? imageHeight : 630, imageAlt: guide.imageAlt,
+  datePublished: new Date(guide.publishedAt * 1000), dateModified: new Date(guide.updatedAt * 1000),
+  authorName: guide.authorName, authorUrl: absUrl(`/penulis/${guide.authorSlug}/`), section: categoryName,
+  placeName: guide.name, location: guide.location,
+});
 const locationHref = guide.citySlug ? cityPath(guide.citySlug) : `/${guide.category}/`;
 ---
-<BaseLayout title={guide.seoTitle ?? guide.title} description={guide.description} canonical={guide.canonicalUrl ?? path} image={image ? absUrl(image) : undefined} imageAlt={guide.imageAlt} type="article" currentCategory={guide.category}
+<BaseLayout title={guide.seoTitle ?? guide.title} description={guide.description} canonical={guide.canonicalUrl ?? path} image={image ? absUrl(image) : undefined} imageAlt={guide.imageAlt} imageWidth={image ? imageWidth : null} imageHeight={image ? imageHeight : null} type="article" currentCategory={guide.category}
   article={{ publishedTime: iso(guide.publishedAt), modifiedTime: iso(guide.updatedAt), section: categoryName, tags: [categoryName, guide.cityName ?? 'Indonesia'], author: guide.authorName }}
-  jsonLd={[breadcrumbLd(crumbs)]}>
+  jsonLd={[articleLd, breadcrumbLd(crumbs)]}>
   <article class="container guide-article">
     <Breadcrumb items={crumbs} />
     <header class="guide-article-head">
