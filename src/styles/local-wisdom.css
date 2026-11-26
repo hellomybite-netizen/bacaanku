@@ -161,9 +161,16 @@ guide-catalog [hidden] { display: none !important; }
   .guide-grid { grid-template-columns: minmax(0, 1fr); }
   .guide-card-copy h2, .guide-card-copy h3 { font-size: 1.2rem; }
   .guide-list-hero { min-block-size: 14.5rem; }
-  .guide-list-hero-region { min-block-size: 12.5rem; align-items: end; }
+  .guide-list-hero-region { min-block-size: 13.5rem; align-items: end; }
   .guide-list-hero-region::after { background: linear-gradient(0deg, rgb(7 37 39 / .88), rgb(8 38 41 / .11) 85%); }
-  .guide-list-hero-region .guide-list-hero-copy { padding-block: 1.1rem; }
+  .guide-list-hero-region .guide-list-hero-copy { padding-block: 1.1rem 3rem; }
+  .guide-list-hero .photo-credit {
+    white-space: normal;
+    text-align: end;
+    max-inline-size: min(22rem, calc(100% - 1rem));
+    padding: .28rem .5rem;
+    background: rgb(0 0 0 / .78);
+  }
   .guide-list-hero-region .guide-list-hero-copy > p { display: none; }
   .guide-region-mobile-description { display: block; }
   .guide-list-content { padding-block-start: 1.05rem; }
