@@ -11,7 +11,7 @@ interface Env {
   CF_ACCESS_AUD?: string;
   CF_ZONE_ID?: string;
   CF_PURGE_TOKEN?: string;
-  /** "warn" = aturan panjang isi hanya peringatan (masa transisi). Kosong/lainnya = ditegakkan (HTTP 400). */
+  /** "enforce" = aturan panjang isi ditegakkan (HTTP 400). Kosong/lainnya = hanya peringatan `warnings` (masa transisi). */
   LENGTH_RULES?: string;
 }
 

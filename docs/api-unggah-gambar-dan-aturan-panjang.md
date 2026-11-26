@@ -14,7 +14,7 @@ Angka seperti `Rp22.000` atau `1.800` = 1 kata; tanda pisah `–` memisahkan kat
 di bawah kolom Isi (✓/✗) memakai rumus yang sama dengan server (`src/lib/length-rules.ts`).
 
 Kapan dicek:
-- **Ditegakkan** saat `action=review`, `schedule`, atau `publish`.
+- **Dicek** saat `action=review`, `schedule`, atau `publish` (ditolak HTTP 400 bila `LENGTH_RULES=enforce`, lihat masa transisi di bawah).
 - **Tidak dicek** saat `draft` dan `archive` (draf boleh pendek).
 - **Artikel lama**: saat mengedit artikel yang sudah ada, aturan hanya berlaku bila **isi (body) diubah**.
   Mengganti judul SEO, gambar, tag, kredit, dsb. tanpa menyentuh isi tetap boleh walau artikelnya lebih pendek dari aturan baru
@@ -31,9 +31,10 @@ Respons bila melanggar (HTTP 400), kunci error:
 } }
 ```
 
-**Masa transisi (`LENGTH_RULES=warn`)**: variabel Worker `LENGTH_RULES` di `wrangler.jsonc`. Saat bernilai `warn`, artikel
-tetap tersimpan/terbit (HTTP 200) dan pelanggaran dikembalikan sebagai `"warnings": { … }` dengan kunci yang sama; form
-menampilkan "Tersimpan, tetapi isi belum memenuhi aturan panjang". Hapus variabel itu (atau isi `enforce`) untuk menegakkan.
+**Masa transisi (default)**: selama variabel Worker `LENGTH_RULES` belum bernilai `enforce`, artikel tetap tersimpan/terbit
+(HTTP 200) dan pelanggaran dikembalikan sebagai `"warnings": { … }` dengan kunci yang sama; form menampilkan
+"Tersimpan, tetapi isi belum memenuhi aturan panjang". Set `LENGTH_RULES=enforce` (binding plain_text di skrip deploy
+`mkworker.mjs`, atau `vars` di `wrangler.jsonc`) untuk menegakkan dengan HTTP 400.
 Alasan: per 25 Nov artikel Jenny 230–435 kata, jadi langsung ditegakkan = semua kiriman Jenny ditolak.
 
 ## 2. Unggah gambar ke R2
@@ -106,5 +107,7 @@ Error (selalu JSON `{ "error": "<kode>", "message": "<pesan Indonesia>" }`):
 1. Dashboard Cloudflare → akun Bacaanku → **R2 Object Storage** → **Purchase R2 / Enable R2** (verifikasi kartu; gratis s.d. 10 GB,
    1 juta operasi tulis & 10 juta operasi baca per bulan).
 2. Buat bucket **`bacaanku-media`** (lokasi otomatis). Tidak perlu akses publik / custom domain — gambar disajikan lewat Worker.
-3. Di `wrangler.jsonc`, buka komentar `"r2_buckets": [{ "binding": "MEDIA", "bucket_name": "bacaanku-media" }]`, lalu deploy.
+3. Di `wrangler.jsonc`, buka komentar `"r2_buckets": [{ "binding": "MEDIA", "bucket_name": "bacaanku-media" }]`. Deploy via
+   `/workspace/deploy-v5/mkworker.mjs` menulis binding sendiri, jadi tambahkan juga
+   `{ type: 'r2_bucket', name: 'MEDIA', bucket_name: 'bacaanku-media' }` ke `bindings` di skrip itu, lalu deploy.
 4. Cek: login `/admin/artikel/baru/` → tombol unggah aktif; `GET /api/admin/media/` → `"enabled": true`.

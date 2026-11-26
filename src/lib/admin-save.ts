@@ -32,8 +32,9 @@ async function enforceLengthRules(env: Env, db: D1Database, prepared: ReturnType
   }
   const found: Record<string, string> = {};
   checkLength(prepared.values.body, prepared.values.category, found);
-  // LENGTH_RULES="warn" = masa transisi: tetap tersimpan, pelanggaran dikembalikan sebagai `warnings`.
-  if ((env.LENGTH_RULES || '').toLowerCase() === 'warn') return found;
+  // Default = masa transisi (peringatan saja): tetap tersimpan, pelanggaran dikembalikan sebagai `warnings`.
+  // Ditegakkan (HTTP 400) hanya bila var Worker LENGTH_RULES="enforce" — aman walau skrip deploy tidak membawa var.
+  if ((env.LENGTH_RULES || '').toLowerCase() !== 'enforce') return found;
   if (Object.keys(found).length) {
     delete prepared.errors.body;
     Object.assign(prepared.errors, found);

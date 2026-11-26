@@ -34,9 +34,11 @@
   // Vars opsional saat Zero Trust / R2 siap:
   //   CF_ACCESS_TEAM_DOMAIN, CF_ACCESS_AUD, MEDIA_BASE
   // Zona produksi untuk purge cache (bukan secret).
-  // LENGTH_RULES: "warn" = aturan panjang isi (berita 450–900 kata; panduan 600–1.800 kata, 4–10 ##, FAQ)
-  // hanya jadi peringatan `warnings` di respons API. Hapus/ubah ke "enforce" setelah panduan Jenny & Rere
-  // diperbarui — saat ini artikel Jenny rata-rata 230–435 kata dan akan ditolak bila langsung ditegakkan.
-  "vars": { "CF_ZONE_ID": "59edbd70449f300ca5f906d8649603ad", "LENGTH_RULES": "warn" },
+  // LENGTH_RULES: aturan panjang isi (berita 450–900 kata; panduan 600–1.800 kata, 4–10 ##, FAQ).
+  // Tanpa var / selain "enforce" = hanya peringatan `warnings` (masa transisi). Set "enforce" setelah panduan
+  // Jenny & Rere diperbarui — per 25 Nov artikel Jenny 230–435 kata dan akan ditolak bila langsung ditegakkan.
+  // Catatan: skrip deploy /workspace/deploy-v5/mkworker.mjs menulis binding sendiri (tidak membaca vars ini);
+  // tambahkan { type: 'plain_text', name: 'LENGTH_RULES', text: 'enforce' } di sana saat siap.
+  "vars": { "CF_ZONE_ID": "59edbd70449f300ca5f906d8649603ad" },
   "observability": { "enabled": false }
 }
