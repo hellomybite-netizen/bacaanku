@@ -62,7 +62,7 @@ if (!IS_STATIC) {
         <div class="row-list">
           {rows.map((row) => (
             <a class="admin-row" href={`/admin/artikel/${row.id}/`}>
-              <span class:list={['pill', `pill-${row.status}`]}>{labels[row.status] || row.status}</span>
+              {row.archived_at ? <span class="pill pill-archived">Arsip · tetap tayang</span> : <span class:list={['pill', `pill-${row.status}`]}>{labels[row.status] || row.status}</span>}
               <strong>{row.title}</strong>
               <small>{row.category_name} · {row.author_name}</small>
               <small>{row.published_at ? formatDateTime(row.published_at) : 'Belum dijadwalkan'}</small>

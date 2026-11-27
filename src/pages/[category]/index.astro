@@ -66,6 +66,7 @@ const selfCanonical = cursor ? `${base}?before=${cursor.publishedAt}&id=${cursor
         <p class="hero-kicker">Jelajahi Bacaanku</p>
         <h1 class="page-title">{category.name}</h1>
         <p>{category.description}</p>
+        {items.length > 0 && items.every((item) => item.archivedAt) && <p class="category-archived-note">Kategori ini berisi arsip berita. Semua tautan tetap bisa dibuka. <a href="/arsip-berita/">Lihat seluruh arsip</a></p>}
       </div>
     </header>
 

@@ -2,12 +2,20 @@
  * Query publik. Setiap pernyataan harus lolos EXPLAIN QUERY PLAN
  * tanpa "SCAN articles" (lihat scripts/explain-queries.mjs).
  * Jangan pakai SELECT * di daftar. Jangan pakai OFFSET.
+ *
+ * ARSIP (migrasi 0004): artikel arsip tetap status='published' (URL tetap 200) tetapi
+ * `archived_at` terisi. Daftar beranda/feed/sitemap/Terpopuler/terkait memakai ACTIVE
+ * (archived_at IS NULL). Halaman kategori lama, tag, penulis, dan pencarian tetap memuat
+ * arsip sebagai jalur jelajah. Sitemap juga melewati artikel robots_noindex = 1.
  */
+
+/** Syarat artikel aktif (bukan arsip). */
+export const ACTIVE = `a.archived_at IS NULL`;
 
 export const cardSelect = `
   a.id, a.slug, a.title, a.excerpt,
   a.hero_r2_key, a.hero_width, a.hero_height, a.hero_alt,
-  a.published_at, a.is_headline,
+  a.published_at, a.is_headline, a.archived_at,
   c.slug AS category_slug, c.name AS category_name
 `;
 
@@ -15,7 +23,7 @@ export const sqlLatest = `
   SELECT ${cardSelect}
   FROM articles a
   JOIN categories c ON c.id = a.category_id
-  WHERE a.status = 'published' AND a.published_at <= ?
+  WHERE a.status = 'published' AND a.published_at <= ? AND ${ACTIVE}
   ORDER BY a.published_at DESC
   LIMIT ?
 `;
@@ -24,7 +32,7 @@ export const sqlHeadline = `
   SELECT ${cardSelect}
   FROM articles a
   JOIN categories c ON c.id = a.category_id
-  WHERE a.status = 'published' AND a.is_headline = 1 AND a.published_at <= ?
+  WHERE a.status = 'published' AND a.is_headline = 1 AND a.published_at <= ? AND ${ACTIVE}
   ORDER BY a.published_at DESC
   LIMIT 1
 `;
@@ -34,6 +42,16 @@ export const sqlByCategory = `
   FROM articles a
   JOIN categories c ON c.id = a.category_id
   WHERE a.category_id = ? AND a.status = 'published' AND a.published_at <= ?
+  ORDER BY a.published_at DESC
+  LIMIT ?
+`;
+
+/** Sama dengan sqlByCategory tanpa arsip — untuk beranda & RSS kategori. */
+export const sqlByCategoryActive = `
+  SELECT ${cardSelect}
+  FROM articles a
+  JOIN categories c ON c.id = a.category_id
+  WHERE a.category_id = ? AND a.status = 'published' AND a.published_at <= ? AND ${ACTIVE}
   ORDER BY a.published_at DESC
   LIMIT ?
 `;
@@ -64,7 +82,7 @@ export const sqlBySlug = `
   SELECT ${cardSelect}
   FROM articles a
   JOIN categories c ON c.id = a.category_id
-  WHERE a.slug = ? AND a.status = 'published' AND a.published_at <= ?
+  WHERE a.slug = ? AND a.status = 'published' AND a.published_at <= ? AND ${ACTIVE}
 `;
 
 export const sqlCategoryBySlug = `
@@ -99,6 +117,7 @@ export const sqlArticle = `
          a.hero_credit, a.hero_credit_url, a.sources_json,
          a.seo_title, a.seo_description, a.canonical_url,
          a.published_at, a.updated_at, a.is_headline, a.category_id,
+         a.archived_at, a.robots_noindex,
          c.slug AS category_slug, c.name AS category_name,
          au.slug AS author_slug, au.name AS author_name, au.role AS author_role, au.bio AS author_bio
   FROM articles a
@@ -118,7 +137,7 @@ export const sqlRelated = `
   SELECT ${cardSelect}
   FROM articles a
   JOIN categories c ON c.id = a.category_id
-  WHERE a.category_id = ? AND a.status = 'published' AND a.id != ? AND a.published_at <= ?
+  WHERE a.category_id = ? AND a.status = 'published' AND a.id != ? AND a.published_at <= ? AND ${ACTIVE}
   ORDER BY a.published_at DESC
   LIMIT ?
 `;
@@ -130,7 +149,7 @@ export const sqlRedirect = `
 export const sqlSearch = `
   SELECT a.id, a.slug, a.title, a.excerpt,
          a.hero_r2_key, a.hero_width, a.hero_height, a.hero_alt,
-         a.published_at, a.is_headline,
+         a.published_at, a.is_headline, a.archived_at,
          c.slug AS category_slug, c.name AS category_name
   FROM articles_fts
   JOIN articles a ON a.id = articles_fts.rowid
@@ -145,6 +164,7 @@ export const sqlNews = `
   FROM articles a
   JOIN categories c ON c.id = a.category_id
   WHERE a.status = 'published' AND a.published_at >= ? AND a.published_at <= ?
+    AND ${ACTIVE} AND a.robots_noindex = 0
   ORDER BY a.published_at DESC
   LIMIT 1000
 `;
@@ -154,8 +174,35 @@ export const sqlMonth = `
   FROM articles a
   JOIN categories c ON c.id = a.category_id
   WHERE a.status = 'published' AND a.published_at >= ? AND a.published_at < ?
+    AND ${ACTIVE} AND a.robots_noindex = 0
   ORDER BY a.published_at DESC
   LIMIT 5000
+`;
+
+/** /arsip-berita/: arsip terbaru dulu (index parsial idx_articles_archived_pub). */
+export const sqlArchived = `
+  SELECT ${cardSelect}
+  FROM articles a
+  JOIN categories c ON c.id = a.category_id
+  WHERE a.archived_at IS NOT NULL AND a.status = 'published' AND a.published_at <= ?
+  ORDER BY a.published_at DESC, a.id DESC
+  LIMIT ?
+`;
+
+/** Keyset halaman berikutnya /arsip-berita/?sebelum=… */
+export const sqlArchivedBefore = `
+  SELECT ${cardSelect}
+  FROM articles a
+  JOIN categories c ON c.id = a.category_id
+  WHERE a.archived_at IS NOT NULL AND a.status = 'published' AND a.published_at <= ?
+    AND (a.published_at < ? OR (a.published_at = ? AND a.id < ?))
+  ORDER BY a.published_at DESC, a.id DESC
+  LIMIT ?
+`;
+
+export const sqlArchivedCount = `
+  SELECT COUNT(*) AS n FROM articles a
+  WHERE a.archived_at IS NOT NULL AND a.status = 'published' AND a.published_at <= ?
 `;
 
 export const sqlPublishedBounds = `
@@ -187,11 +234,29 @@ export const sqlPublishOne = `
 
 export const sqlAdminByStatus = `
   SELECT a.id, a.slug, a.title, a.status, a.updated_at, a.published_at, a.is_headline,
+         a.archived_at,
          c.slug AS category_slug, c.name AS category_name, au.name AS author_name
   FROM articles a
   JOIN categories c ON c.id = a.category_id
   JOIN authors au ON au.id = a.author_id
   WHERE a.status = ?
   ORDER BY a.updated_at DESC
+  LIMIT ?
+`;
+
+/** Filter admin "Diarsipkan": arsip baru (status published + archived_at) dan arsip lama (status archived). */
+const adminCols = `a.id, a.slug, a.title, a.status, a.updated_at, a.published_at, a.is_headline, a.archived_at,
+         c.slug AS category_slug, c.name AS category_name, au.name AS author_name`;
+export const sqlAdminArchived = `
+  SELECT * FROM (
+    SELECT ${adminCols}
+    FROM articles a JOIN categories c ON c.id = a.category_id JOIN authors au ON au.id = a.author_id
+    WHERE a.archived_at IS NOT NULL
+    UNION ALL
+    SELECT ${adminCols}
+    FROM articles a JOIN categories c ON c.id = a.category_id JOIN authors au ON au.id = a.author_id
+    WHERE a.status = 'archived' AND a.archived_at IS NULL
+  )
+  ORDER BY updated_at DESC
   LIMIT ?
 `;

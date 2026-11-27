@@ -1,0 +1,23 @@
+---
+// Banner untuk artikel arsip (migrasi 0004): URL tetap 200, pembaca diberi tahu bahwa isinya arsip.
+interface Props { publishedAt: number; archivedAt: number; kind?: 'news' | 'guide' }
+const { publishedAt, kind = 'news' } = Astro.props;
+const date = new Intl.DateTimeFormat('id-ID', { dateStyle: 'long', timeZone: 'Asia/Jakarta' }).format(new Date(publishedAt * 1000));
+---
+<aside class="archive-banner" role="note" aria-labelledby="archive-banner-title" data-pagefind-ignore>
+  <p class="archive-banner-title" id="archive-banner-title">Arsip {kind === 'news' ? 'berita' : 'artikel'}</p>
+  <p>
+    Artikel ini terbit <time datetime={new Date(publishedAt * 1000).toISOString()}>{date}</time> dan kini disimpan sebagai arsip.
+    Informasinya mungkin sudah tidak terbaru{kind === 'guide' ? ', jadi cek ulang harga dan jam buka ke situs resmi sebelum berangkat' : ''}.
+    Bacaanku sekarang fokus pada panduan hotel, wisata, dan kuliner lokal.
+  </p>
+  <p class="archive-banner-links"><a href="/arsip-berita/">Lihat arsip berita</a><a href="/artikel/">Jelajahi panduan terbaru</a></p>
+</aside>
+<style>
+  .archive-banner { margin: 0 0 1.25rem; padding: 0.9rem 1rem; border: 1px solid #c9a227; border-inline-start: 5px solid #8a6d1f; border-radius: 10px; background: #fff8e1; color: #3d3005; }
+  .archive-banner p { margin: 0 0 0.4rem; line-height: 1.55; }
+  .archive-banner-title { font-weight: 800; text-transform: uppercase; letter-spacing: 0.04em; font-size: 0.8rem; color: #5c4700; }
+  .archive-banner-links { display: flex; flex-wrap: wrap; gap: 0.5rem 1.25rem; margin: 0.2rem 0 0 !important; }
+  .archive-banner a { color: #4a3800; font-weight: 700; text-decoration: underline; text-underline-offset: 2px; min-block-size: 24px; display: inline-flex; align-items: center; }
+  .archive-banner a:focus-visible { outline: 3px solid #1d4ed8; outline-offset: 2px; }
+</style>

@@ -24,6 +24,9 @@ export const photoCredits: Record<GuideImage, PhotoCredit> = {
   "lumajang": { title: "Air Terjun Tumpak Sewu di Kabupaten Lumajang", author: "Irsam24", license: "CC BY-SA 4.0", licenseUrl: "https://creativecommons.org/licenses/by-sa/4.0", source: "https://commons.wikimedia.org/wiki/File:Air_rerjun_Tumpak_Sewu.jpg" },
   "jember": { title: "Pantai Papuma, Kabupaten Jember", author: "Herreads", license: "CC BY 4.0", licenseUrl: "https://creativecommons.org/licenses/by/4.0", source: "https://commons.wikimedia.org/wiki/File:Laut_Pantai_Papuma_Jember.jpg" },
   "solo": { title: "Pendapa Agung Pura Mangkunegaran, Surakarta", author: "Crisco 1492", license: "CC BY-SA 3.0", licenseUrl: "https://creativecommons.org/licenses/by-sa/3.0", source: "https://commons.wikimedia.org/wiki/File:Grand_Pendopo,_Mangkunegaran_Palace.jpg" },
+  "magelang": { title: "Candi Borobudur dilihat dari barat laut, Kabupaten Magelang", author: "Gunawan Kartapranata", license: "Domain publik", licenseUrl: "https://commons.wikimedia.org/wiki/File:Borobudur-Nothwest-view.jpg", source: "https://commons.wikimedia.org/wiki/File:Borobudur-Nothwest-view.jpg" },
+  "bandung": { title: "Gedung Sate, kantor Gubernur Jawa Barat di Kota Bandung", author: "Gunawan Kartapranata", license: "CC BY-SA 3.0", licenseUrl: "https://creativecommons.org/licenses/by-sa/3.0", source: "https://commons.wikimedia.org/wiki/File:Gedung_Sate_Bandung.jpg" },
+  "jakarta": { title: "Monumen Nasional (Monas) di Medan Merdeka, Jakarta Pusat", author: "Ramayoni", license: "CC BY-SA 4.0", licenseUrl: "https://creativecommons.org/licenses/by-sa/4.0", source: "https://commons.wikimedia.org/wiki/File:Monumen_Nasional,_Jakarta,_Indonesia.jpg" },
 };
 
 export const photoCreditText = (key: GuideImage) => { const c = photoCredits[key]; return `Foto: ${c.author} / Wikimedia Commons, ${c.license}`; };

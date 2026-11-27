@@ -4,21 +4,65 @@ import Breadcrumb from '../components/Breadcrumb.astro';
 import { categories } from '../config/site';
 import { breadcrumbLd } from '../utils/seo';
 import { applyPublicCache } from '../lib/cache-headers';
+import { loadArchive } from '../lib/public';
+import { articlePath, formatDate, isoDate } from '../utils/articles';
+
+export const prerender = __BUILD_MODE__ === 'static';
 
 applyPublicCache(Astro, 'list', ['arsip']);
+// Keyset (tanpa OFFSET): ?before={published_at}&id={id} dari item terakhir halaman sebelumnya.
+const before = prerender ? NaN : Number(Astro.url.searchParams.get('before'));
+const cursorId = prerender ? NaN : Number(Astro.url.searchParams.get('id'));
+const cursor = Number.isFinite(before) && before > 0 && Number.isFinite(cursorId) && cursorId > 0 ? { publishedAt: before, id: cursorId } : null;
+const { items, total, next } = await loadArchive(cursor);
 const crumbs = [{ name: 'Beranda', href: '/' }, { name: 'Arsip Berita', href: '/arsip-berita/' }];
+const selfCanonical = cursor ? `/arsip-berita/?before=${cursor.publishedAt}&id=${cursor.id}` : '/arsip-berita/';
+const title = cursor ? 'Arsip Berita — halaman sebelumnya' : 'Arsip Berita';
+const fmt = new Intl.NumberFormat('id-ID');
 ---
-<BaseLayout title="Arsip Berita" description="Arsip berita bacaankunetwork.com: news, teknologi, otomotif, sains, ekonomi, olahraga, dan hiburan. Semua tautan lama tetap bisa dibuka." jsonLd={[breadcrumbLd(crumbs)]}>
+<BaseLayout title={title} description="Arsip berita bacaankunetwork.com: news, teknologi, otomotif, sains, ekonomi, olahraga, dan hiburan. Semua tautan lama tetap bisa dibuka." canonical={selfCanonical} jsonLd={[breadcrumbLd(crumbs)]}>
   <div class="container">
     <Breadcrumb items={crumbs} />
     <header class="page-head">
       <h1 class="page-title">Arsip Berita</h1>
       <p class="muted">Bacaanku kini fokus pada ulasan hotel, wisata, dan kuliner lokal. Berita yang sudah terbit tetap tersimpan di sini, dan semua tautan lamanya tetap berfungsi.</p>
+      {total > 0 && <p class="archive-total">{fmt.format(total)} berita tersimpan, terbaru lebih dulu.</p>}
     </header>
-    <ul class="footer-list archive-list" role="list">
-      {categories.map((c) => (
-        <li><a href={`/${c.slug}/`}><strong>{c.name}</strong></a>{'description' in c && c.description ? <span class="muted"> — {c.description}</span> : null}</li>
-      ))}
-    </ul>
+    <nav class="archive-cats" aria-label="Arsip per kategori">
+      <h2 class="archive-cats-title">Per kategori</h2>
+      <ul role="list">
+        {categories.map((c) => <li><a href={`/${c.slug}/`}>{c.name}</a></li>)}
+      </ul>
+    </nav>
+    <section aria-labelledby="arsip-daftar">
+      <h2 id="arsip-daftar" class="archive-list-title">{cursor ? 'Berita sebelumnya' : 'Semua berita arsip'}</h2>
+      {items.length === 0 ? <p>{cursor ? 'Tidak ada berita lagi di halaman ini.' : 'Belum ada berita yang diarsipkan.'} <a href="/arsip-berita/">Kembali ke halaman pertama</a>.</p> : (
+        <ol class="archive-items" role="list">
+          {items.map((item) => (
+            <li class="archive-item">
+              <a class="archive-item-title" href={articlePath(item.categorySlug, item.slug)}>{item.title}</a>
+              <p class="archive-item-meta"><a href={`/${item.categorySlug}/`}>{item.categoryName}</a><time datetime={isoDate(item.publishedAt)}>{formatDate(item.publishedAt)}</time></p>
+            </li>
+          ))}
+        </ol>
+      )}
+      <nav class="pagination" aria-label="Halaman arsip">
+        {cursor ? <a href="/arsip-berita/">‹ Terbaru</a> : <span aria-disabled="true">‹ Terbaru</span>}
+        {next ? <a href={`/arsip-berita/?before=${next.publishedAt}&id=${next.id}`} rel="next">Berikutnya ›</a> : <span aria-disabled="true">Berikutnya ›</span>}
+      </nav>
+    </section>
   </div>
 </BaseLayout>
+<style>
+  .archive-total { margin: 0.4rem 0 0; font-weight: 700; }
+  .archive-cats { margin: 1rem 0 1.5rem; }
+  .archive-cats-title, .archive-list-title { margin: 0 0 0.6rem; font-size: 1.05rem; }
+  .archive-cats ul { display: flex; flex-wrap: wrap; gap: 0.5rem; margin: 0; padding: 0; list-style: none; }
+  .archive-cats a { display: inline-flex; align-items: center; min-block-size: 2.75rem; padding: 0 0.9rem; border: 1px solid var(--border, #d6dde0); border-radius: 999px; font-weight: 700; text-decoration: none; color: inherit; }
+  .archive-cats a:hover { text-decoration: underline; }
+  .archive-items { display: grid; gap: 0; margin: 0 0 1.25rem; padding: 0; list-style: none; }
+  .archive-item { padding: 0.8rem 0; border-block-end: 1px solid var(--border, #e3e8ea); min-inline-size: 0; }
+  .archive-item-title { font-weight: 750; font-size: 1.02rem; line-height: 1.4; color: inherit; overflow-wrap: anywhere; }
+  .archive-item-meta { display: flex; flex-wrap: wrap; gap: 0.2rem 0.9rem; margin: 0.3rem 0 0; font-size: 0.85rem; color: var(--muted, #4f5b5f); }
+  .archive-item-meta a { color: inherit; font-weight: 700; }
+</style>

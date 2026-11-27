@@ -14,6 +14,8 @@ export type ArticleCard = {
   categorySlug: string;
   categoryName: string;
   isHeadline: boolean;
+  /** Epoch saat diarsipkan (migrasi 0004); null/undefined = aktif. */
+  archivedAt?: number | null;
   heroImage?: ImageMetadata;
 };
 
@@ -48,6 +50,10 @@ export type ArticleView = {
   seoTitle: string | null;
   canonicalUrl: string | null;
   isHeadline: boolean;
+  /** Arsip: URL tetap 200, tampil banner arsip, keluar dari daftar/feed/sitemap. */
+  archivedAt?: number | null;
+  /** noindex per artikel (meta robots + X-Robots-Tag). */
+  robotsNoindex?: boolean;
 };
 
 export type Cursor = { publishedAt: number; id: number };
