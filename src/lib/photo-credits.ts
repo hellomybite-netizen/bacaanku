@@ -30,3 +30,39 @@ export const photoCredits: Record<GuideImage, PhotoCredit> = {
 };
 
 export const photoCreditText = (key: GuideImage) => { const c = photoCredits[key]; return `Foto: ${c.author} / Wikimedia Commons, ${c.license}`; };
+
+/** Foto artikel (public/media/articles/…), dikreditkan juga di /kredit-foto/. */
+export type ArticlePhotoCredit = PhotoCredit & { src: string; width: number; height: number };
+
+export const articlePhotoCredits: ArticlePhotoCredit[] = [
+  {
+    src: '/media/articles/candi-borobudur-magelang-pelataran-tangga-utama.jpg',
+    width: 1600,
+    height: 1064,
+    title: 'Pelataran dan tangga utama Candi Borobudur, Kabupaten Magelang',
+    author: 'Andrew Otto',
+    license: 'CC BY-SA 2.0',
+    licenseUrl: 'https://creativecommons.org/licenses/by-sa/2.0',
+    source: 'https://commons.wikimedia.org/wiki/File:Borobudur_grounds.jpg',
+  },
+  {
+    src: '/media/articles/candi-borobudur-magelang-stupa-berlubang.jpg',
+    width: 1600,
+    height: 1045,
+    title: 'Stupa berlubang di kompleks Candi Borobudur, Kabupaten Magelang',
+    author: 'CEphoto, Uwe Aranas',
+    license: 'CC BY-SA 3.0',
+    licenseUrl: 'https://creativecommons.org/licenses/by-sa/3.0',
+    source: 'https://commons.wikimedia.org/wiki/File:Borobudur-Temple-Park_Indonesia_Stupas-of-Borobudur-01.jpg',
+  },
+  {
+    src: '/media/articles/candi-borobudur-magelang-arca-buddha-stupa.jpg',
+    width: 1600,
+    height: 1116,
+    title: 'Arca Buddha di dalam stupa Candi Borobudur, Kabupaten Magelang',
+    author: 'Philip Nalangan',
+    license: 'CC BY 4.0',
+    licenseUrl: 'https://creativecommons.org/licenses/by/4.0',
+    source: 'https://commons.wikimedia.org/wiki/File:Borobudur_Indonesia_4.jpg',
+  },
+];

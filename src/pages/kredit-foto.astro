@@ -1,19 +1,32 @@
 ---
 import PageLayout from '../layouts/PageLayout.astro';
 import { guideImage } from '../lib/local-guide';
-import { photoCredits } from '../lib/photo-credits';
+import { photoCredits, articlePhotoCredits } from '../lib/photo-credits';
 import '../styles/local-wisdom.css';
 export const prerender = true;
 const rows = Object.entries(photoCredits) as [Parameters<typeof guideImage>[0], (typeof photoCredits)[keyof typeof photoCredits]][];
 ---
 <PageLayout title="Kredit Foto" path="/kredit-foto/" description="Daftar sumber, pembuat, dan lisensi foto sampul kategori, kota, dan provinsi di Bacaanku.">
-  <p>Foto sampul kategori, kota, dan provinsi di Bacaanku berasal dari <a href="https://commons.wikimedia.org/" rel="noopener noreferrer">Wikimedia Commons</a> dengan lisensi terbuka (CC BY, CC BY-SA, atau domain publik). Foto sudah dipotong dan dikompresi; lisensi aslinya tetap berlaku. Foto di dalam artikel dikreditkan langsung di bawah foto masing-masing artikel.</p>
+  <p>Foto sampul kategori, kota, dan provinsi di Bacaanku berasal dari <a href="https://commons.wikimedia.org/" rel="noopener noreferrer">Wikimedia Commons</a> dengan lisensi terbuka (CC BY, CC BY-SA, atau domain publik). Foto sudah dipotong dan dikompresi; lisensi aslinya tetap berlaku. Foto di dalam artikel dikreditkan langsung di bawah foto masing-masing artikel; beberapa foto artikel juga dicantumkan di tabel kedua halaman ini.</p>
   <table class="credit-table">
     <thead><tr><th scope="col">Foto</th><th scope="col">Keterangan</th><th scope="col">Pembuat &amp; lisensi</th></tr></thead>
     <tbody>
       {rows.map(([key, c]) => (
         <tr>
           <td><img src={guideImage(key, 'card')} alt={c.title} width="640" height="360" loading="lazy" /></td>
+          <td><a href={c.source} rel="noopener noreferrer">{c.title}</a></td>
+          <td>{c.author}<br />{c.licenseUrl ? <a href={c.licenseUrl} rel="noopener noreferrer license">{c.license}</a> : c.license}</td>
+        </tr>
+      ))}
+    </tbody>
+  </table>
+  <h2>Foto artikel</h2>
+  <table class="credit-table">
+    <thead><tr><th scope="col">Foto</th><th scope="col">Keterangan</th><th scope="col">Pembuat &amp; lisensi</th></tr></thead>
+    <tbody>
+      {articlePhotoCredits.map((c) => (
+        <tr>
+          <td><img src={c.src} alt={c.title} width={c.width} height={c.height} loading="lazy" /></td>
           <td><a href={c.source} rel="noopener noreferrer">{c.title}</a></td>
           <td>{c.author}<br />{c.licenseUrl ? <a href={c.licenseUrl} rel="noopener noreferrer license">{c.license}</a> : c.license}</td>
         </tr>
