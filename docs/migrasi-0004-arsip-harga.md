@@ -74,6 +74,9 @@ sedang live (kode lama tidak membaca kolom baru; arsip belum berefek sampai kode
   / `priceCheckedAt` / `priceSourceUrl`) bila harga utama/Gratis + tanggal cek (+ URL sumber bila berbayar) tidak dikirim.**
   Skrip/prompt Jenny & Rere harus mengirim field `price_*` SEBELUM kode ini live, kalau tidak terbit pagi berikutnya gagal.
   (Panduan lama yang sudah tayang tetap bisa diedit tanpa harga selama masa transisi — hanya peringatan.)
+- **Sumber minimal 3** untuk panduan juga (sebelumnya 2): kirim ≥3 entri `sources`, kalau tidak ditolak `errors.sources`.
+  Panduan id 269 dan 274 baru punya 2 sumber; perlu sumber ketiga saat disunting.
+- Gratis (`price_free=1`) cukup dengan `price_checked_at`; `price_source_url` boleh kosong.
 - `action=archive` lewat API kini mempertahankan URL (sebelumnya artikel hilang/404).
 
 ## Dampak ke 52 panduan yang sudah tayang (harga)

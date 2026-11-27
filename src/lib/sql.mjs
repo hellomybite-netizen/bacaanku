@@ -180,11 +180,15 @@ export const sqlMonth = `
 `;
 
 /** /arsip-berita/: arsip terbaru dulu (index parsial idx_articles_archived_pub). */
+/** /arsip-berita/ hanya berita (keputusan Rizal 27 Nov): panduan Hotel/Wisata/Kuliner tidak ikut. */
+const NEWS_ONLY = `c.slug NOT IN ('hotel', 'wisata', 'kuliner')`;
+
 export const sqlArchived = `
   SELECT ${cardSelect}
   FROM articles a
   JOIN categories c ON c.id = a.category_id
   WHERE a.archived_at IS NOT NULL AND a.status = 'published' AND a.published_at <= ?
+    AND ${NEWS_ONLY}
   ORDER BY a.published_at DESC, a.id DESC
   LIMIT ?
 `;
@@ -195,6 +199,7 @@ export const sqlArchivedBefore = `
   FROM articles a
   JOIN categories c ON c.id = a.category_id
   WHERE a.archived_at IS NOT NULL AND a.status = 'published' AND a.published_at <= ?
+    AND ${NEWS_ONLY}
     AND (a.published_at < ? OR (a.published_at = ? AND a.id < ?))
   ORDER BY a.published_at DESC, a.id DESC
   LIMIT ?
@@ -202,7 +207,9 @@ export const sqlArchivedBefore = `
 
 export const sqlArchivedCount = `
   SELECT COUNT(*) AS n FROM articles a
+  JOIN categories c ON c.id = a.category_id
   WHERE a.archived_at IS NOT NULL AND a.status = 'published' AND a.published_at <= ?
+    AND ${NEWS_ONLY}
 `;
 
 export const sqlPublishedBounds = `

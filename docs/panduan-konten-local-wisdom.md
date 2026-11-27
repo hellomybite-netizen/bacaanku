@@ -69,7 +69,8 @@ tidak membuat URL baru, jadi tidak ada halaman duplikat. `/daerah/{kota}/` lama 
 | Galeri tambahan | form: baris URL + **teks alternatif per foto** + tombol unggah · API: `gallery` (baris "URL \| alt"), `gallery_json`, atau `gallery_src`+`gallery_alt` berulang | tidak, maks 6; alt wajib ≥5 karakter | `/media/r2/articles/2026/11/rawon-…webp \| Semangkuk rawon` |
 
 Aturan lain sama dengan berita (ringkasan 50–170 karakter, gambar + alt + keterangan + kredit + URL kredit https, ≥1 tag),
-**kecuali sumber: minimal 2** untuk Hotel/Wisata/Kuliner (berita tetap minimal 3).
+termasuk **sumber minimal 3** (keputusan Rizal 27 Nov; sebelumnya 2). Dua panduan lama yang baru punya 2 sumber
+(id 269 dan 274) perlu sumber ketiga saat berikutnya disunting.
 Isi artikel ditulis Markdown; pakai `## Subjudul` untuk tiap bagian (tampil seperti desain GPT).
 
 **Aturan panjang (keputusan Rizal 27 Nov 2026)** — detail: `docs/api-unggah-gambar-dan-aturan-panjang.md`:
@@ -201,7 +202,7 @@ diisi"), sampai harganya dilengkapi. Daftar per artikel: `docs/data-harga-pandua
 
 - **Arsip tidak menghapus apa pun.** Tombol **Arsipkan** di `/admin` (atau `action=archive` di API) pada artikel yang sudah
   tayang: URL tetap sama dan tetap 200, muncul banner "Arsip berita", tetapi artikel keluar dari beranda, menu, sitemap,
-  news-sitemap, RSS, Terpopuler, dan blok artikel terkait. Artikel arsip tercantum di `/arsip-berita/` (berhalaman) dan
+  news-sitemap, RSS, Terpopuler, dan blok artikel terkait. Arsip berita tercantum di `/arsip-berita/` (berhalaman; **hanya berita**, panduan yang diarsipkan tidak ikut tampil di sana) dan
   tetap ada di halaman kategori lama, tag, penulis, dan pencarian. Tidak ada redirect 301.
 - Draf yang belum pernah tayang lalu diarsipkan tetap tersembunyi (perilaku lama).
 - Mengedit artikel arsip: pakai **Simpan arsip** (tetap arsip). **Terbitkan** = aktif lagi (keluar dari arsip).

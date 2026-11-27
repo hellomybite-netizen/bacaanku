@@ -260,7 +260,7 @@ export function parseArticleForm(form: FormData, mediaBase?: string | null): Pre
 
   const filledSources = sources.filter((source) => source.name || source.title || source.url);
   if (strict) {
-    const minSources = isGuideCategory(values.category) ? 2 : 3;
+    const minSources = 3;
     if (filledSources.length < minSources) errors.sources = `Minimal ${minSources} sumber.`;
     filledSources.forEach((source, index) => {
       if (!source.name || !source.title || !/^https:\/\/\S+$/.test(source.url)) {
