@@ -11,6 +11,8 @@ interface Env {
   CF_ACCESS_AUD?: string;
   CF_ZONE_ID?: string;
   CF_PURGE_TOKEN?: string;
+  /** "enforce" = aturan panjang isi ditegakkan (HTTP 400). Kosong/lainnya = hanya peringatan `warnings` (masa transisi). */
+  LENGTH_RULES?: string;
 }
 
 declare const __BUILD_MODE__: 'static' | 'server';

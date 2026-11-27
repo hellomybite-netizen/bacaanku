@@ -7,6 +7,7 @@ import { sqlArticleTags } from './sql.mjs';
 import { localFromRecord, sqlSelectLocal, sqlUpdateLocal, type LocalRecord } from './local-fields';
 import { guideCity } from './local-guide';
 import { SITE } from '../config/site';
+import { checkLength, sameBody } from './length-rules';
 
 /** Kolom lokal belum ada (migrasi 0003 belum jalan) → null, bukan error, supaya /admin berita tetap jalan. */
 async function readLocal(db: D1Database, id: number): Promise<LocalRecord | null> {
@@ -17,9 +18,33 @@ async function readLocal(db: D1Database, id: number): Promise<LocalRecord | null
   }
 }
 
+/**
+ * Aturan panjang (berita 450–900 kata; panduan 600–1.800 kata, 4–10 `##`, FAQ) hanya berlaku saat
+ * review/jadwal/terbit. Draf & arsip bebas. Artikel lama yang isinya TIDAK diubah boleh disimpan
+ * ulang (mis. ganti gambar/tag/judul SEO) walau lebih pendek dari aturan baru.
+ */
+async function enforceLengthRules(env: Env, db: D1Database, prepared: ReturnType<typeof parseArticleForm>, id?: number): Promise<Record<string, string>> {
+  const strict = prepared.action === 'review' || prepared.action === 'schedule' || prepared.action === 'publish';
+  if (!strict) return {};
+  if (id) {
+    const stored = await db.prepare('SELECT body_markdown FROM articles WHERE id = ?').bind(id).first<{ body_markdown: string | null }>();
+    if (stored && sameBody(stored.body_markdown, prepared.values.body)) return {};
+  }
+  const found: Record<string, string> = {};
+  checkLength(prepared.values.body, prepared.values.category, found);
+  // Default = masa transisi (peringatan saja): tetap tersimpan, pelanggaran dikembalikan sebagai `warnings`.
+  // Ditegakkan (HTTP 400) hanya bila var Worker LENGTH_RULES="enforce" — aman walau skrip deploy tidak membawa var.
+  if ((env.LENGTH_RULES || '').toLowerCase() !== 'enforce') return found;
+  if (Object.keys(found).length) {
+    delete prepared.errors.body;
+    Object.assign(prepared.errors, found);
+  }
+  return {};
+}
+
 export type SaveResult =
   | { ok: false; errors: Record<string, string>; values: ArticleValues }
-  | { ok: true; redirect: string; id: number };
+  | { ok: true; redirect: string; id: number; warnings?: Record<string, string> };
 
 export async function handleArticlePost(
   request: Request,
@@ -34,8 +59,9 @@ export async function handleArticlePost(
   }
   const prepared = parseArticleForm(form, env.MEDIA_BASE);
   await validateRemoteHeroSize(prepared.values, prepared.errors);
-  if (Object.keys(prepared.errors).length) return { ok: false, errors: prepared.errors, values: prepared.values };
   const db = getDb();
+  const warnings = await enforceLengthRules(env, db, prepared, opts.id);
+  if (Object.keys(prepared.errors).length) return { ok: false, errors: prepared.errors, values: prepared.values };
   const previousLocal = opts.id && prepared.local.write ? await readLocal(db, opts.id) : null;
   const saved = await saveArticle(db, prepared, opts.id);
   // Kolom local wisdom ditulis terpisah dan HANYA bila artikel tipe hotel/wisata/kuliner
@@ -71,7 +97,13 @@ export async function handleArticlePost(
   const job = purgeContent(env, target).catch((error) => console.error('purge', error));
   if (opts.waitUntil) opts.waitUntil(job);
   else await job;
-  return { ok: true, id: saved.id, redirect: `/admin/artikel/${saved.id}/?tersimpan=1` };
+  const hasWarnings = Object.keys(warnings).length > 0;
+  return {
+    ok: true,
+    id: saved.id,
+    redirect: `/admin/artikel/${saved.id}/?tersimpan=1${hasWarnings ? '&panjang=1' : ''}`,
+    ...(hasWarnings ? { warnings } : {}),
+  };
 }
 
 export async function loadEditor(id: number) {

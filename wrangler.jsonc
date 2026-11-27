@@ -16,10 +16,13 @@
       "database_id": "a214341b-4997-4f9a-95d5-a129d484b99e"
     }
   ],
-  // R2 sengaja belum diikat supaya situs bisa tayang tanpa verifikasi kartu.
-  // Nanti tambahkan:
+  // R2 belum diikat (R2 belum diaktifkan di akun). Kode unggah sudah siap & aman tanpa binding:
+  // tombol unggah /admin nonaktif + POST /api/admin/media/ → 503, /media/r2/* → 404.
+  // Setelah Rizal mengaktifkan R2 dan bucket `bacaanku-media` dibuat, buka komentar baris ini lalu deploy:
   // "r2_buckets": [{ "binding": "MEDIA", "bucket_name": "bacaanku-media" }],
-  // lalu secret/var: MEDIA_BASE = "https://media.bacaankunetwork.com"
+  // Gambar disajikan Worker di https://bacaankunetwork.com/media/r2/<kunci> (cache 1 tahun, immutable);
+  // tidak ada aset statis di /media/r2/, jadi permintaan itu selalu jatuh ke Worker.
+  // MEDIA_BASE opsional, hanya bila nanti memakai domain media khusus (R2 custom domain).
   // Aset statis dilayani langsung; worker hanya didahulukan untuk halaman prerender tanpa garis miring
   // supaya /tentang → /tentang/ menjadi 301 (bukan 307 bawaan aset).
   "assets": { "run_worker_first": ["/tentang", "/redaksi", "/kontak", "/kebijakan-privasi", "/pedoman-media-siber", "/kredit-foto", "/cari", "/privasi"] },
@@ -31,6 +34,11 @@
   // Vars opsional saat Zero Trust / R2 siap:
   //   CF_ACCESS_TEAM_DOMAIN, CF_ACCESS_AUD, MEDIA_BASE
   // Zona produksi untuk purge cache (bukan secret).
+  // LENGTH_RULES: aturan panjang isi (berita 450–900 kata; panduan 600–1.800 kata, 4–10 ##, FAQ).
+  // Tanpa var / selain "enforce" = hanya peringatan `warnings` (masa transisi). Set "enforce" setelah panduan
+  // Jenny & Rere diperbarui — per 25 Nov artikel Jenny 230–435 kata dan akan ditolak bila langsung ditegakkan.
+  // Catatan: skrip deploy /workspace/deploy-v5/mkworker.mjs menulis binding sendiri (tidak membaca vars ini);
+  // tambahkan { type: 'plain_text', name: 'LENGTH_RULES', text: 'enforce' } di sana saat siap.
   "vars": { "CF_ZONE_ID": "59edbd70449f300ca5f906d8649603ad" },
   "observability": { "enabled": false }
 }

@@ -8,6 +8,7 @@ let name = '';
 let csrf = '';
 let values: ArticleValues = emptyValues();
 let errors: Record<string, string> = {};
+let uploadEnabled = false;
 let categories: { slug: string; name: string }[] = [];
 let authors: { slug: string; name: string; role: string }[] = [];
 if (!IS_STATIC) {
@@ -16,6 +17,7 @@ if (!IS_STATIC) {
   const { listAuthors, listCategories } = await import('../../../lib/repo');
   const { handleArticlePost } = await import('../../../lib/admin-save');
   const env = getEnv();
+  uploadEnabled = Boolean(env.MEDIA);
   const session = await readSession(Astro.request, env);
   if (!session) return Astro.redirect('/admin/login/');
   name = session.name;
@@ -40,7 +42,7 @@ if (!IS_STATIC) {
     <>
       <p class="admin-kicker"><a href="/admin/">Artikel</a></p>
       <h1 class="admin-title">Artikel baru</h1>
-      <EditorForm values={values} errors={errors} categories={categories} authors={authors} csrf={csrf} />
+      <EditorForm values={values} errors={errors} categories={categories} authors={authors} csrf={csrf} uploadEnabled={uploadEnabled} />
     </>
   )}
 </AdminLayout>

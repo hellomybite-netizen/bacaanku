@@ -1,5 +1,6 @@
 import { handle } from '@astrojs/cloudflare/handler';
 import { publishDue } from './lib/schedule';
+import { MEDIA_PREFIX, serveMedia } from './lib/r2-media';
 
 type CronContext = { waitUntil(promise: Promise<unknown>): void };
 
@@ -43,6 +44,10 @@ export default {
     }
 
     if (request.method === 'GET' || request.method === 'HEAD') {
+      // Gambar unggahan R2 (404 bila binding MEDIA belum ada).
+      if (url.pathname.startsWith(MEDIA_PREFIX)) {
+        return withHsts(await serveMedia(request, env, url.pathname), !isHttp);
+      }
       if (url.pathname === '/privasi' || url.pathname === '/privasi/') {
         url.pathname = '/kebijakan-privasi/';
         return new Response(null, {

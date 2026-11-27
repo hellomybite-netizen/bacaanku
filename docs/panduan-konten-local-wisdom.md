@@ -59,11 +59,17 @@ tidak membuat URL baru, jadi tidak ada halaman duplikat. `/daerah/{kota}/` lama 
 | Anggaran | `budget_label` + `budget_value` | tidak (isi berdua) | `Kisaran harga` / `Rp22.000–Rp60.000` |
 | Kata kunci peta | `map_query` | tidak | `Rawon Nguling Tambakrejo Tongas Probolinggo` |
 | Tombol aksi | `action_label` + `action_url` (https) | tidak | `Lihat Situs Resmi` / `https://…` |
-| Galeri tambahan | `gallery` (baris "URL \| alt") atau `gallery_json` | tidak, maks 6 | `/media/local-wisdom/rawon-wide.webp \| Semangkuk rawon` |
+| Galeri tambahan | form: baris URL + **teks alternatif per foto** + tombol unggah · API: `gallery` (baris "URL \| alt"), `gallery_json`, atau `gallery_src`+`gallery_alt` berulang | tidak, maks 6; alt wajib ≥5 karakter | `/media/r2/articles/2026/11/rawon-…webp \| Semangkuk rawon` |
 
 Aturan lain sama dengan berita (ringkasan 50–170 karakter, gambar + alt + keterangan + kredit + URL kredit https, ≥1 tag),
 **kecuali sumber: minimal 2** untuk Hotel/Wisata/Kuliner (berita tetap minimal 3).
 Isi artikel ditulis Markdown; pakai `## Subjudul` untuk tiap bagian (tampil seperti desain GPT).
+
+**Aturan panjang (keputusan Rizal 27 Nov 2026)** — detail: `docs/api-unggah-gambar-dan-aturan-panjang.md`:
+- Panduan Hotel/Wisata/Kuliner: **600–1.800 kata**, **4–10 subjudul `## `**, dan **bagian `## FAQ`** berisi minimal 2 pertanyaan
+  (mis. `### Jam berapa buka?`). FAQ ikut dihitung sebagai subjudul.
+- Berita: **450–900 kata**.
+- Dicek saat review/jadwal/terbit; draf bebas. Artikel lama boleh diedit tanpa mengubah isi (mis. ganti foto) walau lebih pendek.
 
 Validasi yang menolak (HTTP 400 + pesan): kota tidak terdaftar; `tipe` berbeda dengan `category`; field kota/panduan
 dikirim untuk kategori berita biasa; `action_url` bukan https; terbit tanpa kota/lokasi.
@@ -115,7 +121,10 @@ Hasil: artikel tayang di `/kuliner/rawon-nguling/`, `/kuliner/`, `/artikel/`, `/
   mis. `Bakso Malang (foto ilustrasi menu, bukan di Bakso President)` atau `Kawasan Alun-Alun Tugu (foto kawasan, bukan foto hotel)`.
 - `hero_credit` = `Foto: {Pembuat} / Wikimedia Commons, {Lisensi}`; `hero_credit_url` = URL halaman file Commons.
 - Jika tidak ada foto berlisensi, jangan pakai foto tempat lain yang menyesatkan; pakai foto kawasan/menu umum dengan label jelas.
-- Simpan di `public/media/local-wisdom/` sebagai WebP 16:9: `{nama}-wide.webp` (≤1.600 px) + `{nama}-card.webp` (640 px).
+- **Unggah ke R2 (baru)**: tombol unggah di `/admin` (otomatis ≤1.600 px + WebP) atau `POST /api/admin/media/` →
+  pakai `url` hasilnya di `hero_url` / galeri. Kontrak API lengkap: `docs/api-unggah-gambar-dan-aturan-panjang.md`.
+  Hindari hotlink `upload.wikimedia.org`: unduh thumbnail berlisensi, lalu unggah.
+- (Cara lama, untuk sampul kota/kategori di repo) simpan di `public/media/local-wisdom/` sebagai WebP 16:9: `{nama}-wide.webp` (≤1.600 px) + `{nama}-card.webp` (640 px).
   Kartu otomatis memakai varian `-card.webp`. Sampul kota/kategori dikreditkan di `src/lib/photo-credits.ts` dan `/kredit-foto/`.
 - Alat bantu: `/workspace/bacaanku-photos/photos.py` (cari + unduh + konversi + catat kredit).
 
