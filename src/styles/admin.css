@@ -1,3 +1,6 @@
+/* Variabel lama admin (--navy, --brand-red, …) hilang dari global.css sejak rebranding Local Wisdom → tombol
+   "Terbitkan" & bilah atas jadi transparan dan teks galat tidak merah. Dipetakan ulang ke palet baru (kontras AA). */
+.admin-body { --navy: var(--teal-deep, #123b3b); --brand-red: #b42318; --brand-red-strong: #9b1c10; --accent-strong: var(--teal, #0f766e); }
 .admin-body { margin: 0; background: var(--bg); color: var(--text); font-family: var(--font-sans); }
 .admin-top {
   position: sticky; inset-block-start: 0; z-index: 20;
@@ -96,3 +99,13 @@
 @media (min-width: 40rem) { .gallery-actions { grid-template-columns: minmax(0, 1fr) auto; } }
 @media (max-width: 26rem) { .gallery-row, .hero-upload { grid-template-columns: minmax(0, 1fr); } }
 .admin-body button:disabled { opacity: 0.6; cursor: not-allowed; }
+
+/* Arsip, harga, noindex (migrasi 0004) */
+.admin-note { margin: 0 0 1rem; padding: 0.8rem 1rem; border-radius: var(--radius); border-inline-start: 4px solid #8a6d1f; background: color-mix(in srgb, #c99a2e 14%, var(--surface)); }
+.price-field { display: grid; gap: 0.7rem; margin: 0 0 0.9rem; padding: 0.8rem; border: 1px solid var(--border); border-radius: var(--radius-sm); min-inline-size: 0; }
+.price-field legend { padding-inline: 0.3rem; font-size: 0.78rem; font-weight: 800; }
+.price-field input:disabled { opacity: 0.6; }
+.check-field { display: flex; align-items: center; gap: 0.5rem; min-block-size: 2.75rem; font-weight: 700; }
+.check-field input { inline-size: 1.15rem; block-size: 1.15rem; flex: none; }
+[aria-invalid='true'] { border-color: var(--brand-red-strong); }
+.price-field textarea { min-block-size: 5.5rem; block-size: auto; }

@@ -123,6 +123,11 @@ guide-catalog [hidden] { display: none !important; }
 .guide-facts dl > div + div { border-block-start: 1px solid #eaf2f1; }
 .guide-facts dt { font-weight: 750; }
 .guide-facts dd { margin: 0; }
+.guide-facts dd { overflow-wrap: anywhere; }
+.guide-price-value { display: block; font-size: 1rem; color: #0f3d3a; }
+.guide-price-meta { display: block; margin-block-start: .2rem; color: #4a5a5c; font-size: .78rem; line-height: 1.45; }
+.guide-price-meta a { color: #0b5f59; font-weight: 700; text-decoration: underline; text-underline-offset: 2px; }
+.guide-price-badge { display: inline-block; margin-block-start: .25rem; padding: .1rem .45rem; border-radius: .4rem; background: #fff3cd; color: #5c4400; font-size: .74rem; font-weight: 700; line-height: 1.4; }
 .guide-facts a, .guide-sources a { color: #076d65; font-weight: 700; }
 .guide-action { display: block; padding: .78rem 1rem; border-radius: .7rem; background: #c54227; color: #fff; text-align: center; text-decoration: none; font-weight: 800; }
 .guide-action:hover { background: #aa341c; color: #fff; }

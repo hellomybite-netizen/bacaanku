@@ -50,7 +50,8 @@ export const GET: APIRoute = async (context) => {
   const entries: { path: string; lastmod: string }[] = [
     { path: '/', lastmod: fallback },
     ...staticPages.map((path) => ({ path, lastmod: fallback })),
-    ...categories.map((category) => ({
+    // Kategori berita lama yang semua artikelnya diarsipkan tidak dimasukkan (halamannya tetap 200 untuk jalur jelajah).
+    ...categories.filter((category) => !meta || meta.activeCategories.has(category.slug)).map((category) => ({
       path: `/${category.slug}/`,
       lastmod: isoOrFallback(meta?.categoriesLastMod.get(category.slug), fallback),
     })),

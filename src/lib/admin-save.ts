@@ -8,6 +8,21 @@ import { localFromRecord, sqlSelectLocal, sqlUpdateLocal, type LocalRecord } fro
 import { guideCity } from './local-guide';
 import { SITE } from '../config/site';
 import { checkLength, sameBody } from './length-rules';
+import { priceFromRecord, sqlUpdatePrice, type PriceRecord } from './price';
+import { isGuideCategory } from './local-guide';
+
+/** Kolom 0004 belum ada → null (form tetap jalan, field harga kosong). */
+async function readExtra(db: D1Database, id: number): Promise<(PriceRecord & { robots_noindex: number | null; archived_at: number | null; status: string; published_at: number | null }) | null> {
+  try {
+    return await db.prepare(`SELECT price_label, price_value, price_free, price_checked_at, price_source_name, price_source_url,
+      price_extra_json, robots_noindex, archived_at, status, published_at FROM articles WHERE id = ?`).bind(id).first();
+  } catch {
+    return null;
+  }
+}
+
+/* Harga wajib untuk panduan saat review/jadwal/terbit, termasuk panduan lama (keputusan Rizal 27 Nov:
+ * "Wajib harga langsung berlaku", tanpa masa transisi). Validasinya di price.ts → errors.priceValue (HTTP 400 di API). */
 
 /** Kolom lokal belum ada (migrasi 0003 belum jalan) → null, bukan error, supaya /admin berita tetap jalan. */
 async function readLocal(db: D1Database, id: number): Promise<LocalRecord | null> {
@@ -73,6 +88,16 @@ export async function handleArticlePost(
       l.mapQuery, l.actionLabel, l.actionUrl, l.galleryJson, saved.id,
     ).run();
   }
+  // Harga (hanya panduan) + arsip + noindex: kolom migrasi 0004, ditulis terpisah.
+  if (isGuideCategory(prepared.values.category)) {
+    const p = prepared.price;
+    await db.prepare(sqlUpdatePrice).bind(p.label, p.value, p.free, p.min, p.max, p.checkedAt, p.sourceName, p.sourceUrl, p.extraJson, saved.id).run();
+  }
+  // Arsipkan = archived_at diisi (dipertahankan bila sudah arsip); aksi lain (terbit/draf/jadwal) = bukan arsip.
+  await db
+    .prepare(`UPDATE articles SET archived_at = CASE WHEN ?1 = 1 THEN COALESCE(archived_at, unixepoch()) ELSE NULL END, robots_noindex = COALESCE(?2, robots_noindex) WHERE id = ?3`)
+    .bind(prepared.archive ? 1 : 0, prepared.robotsNoindex == null ? null : prepared.robotsNoindex ? 1 : 0, saved.id)
+    .run();
   const tags = await db.prepare(sqlArticleTags).bind(saved.id).all<{ slug: string }>();
   const category = prepared.values.category;
   const target = purgeForArticle({
@@ -83,6 +108,8 @@ export async function handleArticlePost(
     tagSlugs: tags.results.map((tag) => tag.slug),
   });
   if (saved.oldPath) target.urls.push(new URL(saved.oldPath, 'https://bacaankunetwork.com').href);
+  target.tags.push('arsip');
+  target.urls.push(`${SITE.url.replace(/\/$/, '')}/arsip-berita/`, `${SITE.url.replace(/\/$/, '')}/sitemap-halaman.xml`);
   if (prepared.local.write) {
     const origin = SITE.url.replace(/\/$/, '');
     target.tags.push('artikel', 'daerah');
@@ -101,7 +128,7 @@ export async function handleArticlePost(
   return {
     ok: true,
     id: saved.id,
-    redirect: `/admin/artikel/${saved.id}/?tersimpan=1${hasWarnings ? '&panjang=1' : ''}`,
+    redirect: `/admin/artikel/${saved.id}/?tersimpan=1${Object.keys(warnings).length ? '&panjang=1' : ''}`,
     ...(hasWarnings ? { warnings } : {}),
   };
 }
@@ -110,5 +137,12 @@ export async function loadEditor(id: number) {
   const db = getDb();
   const record = await adminArticle(db, id);
   if (!record) return null;
-  return { ...record, local: localFromRecord(await readLocal(db, id)) };
+  const extra = await readExtra(db, id);
+  return {
+    ...record,
+    local: localFromRecord(await readLocal(db, id)),
+    price: priceFromRecord(extra),
+    robots_noindex: extra?.robots_noindex ?? 0,
+    archived_at: extra?.archived_at ?? null,
+  };
 }

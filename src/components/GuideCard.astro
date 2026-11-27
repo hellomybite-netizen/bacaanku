@@ -13,7 +13,9 @@ const Heading = `h${headingLevel}` as 'h2' | 'h3';
       <span class:list={['guide-badge', `guide-color-${guide.category}`]}>{guide.categoryName}</span>
       <Heading>{guide.name}</Heading>
       <p class="guide-card-location"><GuideIcon name="pin" />{guide.location}</p>
-      {showBudget && (guide.budget ? (
+      {showBudget && (guide.price?.value ? (
+        <p class="guide-card-budget"><small>{guide.price.label}</small><strong>{guide.price.value}</strong></p>
+      ) : guide.budget ? (
         <p class="guide-card-budget"><small>{guide.budget.label}</small><strong>{guide.budget.value}</strong></p>
       ) : (
         <p class="guide-card-budget"><span>{guide.category === 'hotel' ? 'Cek tarif & kamar' : guide.category === 'wisata' ? 'Cek tiket & kunjungan' : 'Lihat panduan kuliner'}</span></p>

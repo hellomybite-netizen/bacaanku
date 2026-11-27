@@ -7,6 +7,7 @@ import Breadcrumb from '../../components/Breadcrumb.astro';
 import ShareButtons from '../../components/ShareButtons.astro';
 import Trending from '../../components/Trending.astro';
 import GuideArticle from '../../components/GuideArticle.astro';
+import ArchiveBanner from '../../components/ArchiveBanner.astro';
 import { loadGuide, loadGuidesByCity, loadGuidesByCategory } from '../../lib/guide-repo';
 import { isGuideCategory } from '../../lib/local-guide';
 import { absUrl, articlePath, formatDateTime, isoDate } from '../../utils/articles';
@@ -60,6 +61,8 @@ if (article) {
     ...article.tags.map((tag) => `tag-${tag.slug}`),
   ]);
 }
+// noindex per artikel (migrasi 0004, default mati): meta robots + header untuk perayap.
+if (article?.robotsNoindex || guide?.robotsNoindex) Astro.response.headers.set('X-Robots-Tag', 'noindex, follow');
 const path = article ? articlePath(article.categorySlug, article.slug) : Astro.url.pathname;
 const pageUrl = absUrl(path);
 const crumbs = article
@@ -84,6 +87,7 @@ const sizes = '(min-width: 1240px) 780px, (min-width: 960px) 64vw, calc(100vw - 
     imageHeight={og ? article.heroHeight : null}
     type="article"
     currentCategory={article.categorySlug}
+    noindex={article.robotsNoindex}
     article={{
       publishedTime: isoDate(article.publishedAt),
       modifiedTime: isoDate(article.updatedAt),
@@ -113,6 +117,7 @@ const sizes = '(min-width: 1240px) 780px, (min-width: 960px) 64vw, calc(100vw - 
       <Breadcrumb items={crumbs} />
       <div class="with-sidebar">
         <article class="article" data-pagefind-body>
+          {article.archivedAt ? <ArchiveBanner publishedAt={article.publishedAt} archivedAt={article.archivedAt} /> : null}
           <header class="article-head">
             <div class="article-heading-row">
               <div>

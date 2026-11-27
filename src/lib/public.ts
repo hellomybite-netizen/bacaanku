@@ -27,6 +27,20 @@ export async function loadArticle(category: string, slug: string): Promise<Artic
   return articlePage(db, category, slug, mediaBase);
 }
 
+/** /arsip-berita/ (SSR saja; pratinjau statis tidak punya data arsip). */
+export async function loadArchive(cursor: Cursor | null) {
+  if (IS_STATIC) return { items: [], total: 0, next: null };
+  const { archivePage } = await import('./repo');
+  const { db, mediaBase } = await serverDb();
+  try {
+    return await archivePage(db, cursor, mediaBase);
+  } catch (error) {
+    // Migrasi 0004 belum jalan (kolom archived_at belum ada) → halaman tetap tayang tanpa daftar.
+    console.error('arsip', error);
+    return { items: [], total: 0, next: null };
+  }
+}
+
 export async function loadTag(slug: string) {
   if (IS_STATIC) return (await import('./static-data')).tagPage(slug);
   const { tagPage } = await import('./repo');

@@ -111,3 +111,15 @@ Error (selalu JSON `{ "error": "<kode>", "message": "<pesan Indonesia>" }`):
    `/workspace/deploy-v5/mkworker.mjs` menulis binding sendiri, jadi tambahkan juga
    `{ type: 'r2_bucket', name: 'MEDIA', bucket_name: 'bacaanku-media' }` ke `bindings` di skrip itu, lalu deploy.
 4. Cek: login `/admin/artikel/baru/` → tombol unggah aktif; `GET /api/admin/media/` → `"enabled": true`.
+
+## Tambahan 27 Nov 2026 — harga, arsip, noindex (cabang `arsip-dan-harga`, migrasi 0004)
+
+Field baru di `POST /api/admin/articles/` dan `/api/admin/articles/{id}/` (form-urlencoded/multipart, sama seperti field lain):
+
+| Field | Untuk | Catatan |
+|---|---|---|
+| `price_label`, `price_value`, `price_free`, `price_checked_at`, `price_source_name`, `price_source_url`, `price_extra` / `price_extra_json` | hotel/wisata/kuliner | Wajib saat `review`/`schedule`/`publish`: harga utama atau `price_free=1`, `price_checked_at` (YYYY-MM-DD), dan `price_source_url` https untuk harga berbayar. Galat 400: `errors.priceValue`, `priceCheckedAt`, `priceSourceUrl`, `priceExtra`, `price` (harga di kategori berita). Panduan lama yang sudah tayang tanpa harga: tetap tersimpan, `warnings.priceValue`. |
+| `robots_noindex` | semua | `1` = noindex. Tidak dikirim = nilai tersimpan tidak berubah. Default 0. |
+| `action=archive` | semua | Artikel yang sudah tayang tetap `published` di URL yang sama (200 + banner), `archived_at` diisi. `action=publish` membatalkan arsip. |
+
+Aturan isi harga & arsip: `docs/panduan-konten-local-wisdom.md` bagian 5a dan 5b. Rencana migrasi: `docs/migrasi-0004-arsip-harga.md`.

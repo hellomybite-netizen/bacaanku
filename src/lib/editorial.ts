@@ -3,6 +3,7 @@ import { isResolvableHero, rewriteWikimediaOriginal } from './media';
 import { renderMarkdown } from './markdown.mjs';
 import { emptyLocal, parseLocal, type LocalValues, type PreparedLocal } from './local-fields';
 import { isGuideCategory } from './local-guide';
+import { emptyPrice, parsePrice, type PreparedPrice, type PriceValues } from './price';
 
 export type Source = { name: string; title: string; url: string };
 export type ArticleAction = 'draft' | 'review' | 'schedule' | 'publish' | 'archive';
@@ -30,6 +31,10 @@ export type ArticleValues = {
   body: string;
   /** Field opsional local wisdom (kota & info panduan). */
   local: LocalValues;
+  /** Harga terstruktur (wajib untuk hotel/wisata/kuliner saat terbit). */
+  price: PriceValues;
+  /** noindex per artikel (default mati). */
+  robotsNoindex: boolean;
 };
 
 export type PreparedArticle = {
@@ -43,6 +48,11 @@ export type PreparedArticle = {
   bodyHtml: string;
   readingMinutes: number;
   local: PreparedLocal;
+  price: PreparedPrice;
+  /** true = tombol Arsipkan pada artikel yang sudah tayang: status tetap published, archived_at diisi. */
+  archive: boolean;
+  /** null = field tidak dikirim (API lama) → nilai tersimpan tidak diubah. */
+  robotsNoindex: boolean | null;
   errors: Record<string, string>;
 };
 
@@ -71,6 +81,8 @@ export function emptyValues(): ArticleValues {
     publishWib: '',
     body: '',
     local: emptyLocal(),
+    price: emptyPrice(),
+    robotsNoindex: false,
   };
 }
 
@@ -100,6 +112,8 @@ export function valuesFromRecord(record: {
   body_markdown: string;
   tags: { name: string }[];
   local?: LocalValues;
+  price?: PriceValues;
+  robots_noindex?: number | null;
 }): ArticleValues {
   let sources: Source[] = [];
   try {
@@ -131,6 +145,8 @@ export function valuesFromRecord(record: {
     publishWib: epochToWibInput(record.published_at),
     body: record.body_markdown || '',
     local: record.local ?? emptyLocal(),
+    price: record.price ?? emptyPrice(),
+    robotsNoindex: Number(record.robots_noindex) === 1,
   };
 }
 
@@ -198,7 +214,12 @@ export function parseArticleForm(form: FormData, mediaBase?: string | null): Pre
     publishWib: field(form, 'publish_wib'),
     body: typeof form.get('body') === 'string' ? String(form.get('body')) : '',
     local: emptyLocal(),
+    price: emptyPrice(),
+    robotsNoindex: ['1', 'true', 'on', 'ya'].includes(field(form, 'robots_noindex').toLowerCase()),
   };
+  // Form /admin selalu mengirim penanda robots_noindex_field=1 (checkbox kosong = 0).
+  // API yang tidak mengirim robots_noindex sama sekali tidak mengubah nilai tersimpan.
+  const robotsSent = form.has('robots_noindex') || form.get('robots_noindex_field') === '1';
 
   const errors: Record<string, string> = {};
   const strict = action === 'review' || action === 'schedule' || action === 'publish';
@@ -213,6 +234,8 @@ export function parseArticleForm(form: FormData, mediaBase?: string | null): Pre
   else if (tipe && field(form, 'category') && field(form, 'category') !== tipe) errors.category = 'Kategori dan tipe wisata berbeda. Isi salah satu saja.';
   const local = parseLocal(form, values.category, strict, errors);
   values.local = local.values;
+  const price = parsePrice(form, values.category, isGuideCategory(values.category), strict, errors);
+  values.price = price.values;
   if (!values.author) errors.author = 'Pilih penulis.';
 
   if (strict) {
@@ -237,7 +260,7 @@ export function parseArticleForm(form: FormData, mediaBase?: string | null): Pre
 
   const filledSources = sources.filter((source) => source.name || source.title || source.url);
   if (strict) {
-    const minSources = isGuideCategory(values.category) ? 2 : 3;
+    const minSources = 3;
     if (filledSources.length < minSources) errors.sources = `Minimal ${minSources} sumber.`;
     filledSources.forEach((source, index) => {
       if (!source.name || !source.title || !/^https:\/\/\S+$/.test(source.url)) {
@@ -256,8 +279,16 @@ export function parseArticleForm(form: FormData, mediaBase?: string | null): Pre
   let publishedAt = values.publishWib ? wibInputToEpoch(values.publishWib) : null;
   if (values.publishWib && publishedAt == null) errors.publishWib = 'Waktu tayang tidak valid.';
   let status: PreparedArticle['status'] = 'draft';
+  let archive = false;
   if (action === 'review') status = 'review';
-  if (action === 'archive') status = 'archived';
+  if (action === 'archive') {
+    // Arsip TIDAK menghapus halaman: artikel yang sudah tayang tetap 'published' (URL 200, banner arsip)
+    // dan hanya keluar dari beranda/feed/sitemap. Draf yang belum pernah tayang tetap disembunyikan.
+    if (publishedAt != null && publishedAt <= now + 60) {
+      status = 'published';
+      archive = true;
+    } else status = 'archived';
+  }
   if (action === 'schedule') {
     status = 'scheduled';
     if (publishedAt == null) errors.publishWib = 'Jadwal wajib diisi (waktu WIB).';
@@ -287,6 +318,9 @@ export function parseArticleForm(form: FormData, mediaBase?: string | null): Pre
     bodyHtml: rendered.html,
     readingMinutes: rendered.minutes,
     local: local.prepared,
+    price: price.prepared,
+    archive,
+    robotsNoindex: robotsSent ? values.robotsNoindex : null,
     errors,
   };
 }

@@ -1,3 +1,4 @@
+import type { GuidePrice } from './price';
 // Konfigurasi & tipe "local wisdom" (desain GPT). Isi ulasan TIDAK lagi ditulis di kode:
 // semuanya dari D1 (lihat src/lib/guide-repo.ts). File ini hanya berisi daftar kategori (tipe),
 // provinsi, dan kota yang boleh dipakai di /admin & API terbit, plus helper path/gambar.
@@ -12,6 +13,8 @@ export const guideProvinces = [
   { slug: 'jawa-timur', name: 'Jawa Timur', description: 'Dari kaldera Tengger di Probolinggo sampai kota sejuk Malang dan Batu: panduan hotel, wisata, dan kuliner Jawa Timur.', image: 'bromo' },
   { slug: 'jawa-tengah', name: 'Jawa Tengah', description: 'Panduan hotel, wisata, dan kuliner Jawa Tengah, dimulai dari Kota Surakarta (Solo).', image: 'solo' },
   { slug: 'di-yogyakarta', name: 'DI Yogyakarta', description: 'Kenali Yogyakarta lewat dapur gudeg, kampung lama, dan tempat singgah di sekitar Keraton.', image: 'gudeg' },
+  { slug: 'jawa-barat', name: 'Jawa Barat', description: 'Panduan hotel, wisata, dan kuliner Jawa Barat, dimulai dari Kota Bandung.', image: 'bandung' },
+  { slug: 'dki-jakarta', name: 'DKI Jakarta', description: 'Panduan hotel, wisata, dan kuliner di Jakarta: dari kawasan Monas sampai kampung kota.', image: 'jakarta' },
 ] as const;
 
 /**
@@ -31,13 +34,17 @@ export const guideCities = [
   { slug: 'kediri', name: 'Kediri', province: 'jawa-timur', description: 'Dari Gunung Kelud sampai Simpang Lima Gumul: wisata, kuliner, dan hotel di Kediri.', image: 'kediri', nav: false },
   { slug: 'lumajang', name: 'Lumajang', province: 'jawa-timur', description: 'Air terjun di kaki Semeru, danau, dan kuliner khas Lumajang.', image: 'lumajang', nav: false },
   { slug: 'jember', name: 'Jember', province: 'jawa-timur', description: 'Pantai selatan, kebun kopi, dan kuliner khas Jember.', image: 'jember', nav: false },
+  { slug: 'magelang', name: 'Magelang', province: 'jawa-tengah', description: 'Candi Borobudur, kota lama Magelang, dan kuliner khas di kaki Merapi–Merbabu.', image: 'magelang', nav: false },
   { slug: 'solo', name: 'Solo', province: 'jawa-tengah', description: 'Keraton, pasar, dan kuliner legendaris Kota Surakarta (Solo).', image: 'solo', nav: false },
   { slug: 'yogyakarta', name: 'Yogyakarta', province: 'di-yogyakarta', description: 'Kenali kuliner Yogyakarta lewat dapur dan kedai gudeg di sekitar Wijilan.', image: 'gudeg', nav: true },
+  { slug: 'bandung', name: 'Bandung', province: 'jawa-barat', description: 'Gedung bersejarah, udara sejuk, dan kuliner Kota Bandung.', image: 'bandung', nav: false },
+  { slug: 'jakarta', name: 'Jakarta', province: 'dki-jakarta', description: 'Panduan hotel, wisata, dan kuliner di Jakarta.', image: 'jakarta', nav: false },
 ] as const;
 
 export type GuideCategory = (typeof guideCategories)[number]['slug'];
 export type GuideImage = 'bromo' | 'malang' | 'batu' | 'surabaya' | 'rawon' | 'hotel' | 'tugu' | 'bakso' | 'jatim' | 'gudeg'
-  | 'mojokerto' | 'pasuruan' | 'bangil' | 'blitar' | 'kediri' | 'lumajang' | 'jember' | 'solo';
+  | 'mojokerto' | 'pasuruan' | 'bangil' | 'blitar' | 'kediri' | 'lumajang' | 'jember' | 'solo'
+  | 'magelang' | 'bandung' | 'jakarta';
 
 /** Satu artikel local wisdom (ulasan/panduan) hasil baca D1. */
 export type Guide = {
@@ -62,6 +69,11 @@ export type Guide = {
   gallery: { src: string; cardSrc: string; alt: string }[];
   facts: { label: string; value: string }[];
   budget?: { label: string; value: string };
+  /** Harga terstruktur (migrasi 0004): harga utama + tanggal cek + sumber + harga tambahan. */
+  price?: GuidePrice;
+  /** Arsip: halaman tetap 200 + banner, keluar dari daftar/sitemap. */
+  archivedAt?: number | null;
+  robotsNoindex?: boolean;
   mapQuery: string;
   action?: { label: string; url: string };
   sources: { label: string; url: string }[];

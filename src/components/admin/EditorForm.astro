@@ -2,6 +2,7 @@
 import type { ArticleValues } from '../../lib/editorial';
 import { guideCities, guideProvince, isGuideCategory } from '../../lib/local-guide';
 import { lengthRuleFor } from '../../lib/length-rules';
+import { DEFAULT_PRICE_LABEL, todayWib } from '../../lib/price';
 interface Author { slug: string; name: string; role: string }
 interface Category { slug: string; name: string }
 interface Props {
@@ -14,8 +15,13 @@ interface Props {
   status?: string;
   /** true bila binding R2 `MEDIA` ada. false → tombol unggah dinonaktifkan dengan catatan. */
   uploadEnabled?: boolean;
+  /** Epoch arsip (migrasi 0004). Terisi = artikel tetap tayang di URL yang sama, tapi keluar dari daftar/feed/sitemap. */
+  archivedAt?: number | null;
 }
-const { values, errors, categories, authors, csrf, saved = false, status, uploadEnabled = false } = Astro.props;
+const { values, errors, categories, authors, csrf, saved = false, status, uploadEnabled = false, archivedAt = null } = Astro.props;
+const price = values.price;
+const archivedLabel = archivedAt ? new Intl.DateTimeFormat('id-ID', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'Asia/Jakarta' }).format(new Date(archivedAt * 1000)) + ' WIB' : '';
+const priceErr = (key: string) => errors[key] || '';
 const errorList = Object.values(errors);
 const local = values.local;
 const localOpen = isGuideCategory(values.category) || Object.values(local).some(Boolean);
@@ -35,6 +41,12 @@ const lengthWarn = Astro.url.searchParams.get('panjang') === '1';
 const bodyErrors = [errors.body, errors.bodyHeadings, errors.bodyFaq].filter(Boolean);
 ---
 {saved && <p class="admin-ok" role="status">Tersimpan.</p>}
+{archivedAt && (
+  <p class="admin-note" role="note">
+    <strong>Artikel ini diarsipkan</strong> sejak {archivedLabel}. URL-nya tetap terbuka (200) dengan banner arsip, tetapi tidak tampil di beranda, menu, sitemap, RSS, Terpopuler, dan artikel terkait.
+    Pakai <em>Simpan arsip</em> untuk menyimpan perubahan tanpa membatalkan arsip, atau <em>Terbitkan</em> untuk mengaktifkannya lagi.
+  </p>
+)}
 {saved && lengthWarn && <p class="admin-error" role="status">Tersimpan, tetapi isi belum memenuhi aturan panjang (lihat penghitung di bawah kolom Isi). Aturan ini akan ditegakkan.</p>}
 {errorList.length > 0 && (
   <div class="admin-error" role="alert">
@@ -101,6 +113,47 @@ const bodyErrors = [errors.body, errors.bodyHeadings, errors.bodyFaq].filter(Boo
         <textarea name="facts" rows="4" placeholder={"Alamat: Jl. Raya Tambakrejo No.75, Tongas\nJam buka: Setiap hari 05.30–21.00 WIB"}>{local.facts}</textarea>
         {errors.facts && <small class="field-error">{errors.facts}</small>}
       </label>
+      <fieldset class="price-field" aria-describedby="price-help">
+        <legend>Harga <small class="hint">wajib untuk Hotel/Wisata/Kuliner saat Ke review, Jadwalkan, atau Terbitkan</small></legend>
+        <p class="hint" id="price-help">Tulis harga yang sudah Anda cek sendiri, lengkap dengan tanggal cek dan sumbernya. Jangan mengarang dan jangan menulis "cek situs resmi" sebagai harga. Tempat tanpa tiket (alun-alun, masjid): centang Gratis.</p>
+        <div class="split split-2">
+          <label class="field">
+            <span>Label harga</span>
+            <input name="price_label" maxlength="40" value={price.label} placeholder={DEFAULT_PRICE_LABEL[values.category] || 'Tiket masuk per orang'} aria-describedby="price-label-error" />
+            <small class="field-error" id="price-label-error">{priceErr('priceLabel')}</small>
+          </label>
+          <label class="field">
+            <span>Harga utama (Rp)</span>
+            <input name="price_value" maxlength="120" value={price.value} placeholder="Rp20.000 per orang" disabled={price.free} aria-invalid={errors.priceValue ? 'true' : undefined} aria-describedby="price-value-error" data-price-value />
+            <small class="field-error" id="price-value-error">{priceErr('priceValue')}</small>
+          </label>
+        </div>
+        <label class="check-field"><input type="checkbox" name="price_free" value="1" checked={price.free} data-price-free /> Gratis (tidak ada tiket masuk)</label>
+        <div class="split split-2">
+          <label class="field">
+            <span>Tanggal cek</span>
+            <input name="price_checked_at" type="date" max={todayWib()} value={price.checkedAt} aria-invalid={errors.priceCheckedAt ? 'true' : undefined} aria-describedby="price-checked-error" />
+            <small class="field-error" id="price-checked-error">{priceErr('priceCheckedAt')}</small>
+          </label>
+          <label class="field">
+            <span>Nama sumber harga</span>
+            <input name="price_source_name" maxlength="80" value={price.sourceName} placeholder="Situs resmi pengelola" aria-describedby="price-source-name-error" />
+            <small class="field-error" id="price-source-name-error">{priceErr('priceSourceName')}</small>
+          </label>
+        </div>
+        <label class="field">
+          <span>URL sumber harga (https) <small class="hint">wajib untuk harga berbayar</small></span>
+          <input name="price_source_url" type="url" value={price.sourceUrl} placeholder="https://" aria-invalid={errors.priceSourceUrl ? 'true' : undefined} aria-describedby="price-source-url-error" />
+          <small class="field-error" id="price-source-url-error">{priceErr('priceSourceUrl')}</small>
+        </label>
+        <label class="field">
+          <span>Harga tambahan, satu baris "Label: nilai | URL sumber"</span>
+          <textarea name="price_extra" rows="3" aria-describedby="price-extra-hint price-extra-error" placeholder={"Parkir motor: Rp5.000 | https://…\nSewa jip: Rp600.000 per jip"}>{price.extra}</textarea>
+          <small class="hint" id="price-extra-hint">Baris tanpa URL sumber tampil dengan label "Belum terverifikasi, cek situs resmi". Maksimal 6 baris.</small>
+          <small class="field-error" id="price-extra-error">{priceErr('priceExtra')}</small>
+        </label>
+        {errors.price && <small class="field-error">{errors.price}</small>}
+      </fieldset>
       <div class="split split-2">
         <label class="field"><span>Label anggaran</span><input name="budget_label" value={local.budgetLabel} placeholder="Kisaran harga" /></label>
         <label class="field"><span>Nilai anggaran</span><input name="budget_value" value={local.budgetValue} placeholder="Rp22.000–Rp60.000" /></label>
@@ -191,7 +244,7 @@ const bodyErrors = [errors.body, errors.bodyHeadings, errors.bodyFaq].filter(Boo
       <label class="field"><span>Lebar (px)</span><input name="hero_width" inputmode="numeric" value={values.heroWidth} /></label>
       <label class="field"><span>Tinggi (px)</span><input name="hero_height" inputmode="numeric" value={values.heroHeight} /></label>
     </div>
-    <p class="admin-kicker">Sumber (minimal 3 saat tayang; artikel Hotel/Wisata/Kuliner minimal 2)</p>
+    <p class="admin-kicker">Sumber (minimal 3 saat tayang, termasuk Hotel/Wisata/Kuliner)</p>
     <div id="sources">
       {values.sources.map((source) => (
         <div class="source-row">
@@ -212,24 +265,31 @@ const bodyErrors = [errors.body, errors.bodyHeadings, errors.bodyFaq].filter(Boo
       <textarea name="seo_description" id="seo_description" maxlength="170" rows="3">{values.seoDescription}</textarea>
     </label>
     <label class="field"><span>URL kanonis (opsional)</span><input name="canonical_url" type="url" value={values.canonicalUrl} /></label>
-    <label class="people"><input type="checkbox" name="is_headline" value="1" checked={values.isHeadline} /> Headline beranda</label>
+    <input type="hidden" name="robots_noindex_field" value="1" />
+    <label class="check-field"><input type="checkbox" name="robots_noindex" value="1" checked={values.robotsNoindex} aria-describedby="noindex-hint" /> Jangan diindeks mesin pencari (noindex)</label>
+    <small class="hint" id="noindex-hint">Default mati. Halaman tetap terbuka, tetapi diberi meta robots noindex dan keluar dari sitemap. Keputusan noindex/410 untuk arsip berita baru diambil sekitar akhir Des 2026–Jan 2027.</small>
+    <label class="check-field"><input type="checkbox" name="is_headline" value="1" checked={values.isHeadline} /> Headline beranda</label>
     <label class="field">
       <span>Waktu tayang (WIB)</span>
       <input name="publish_wib" type="datetime-local" value={values.publishWib} />
-      {status && <small class="hint">Status sekarang: {status}</small>}
+      {status && <small class="hint">Status sekarang: {status}{archivedAt ? ' · diarsipkan (URL tetap tayang)' : ''}</small>}
     </label>
     <div class="editor-actions">
       <button type="submit" name="action" value="draft" formnovalidate>Simpan draf</button>
       <button type="submit" name="action" value="review">Ke review</button>
       <button type="submit" name="action" value="schedule">Jadwalkan</button>
       <button class="btn-primary" type="submit" name="action" value="publish">Terbitkan</button>
-      <button type="submit" name="action" value="archive" formnovalidate>Arsipkan</button>
+      <button type="submit" name="action" value="archive" formnovalidate aria-describedby="archive-hint">{archivedAt ? 'Simpan arsip' : 'Arsipkan'}</button>
     </div>
+    <small class="hint" id="archive-hint">Arsipkan tidak menghapus halaman: URL tetap terbuka dengan banner arsip, hanya keluar dari beranda, menu, sitemap, RSS, Terpopuler, dan artikel terkait. Draf yang belum pernah tayang tetap tersembunyi.</small>
   </div>
 </form>
 <script>
   import { bodyStats, lengthRuleFor } from '../../lib/length-rules';
   const form = document.querySelector<HTMLFormElement>('form.editor-grid');
+  const priceFree = form?.querySelector<HTMLInputElement>('[data-price-free]');
+  const priceValue = form?.querySelector<HTMLInputElement>('[data-price-value]');
+  priceFree?.addEventListener('change', () => { if (priceValue) priceValue.disabled = priceFree.checked; });
   const title = form?.querySelector<HTMLInputElement>('[name="title"]');
   const slug = form?.querySelector<HTMLInputElement>('[data-slug]');
   let slugTouched = Boolean(slug?.value);

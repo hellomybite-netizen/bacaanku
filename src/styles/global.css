@@ -169,6 +169,8 @@ main:focus { outline: none; }
 .category-hero-content { position: relative; z-index: 1; max-inline-size: 44rem; padding: 2rem; }
 .category-hero .page-title { color: #fff; }
 .category-hero-content > p:last-child { margin: .55rem 0 0; color: rgb(255 255 255 / .9); }
+.category-archived-note { font-weight: 700; }
+.category-archived-note a { color: #fff; text-decoration: underline; text-underline-offset: 2px; }
 .category-tabs { display: flex; gap: .55rem; overflow-x: auto; margin-block: 1.35rem; padding-block: .1rem; scrollbar-width: none; }
 .category-tabs::-webkit-scrollbar { display: none; }
 .category-tab { flex: 0 0 auto; padding: .52rem .9rem; border-radius: 999px; background: var(--soft); color: var(--teal-deep); font-size: .78rem; font-weight: 800; text-decoration: none; }

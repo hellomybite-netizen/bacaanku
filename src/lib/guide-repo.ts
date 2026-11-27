@@ -4,6 +4,7 @@ import { publicAuthor } from './authors';
 // Mode statis (pratinjau GitHub Pages) memakai data awal scripts/preview/local-wisdom-seed.mjs.
 import { IS_STATIC } from './mode';
 import { resolveHero } from './media';
+import { mapPrice } from './price';
 import { cardVariant, guideCategory, guideCities, guideCity, guideProvince, isGuideCategory, GUIDE_CATEGORY_SLUGS, type Guide, type GuideCategory } from './local-guide';
 
 const GUIDE_IN = GUIDE_CATEGORY_SLUGS.map((slug) => `'${slug}'`).join(', ');
@@ -12,32 +13,36 @@ const CITY_IN = guideCities.map((city) => `'${city.slug}'`).join(', ');
 const cardCols = `
   a.id, a.slug, a.title, a.excerpt, a.hero_r2_key, a.hero_alt, a.published_at, a.updated_at,
   a.city_slug, a.province_slug, a.place_name, a.location_label, a.budget_label, a.budget_value,
+  a.price_label, a.price_value, a.price_free, a.archived_at,
   c.slug AS category_slug, c.name AS category_name`;
 
 const fullCols = `${cardCols},
   a.body_html, a.reading_minutes, a.hero_caption, a.hero_credit, a.hero_credit_url, a.sources_json,
   a.facts_json, a.map_query, a.action_label, a.action_url, a.gallery_json, a.seo_title, a.canonical_url,
+  a.price_checked_at, a.price_source_name, a.price_source_url, a.price_extra_json, a.robots_noindex,
   au.slug AS author_slug, au.name AS author_name`;
 
 const base = `FROM articles a JOIN categories c ON c.id = a.category_id`;
 const live = `a.status = 'published' AND a.published_at <= ?`;
+/** Daftar, hitungan kota, dan blok terkait melewati arsip (migrasi 0004). Halaman tunggal tetap tayang. */
+const listed = `${live} AND a.archived_at IS NULL`;
 
 export const sqlGuidesAll = `SELECT ${cardCols} ${base}
-  WHERE a.category_id IN (SELECT id FROM categories WHERE slug IN (${GUIDE_IN})) AND ${live}
+  WHERE a.category_id IN (SELECT id FROM categories WHERE slug IN (${GUIDE_IN})) AND ${listed}
   ORDER BY a.published_at DESC LIMIT ?`;
 export const sqlGuidesByCategory = `SELECT ${cardCols} ${base}
-  WHERE a.category_id = (SELECT id FROM categories WHERE slug = ?) AND ${live}
+  WHERE a.category_id = (SELECT id FROM categories WHERE slug = ?) AND ${listed}
   ORDER BY a.published_at DESC LIMIT ?`;
 export const sqlGuidesByCity = `SELECT ${cardCols} ${base}
-  WHERE a.city_slug = ? AND ${live} AND c.slug IN (${GUIDE_IN})
+  WHERE a.city_slug = ? AND ${listed} AND c.slug IN (${GUIDE_IN})
   ORDER BY a.published_at DESC LIMIT ?`;
 export const sqlGuidesByProvince = `SELECT ${cardCols} ${base}
-  WHERE a.province_slug = ? AND ${live} AND c.slug IN (${GUIDE_IN})
+  WHERE a.province_slug = ? AND ${listed} AND c.slug IN (${GUIDE_IN})
   ORDER BY a.published_at DESC LIMIT ?`;
 export const sqlGuideBySlug = `SELECT ${fullCols} ${base} JOIN authors au ON au.id = a.author_id
   WHERE a.slug = ? AND ${live}`;
 export const sqlGuideCityCounts = `SELECT a.city_slug AS city, c.slug AS category, COUNT(*) AS n ${base}
-  WHERE a.city_slug IN (${CITY_IN}) AND ${live} AND c.slug IN (${GUIDE_IN})
+  WHERE a.city_slug IN (${CITY_IN}) AND ${listed} AND c.slug IN (${GUIDE_IN})
   GROUP BY a.city_slug, c.slug`;
 
 type Row = Record<string, unknown>;
@@ -63,6 +68,7 @@ export function mapGuide(row: Row, mediaBase?: string): Guide {
       return { src, cardSrc: cardVariant(src), alt: String(g.alt || '') };
     });
   const budget = row.budget_label && row.budget_value ? { label: str(row.budget_label), value: str(row.budget_value) } : undefined;
+  const price = mapPrice(row, category);
   const action = row.action_url ? { label: str(row.action_label) || 'Kunjungi situs resmi', url: str(row.action_url) } : undefined;
   return {
     id: Number(row.id),
@@ -86,6 +92,9 @@ export function mapGuide(row: Row, mediaBase?: string): Guide {
     gallery,
     facts,
     budget,
+    price,
+    archivedAt: row.archived_at == null ? null : Number(row.archived_at),
+    robotsNoindex: Number(row.robots_noindex) === 1,
     mapQuery: str(row.map_query) || [str(row.place_name), str(row.location_label)].filter(Boolean).join(' '),
     action,
     sources,

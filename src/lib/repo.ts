@@ -4,12 +4,17 @@ import { resolveHero } from './media';
 import type { ArticleCard, ArticlePayload, ArticleView, CategoryPage, Cursor, HomeBundle, SourceItem } from './content-types';
 import type { PreparedArticle } from './editorial';
 import {
+  sqlAdminArchived,
   sqlAdminByStatus,
+  sqlArchived,
+  sqlArchivedBefore,
+  sqlArchivedCount,
   sqlArticle,
   sqlArticleTags,
   sqlAuthorBySlug,
   sqlByAuthor,
   sqlByCategory,
+  sqlByCategoryActive,
   sqlByCategoryBefore,
   sqlBySlug,
   sqlByTag,
@@ -36,6 +41,7 @@ type CardRow = {
   hero_alt: string;
   published_at: number;
   is_headline: number;
+  archived_at?: number | null;
   category_slug: string;
   category_name: string;
 };
@@ -58,6 +64,7 @@ function mapCard(row: CardRow, mediaBase?: string): ArticleCard {
     categorySlug: row.category_slug,
     categoryName: row.category_name,
     isHeadline: row.is_headline === 1,
+    archivedAt: row.archived_at ?? null,
   };
 }
 
@@ -101,7 +108,7 @@ export async function homeBundle(db: D1Database, mediaBase?: string): Promise<Ho
   const rest = latest.filter((card) => card.id !== headline?.id);
   const categoryIds = siteCategories.map((_, index) => (first[index + 2] as D1Result<{ id: number }>).results[0]?.id);
   const categoryBatch = await db.batch<CardRow>(
-    categoryIds.map((id) => db.prepare(sqlByCategory).bind(id ?? -1, stamp, 4)),
+    categoryIds.map((id) => db.prepare(sqlByCategoryActive).bind(id ?? -1, stamp, 4)),
   );
   const byCategory = siteCategories
     .map((category, index) => ({
@@ -189,6 +196,8 @@ export async function articlePage(db: D1Database, category: string, slug: string
     seoTitle: (row.seo_title as string | null) ?? null,
     canonicalUrl: (row.canonical_url as string | null) ?? null,
     isHeadline: row.is_headline === 1,
+    archivedAt: (row.archived_at as number | null) ?? null,
+    robotsNoindex: Number(row.robots_noindex) === 1,
   };
   return { article, related: relatedRows, trending };
 }
@@ -241,7 +250,7 @@ export async function feedItems(db: D1Database, categorySlug: string | null, med
   }
   const category = await db.prepare(sqlCategoryBySlug).bind(categorySlug).first<{ id: number; name: string; description: string }>();
   if (!category) return null;
-  const items = await allCards(db, sqlByCategory, [category.id, stamp, 50], mediaBase);
+  const items = await allCards(db, sqlByCategoryActive, [category.id, stamp, 50], mediaBase);
   return { titleSuffix: category.name, description: category.description, items };
 }
 
@@ -293,6 +302,23 @@ export async function newsEntries(db: D1Database) {
   return results;
 }
 
+/** /arsip-berita/: 24 per halaman, keyset (tanpa OFFSET). */
+export async function archivePage(db: D1Database, cursor: Cursor | null, mediaBase?: string) {
+  const limit = 24;
+  const stamp = now();
+  const rows = cursor
+    ? await allCards(db, sqlArchivedBefore, [stamp, cursor.publishedAt, cursor.publishedAt, cursor.id, limit + 1], mediaBase)
+    : await allCards(db, sqlArchived, [stamp, limit + 1], mediaBase);
+  const count = await db.prepare(sqlArchivedCount).bind(stamp).first<{ n: number }>();
+  const items = rows.slice(0, limit);
+  const last = items.at(-1);
+  return {
+    items,
+    total: Number(count?.n ?? 0),
+    next: rows.length > limit && last ? { publishedAt: last.publishedAt, id: last.id } : null,
+  };
+}
+
 export type AdminRow = {
   id: number;
   slug: string;
@@ -301,6 +327,7 @@ export type AdminRow = {
   updated_at: number;
   published_at: number | null;
   is_headline: number;
+  archived_at?: number | null;
   category_slug: string;
   category_name: string;
   author_name: string;
@@ -308,11 +335,19 @@ export type AdminRow = {
 
 export async function adminList(db: D1Database, filter: { status: string; category: string; q: string }): Promise<AdminRow[]> {
   const q = filter.q.trim();
+  if (filter.status === 'archived') {
+    // Arsip = archived_at terisi (URL tetap tayang) atau status lama 'archived' (draf yang disembunyikan).
+    const { results } = await db.prepare(sqlAdminArchived).bind(300).all<AdminRow>();
+    const like = q.toLowerCase();
+    return results
+      .filter((row) => (!filter.category || row.category_slug === filter.category) && (!like || row.title.toLowerCase().includes(like)))
+      .slice(0, 50);
+  }
   if (q) {
     const like = `%${q.replace(/[\\%_]/g, '')}%`;
     const sql = filter.status
       ? `${sqlAdminByStatus.replace('WHERE a.status = ?', 'WHERE a.status = ? AND a.title LIKE ?')}`
-      : `SELECT a.id, a.slug, a.title, a.status, a.updated_at, a.published_at, a.is_headline,
+      : `SELECT a.id, a.slug, a.title, a.status, a.updated_at, a.published_at, a.is_headline, a.archived_at,
            c.slug AS category_slug, c.name AS category_name, au.name AS author_name
          FROM articles a
          JOIN categories c ON c.id = a.category_id
@@ -330,7 +365,7 @@ export async function adminList(db: D1Database, filter: { status: string; catego
   }
   const { results } = await db
     .prepare(
-      `SELECT a.id, a.slug, a.title, a.status, a.updated_at, a.published_at, a.is_headline,
+      `SELECT a.id, a.slug, a.title, a.status, a.updated_at, a.published_at, a.is_headline, a.archived_at,
               c.slug AS category_slug, c.name AS category_name, au.name AS author_name
        FROM articles a
        JOIN categories c ON c.id = a.category_id
@@ -503,17 +538,20 @@ export async function sitemapPageMeta(db: D1Database) {
   const stamp = now();
   const [boundsRes, catRes, authorRes] = await db.batch([
     db.prepare(`SELECT MAX(COALESCE(updated_at, published_at)) AS last_at FROM articles WHERE status = 'published' AND published_at <= ?`).bind(stamp),
-    db.prepare(`SELECT c.slug, MAX(COALESCE(a.updated_at, a.published_at)) AS last_at FROM categories c LEFT JOIN articles a ON a.category_id = c.id AND a.status = 'published' AND a.published_at <= ? WHERE c.is_active = 1 GROUP BY c.slug`).bind(stamp),
+    // last_at & active hanya dari artikel non-arsip: kategori berita lama yang seluruhnya diarsipkan keluar dari sitemap.
+    db.prepare(`SELECT c.slug, MAX(COALESCE(a.updated_at, a.published_at)) AS last_at, COUNT(a.id) AS active FROM categories c LEFT JOIN articles a ON a.category_id = c.id AND a.status = 'published' AND a.published_at <= ? AND a.archived_at IS NULL AND a.robots_noindex = 0 WHERE c.is_active = 1 GROUP BY c.slug`).bind(stamp),
     db.prepare(`SELECT au.slug, MAX(COALESCE(a.updated_at, a.published_at)) AS last_at, COUNT(a.id) AS cnt FROM authors au JOIN articles a ON a.author_id = au.id AND a.status = 'published' AND a.published_at <= ? WHERE au.is_active = 1 AND au.bio NOT LIKE '%Profil fiktif%' GROUP BY au.slug HAVING cnt > 0 ORDER BY au.slug`).bind(stamp),
   ]);
   const latestAt = (boundsRes.results[0] as { last_at: number | null } | undefined)?.last_at ?? null;
   const categoriesLastMod = new Map<string, number>();
-  for (const row of catRes.results as { slug: string; last_at: number | null }[]) {
+  const activeCategories = new Set<string>();
+  for (const row of catRes.results as { slug: string; last_at: number | null; active: number }[]) {
     if (row.last_at) categoriesLastMod.set(row.slug, row.last_at);
+    if (Number(row.active) > 0) activeCategories.add(row.slug);
   }
   const authors = (authorRes.results as { slug: string; last_at: number | null }[]).map((row) => ({
     slug: row.slug,
     lastAt: row.last_at ?? latestAt,
   }));
-  return { latestAt, categoriesLastMod, authors };
+  return { latestAt, categoriesLastMod, activeCategories, authors };
 }

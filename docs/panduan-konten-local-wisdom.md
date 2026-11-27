@@ -33,6 +33,13 @@ Kota terdaftar (`src/lib/local-guide.ts`, minta admin bila perlu kota baru):
 | `lumajang` | Lumajang | Jawa Timur |
 | `jember` | Jember | Jawa Timur |
 | `solo` | Solo (Surakarta) | Jawa Tengah |
+| `magelang` | Magelang (Kota & Kab., termasuk Borobudur) | Jawa Tengah |
+| `bandung` | Bandung | Jawa Barat |
+| `jakarta` | Jakarta | DKI Jakarta |
+
+Halaman kota `/artikel/{kota}/` dan provinsi `/daerah/{provinsi}/` baru muncul (200) setelah ada minimal 1 artikel terbit,
+dan baru boleh diindeks Google setelah ≥3 artikel. Sebelum itu 404 — tidak ada halaman kosong/tipis.
+Provinsi terdaftar: Jawa Timur, Jawa Tengah, DI Yogyakarta, **Jawa Barat**, **DKI Jakarta** (baru, 27 Nov 2026).
 
 ## 2. Di mana artikel muncul (struktur URL)
 
@@ -62,7 +69,8 @@ tidak membuat URL baru, jadi tidak ada halaman duplikat. `/daerah/{kota}/` lama 
 | Galeri tambahan | form: baris URL + **teks alternatif per foto** + tombol unggah · API: `gallery` (baris "URL \| alt"), `gallery_json`, atau `gallery_src`+`gallery_alt` berulang | tidak, maks 6; alt wajib ≥5 karakter | `/media/r2/articles/2026/11/rawon-…webp \| Semangkuk rawon` |
 
 Aturan lain sama dengan berita (ringkasan 50–170 karakter, gambar + alt + keterangan + kredit + URL kredit https, ≥1 tag),
-**kecuali sumber: minimal 2** untuk Hotel/Wisata/Kuliner (berita tetap minimal 3).
+termasuk **sumber minimal 3** (keputusan Rizal 27 Nov; sebelumnya 2). Dua panduan lama yang baru punya 2 sumber
+(id 269 dan 274) perlu sumber ketiga saat berikutnya disunting.
 Isi artikel ditulis Markdown; pakai `## Subjudul` untuk tiap bagian (tampil seperti desain GPT).
 
 **Aturan panjang (keputusan Rizal 27 Nov 2026)** — detail: `docs/api-unggah-gambar-dan-aturan-panjang.md`:
@@ -104,29 +112,108 @@ hero_credit=Ilustrasi dibuat dengan AI (GPT) untuk Bacaanku
 hero_credit_url=https://bacaankunetwork.com/tentang/
 source_name=Kemendikbud (WBTb)   source_title=Penetapan WBTb 2018: Rawon Nguling   source_url=https://…
 source_name=Liputan6               source_title=Jam buka Rawon Nguling             source_url=https://www.liputan6.com/…
+price_label=Harga per porsi            # opsional; default per tipe (lihat bagian Harga)
+price_value=Rp25.000–Rp45.000 per porsi
+price_checked_at=2026-11-27           # YYYY-MM-DD, tanggal Anda mengecek
+price_source_name=Menu resmi di Instagram pengelola
+price_source_url=https://…
+price_extra=Es teh: Rp5.000 | https://…
+            Parkir motor: Rp3.000     # tanpa URL → tampil "Belum terverifikasi"
 body=## Kenapa Rawon Nguling terkenal
 ...
 ```
+
+Tempat tanpa tiket: kirim `price_free=1` (atau `price_value=Gratis`) + `price_checked_at`; URL sumber boleh kosong.
+Versi JSON harga tambahan: `price_extra_json=[{"label":"Parkir motor","value":"Rp3.000","source_url":"https://…"}]`.
+Opsional `robots_noindex=1` (default mati — jangan dipakai tanpa izin Rizal). Bila field ini tidak dikirim, nilai tersimpan tidak berubah.
 
 (`facts` = satu fakta per baris; `source_*` diulang sekali per sumber, urutannya berpasangan.)
 Versi JSON untuk skrip: `facts_json=[{"label":"Jam buka","value":"Setiap hari 05.30–21.00 WIB"}]`.
 Hasil: artikel tayang di `/kuliner/rawon-nguling/`, `/kuliner/`, `/artikel/`, `/artikel/probolinggo/`, dan `/daerah/jawa-timur/`.
 
-## 5. Gambar (wajib foto berlisensi — keputusan Rizal 26 Nov 2026)
+## 5. Gambar (wajib foto berlisensi — keputusan Rizal 26 Nov 2026, diperketat 27 Nov 2026)
 
-- **Tidak boleh** memakai gambar AI yang meniru tempat nyata. Ilustrasi AI lama (GPT) sudah diganti semua.
-- Pakai foto berlisensi terbuka, mis. Wikimedia Commons dengan lisensi **CC BY, CC BY-SA, CC0, atau domain publik**
-  (bukan NC/ND). Catat pembuat, lisensi, dan URL halaman file.
-- Isi `hero_caption` dengan apa yang benar-benar tampak di foto. Jika foto bukan dari tempat yang diulas, tulis jujur,
-  mis. `Bakso Malang (foto ilustrasi menu, bukan di Bakso President)` atau `Kawasan Alun-Alun Tugu (foto kawasan, bukan foto hotel)`.
-- `hero_credit` = `Foto: {Pembuat} / Wikimedia Commons, {Lisensi}`; `hero_credit_url` = URL halaman file Commons.
-- Jika tidak ada foto berlisensi, jangan pakai foto tempat lain yang menyesatkan; pakai foto kawasan/menu umum dengan label jelas.
-- **Unggah ke R2 (baru)**: tombol unggah di `/admin` (otomatis ≤1.600 px + WebP) atau `POST /api/admin/media/` →
-  pakai `url` hasilnya di `hero_url` / galeri. Kontrak API lengkap: `docs/api-unggah-gambar-dan-aturan-panjang.md`.
-  Hindari hotlink `upload.wikimedia.org`: unduh thumbnail berlisensi, lalu unggah.
-- (Cara lama, untuk sampul kota/kategori di repo) simpan di `public/media/local-wisdom/` sebagai WebP 16:9: `{nama}-wide.webp` (≤1.600 px) + `{nama}-card.webp` (640 px).
-  Kartu otomatis memakai varian `-card.webp`. Sampul kota/kategori dikreditkan di `src/lib/photo-credits.ts` dan `/kredit-foto/`.
+**Aturan utama: foto harus menampilkan tempat yang PERSIS sama dengan yang diulas** (hotelnya sendiri, kedainya sendiri,
+objek wisatanya sendiri). Berlaku untuk semua sumber di bawah, termasuk Unsplash/Pexels.
+
+Sumber yang boleh (urutan prioritas):
+
+| Sumber | Syarat | Format kredit (`hero_credit`) | `hero_credit_url` |
+|---|---|---|---|
+| Situs resmi / pengelola / pers kit | Ada izin tertulis atau halaman media/pers yang mengizinkan pemakaian redaksional; simpan buktinya (email/URL) | `Foto: {Nama pengelola}` atau `Foto: {Pembuat} / {Pengelola}` | halaman sumber foto |
+| Wikimedia Commons | Lisensi **CC BY, CC BY-SA, CC0, atau domain publik** (bukan NC/ND, bukan "fair use") | `Foto: {Pembuat} / Wikimedia Commons, {Lisensi}` | halaman file Commons (`commons.wikimedia.org/wiki/File:…`) |
+| Unsplash | Lokasi foto terverifikasi sama (judul/lokasi foto + ciri bangunan cocok). Lisensi Unsplash | `Foto: {Fotografer} / Unsplash` | halaman foto di unsplash.com |
+| Pexels | Sama seperti Unsplash. Lisensi Pexels | `Foto: {Fotografer} / Pexels` | halaman foto di pexels.com |
+| Foto sendiri (redaksi/penulis) | Diambil di tempatnya | `Foto: {Nama} / Bacaanku` | `https://bacaankunetwork.com/redaksi/` |
+
+Dilarang: gambar AI yang meniru tempat nyata; foto dari Google Maps/Google Images, Instagram, TikTok, TripAdvisor, OTA
+(Traveloka/Tiket/Agoda/Booking) atau situs berita lain tanpa izin; foto NC/ND; foto tempat lain yang mirip.
+
+- Ukuran: unggah ≤1.600 px sisi panjang, ≤1,5 MB (tombol unggah di `/admin` otomatis mengecilkan + WebP). Jangan hotlink
+  `upload.wikimedia.org` atau file asli Commons — unduh thumbnail, lalu unggah.
+- `hero_caption` = apa yang benar-benar tampak di foto, jujur (mis. `Fasad Hotel Tugu Malang di Jl. Tugu`).
+- Teks alternatif (`hero_alt`, alt galeri) wajib ≥5 karakter, menjelaskan isi foto, bukan mengulang judul.
+- Catat lisensi: Wikimedia/Unsplash/Pexels → simpan URL halaman foto di `hero_credit_url`. Untuk izin pengelola, simpan
+  bukti izin di folder redaksi dan sebut di kredit.
+- Tidak ada foto yang memenuhi syarat? **Jangan terbitkan dengan foto lain**: simpan draf dan minta foto ke pengelola,
+  atau pakai foto sendiri. (Panduan lama yang memakai "foto kawasan/ilustrasi" — 17 artikel per 27 Nov 2026 — menunggu
+  keputusan Rizal: diganti bertahap atau dibiarkan dengan label jujur.)
+- **Unggah ke R2**: tombol unggah di `/admin` atau `POST /api/admin/media/` → pakai `url` hasilnya di `hero_url` / galeri.
+  Kontrak API lengkap: `docs/api-unggah-gambar-dan-aturan-panjang.md`.
+- Sampul kota/provinsi/kategori di repo: `public/media/local-wisdom/{nama}-wide.webp` (1.600×900) + `{nama}-card.webp`
+  (640×360), dikreditkan di `src/lib/photo-credits.ts` dan `/kredit-foto/`. Sampul baru 27 Nov 2026: Magelang (Candi
+  Borobudur, Gunawan Kartapranata, domain publik), Bandung (Gedung Sate, Gunawan Kartapranata, CC BY-SA 3.0), Jakarta
+  (Monas, Ramayoni, CC BY-SA 4.0) — semuanya Wikimedia Commons.
 - Alat bantu: `/workspace/bacaanku-photos/photos.py` (cari + unduh + konversi + catat kredit).
+
+## 5a. Harga (wajib untuk Hotel/Wisata/Kuliner — keputusan Rizal 27 Nov 2026)
+
+Field harga ada di panel "Artikel lokal" (`/admin`) dan di API (`price_*`). Tampil paling atas di **Info Singkat**,
+lengkap dengan "Dicek {tanggal} · Sumber: {nama}".
+
+| Field | Form / API | Wajib saat terbit | Contoh |
+|---|---|---|---|
+| Label harga | `price_label` | tidak (default: hotel `Tarif kamar per malam`, wisata `Tiket masuk per orang`, kuliner `Harga per porsi`) | `Tiket masuk dewasa` |
+| Harga utama | `price_value` | **ya**, atau centang Gratis | `Rp20.000 per orang` · `Rp450.000–Rp700.000 per malam` |
+| Gratis | `price_free=1` (atau `price_value=Gratis`) | pengganti harga utama untuk tempat tanpa tiket (alun-alun, masjid, makam, monumen) | |
+| Tanggal cek | `price_checked_at` (YYYY-MM-DD, tidak boleh di masa depan) | **ya** | `2026-11-27` |
+| Nama sumber | `price_source_name` | disarankan | `Disparbud Lumajang` |
+| URL sumber | `price_source_url` (https) | **ya untuk harga berbayar**; boleh kosong untuk Gratis | `https://…` |
+| Harga tambahan | `price_extra` (baris `Label: nilai \| URL`) atau `price_extra_json` | tidak, maks 6 | `Parkir motor: Rp5.000` |
+
+Aturan isi:
+
+1. **Jangan mengarang harga.** Harga utama hanya nominal yang Anda cek sendiri hari itu di sumber yang bisa dibuka.
+2. "Cek situs resmi", "bervariasi", "hubungi pengelola" **bukan harga** — ditolak sistem. Kalau tidak ada nominal yang bisa
+   dicek, artikel belum siap terbit (simpan draf).
+3. Sumber berbeda? Tulis rentang (`Rp7.500–Rp15.000`) dan pakai sumber paling resmi/terbaru sebagai URL sumber.
+4. Format per tipe: hotel = tarif kamar **per malam** "mulai dari" (sebut tipe kamar/tanggal bila perlu); wisata = tiket **per
+   orang** (sebut hari kerja/akhir pekan, lokal/mancanegara bila beda); kuliner = harga **per porsi** atau kisaran per orang.
+5. Harga tambahan yang belum bisa dicek (parkir, sewa jip, menu lain) boleh ditulis **tanpa URL** — tampil dengan label
+   "Belum terverifikasi, cek situs resmi". Dengan URL sumber → tampil tautan "Sumber".
+6. Cek ulang harga minimal setiap 6 bulan atau saat ada kabar kenaikan; perbarui `price_checked_at`.
+
+Penegakan (keputusan Rizal 27 Nov: "Wajib harga langsung berlaku"): harga utama (atau Gratis) + tanggal cek (+ URL sumber
+untuk harga berbayar) **wajib saat Ke review, Jadwalkan, atau Terbitkan** untuk SEMUA panduan, termasuk 52 panduan lama.
+Tanpa itu simpan ditolak (API: HTTP 400 `errors.priceValue` / `priceCheckedAt` / `priceSourceUrl`). Tidak ada masa transisi.
+Simpan draf dan Arsipkan tidak dicek. Artikel lama yang tampil di situs tetap tayang apa adanya; harganya wajib dilengkapi
+saat berikutnya disunting. Daftar per artikel: `docs/data-harga-panduan-2026-11-27.csv`.
+
+## 5b. Arsip & noindex (keputusan Rizal 27 Nov 2026)
+
+- **Arsip tidak menghapus apa pun.** Tombol **Arsipkan** di `/admin` (atau `action=archive` di API) pada artikel yang sudah
+  tayang: URL tetap sama dan tetap 200, muncul banner "Arsip berita", tetapi artikel keluar dari beranda, menu, sitemap,
+  news-sitemap, RSS, Terpopuler, dan blok artikel terkait. Arsip berita tercantum di `/arsip-berita/` (berhalaman; **hanya berita**, panduan yang diarsipkan tidak ikut tampil di sana) dan
+  tetap ada di halaman kategori lama, tag, penulis, dan pencarian. Tidak ada redirect 301.
+- Draf yang belum pernah tayang lalu diarsipkan tetap tersembunyi (perilaku lama).
+- Mengedit artikel arsip: pakai **Simpan arsip** (tetap arsip). **Terbitkan** = aktif lagi (keluar dari arsip).
+  Simpan draf = artikel turun dari situs (404) — hindari untuk arsip.
+- Rencana: seluruh 208 berita lama (7 kategori lama, daftar dari inventaris 27 Nov 2026) diarsipkan sekaligus lewat
+  migrasi data `0004b` setelah disetujui Rizal. Berita baru yang ditulis sesudahnya tetap tayang normal sampai diarsipkan.
+- **noindex** per artikel (centang "Jangan diindeks", API `robots_noindex=1`): halaman tetap terbuka, diberi meta robots
+  `noindex, follow` + header `X-Robots-Tag`, dan keluar dari sitemap. Default mati dan **belum dipakai** untuk artikel mana
+  pun. Keputusan noindex/410 untuk arsip berita bertraffic nol baru diambil sekitar akhir Des 2026–Jan 2027 (setelah usia
+  1–2 bulan), oleh Rizal/SEO.
 
 ## 6. Cek fakta (wajib sebelum terbit)
 
@@ -143,7 +230,12 @@ Log koreksi untuk 7 panduan awal (dicek 25 Nov 2026; foto diganti foto berlisens
 | Gudeg Yu Djum | Situs gudegyudjum.com tak bisa diakses → tombol ke gudegyudjumpusat.com; ada beberapa gerai "Yu Djum" di Wijilan; dapur asal di Karangasem/Mbarek, Sleman; tahan ±2 hari | gudegyudjumpusat.com, Dinas Pariwisata DIY, visitingjogja |
 | Hotel Tugu Malang | Jl. Tugu 3 — sesuai | tuguhotels.com |
 
-## 7. Go-live (untuk Rizal/admin — BELUM dijalankan di produksi)
+## 7. Go-live (untuk Rizal/admin)
+
+Arsip + harga + noindex (migrasi 0004, cabang `arsip-dan-harga`): **ikuti `docs/migrasi-0004-arsip-harga.md`**
+(backup → 0004 → 0004b → deploy → verifikasi). Belum dijalankan di produksi.
+
+Riwayat 0003 (sudah dijalankan 26 Nov 2026):
 
 1. Backup D1 produksi: `wrangler d1 export bacaanku-db --remote --output backup-YYYYMMDD.sql`.
 2. Jalankan migrasi **sebelum** deploy: `wrangler d1 execute bacaanku-db --remote --file=docs/migrations/0003_local_wisdom.sql`.
