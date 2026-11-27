@@ -193,10 +193,11 @@ Aturan isi:
    "Belum terverifikasi, cek situs resmi". Dengan URL sumber → tampil tautan "Sumber".
 6. Cek ulang harga minimal setiap 6 bulan atau saat ada kabar kenaikan; perbarui `price_checked_at`.
 
-Penegakan: harga utama (atau Gratis) + tanggal cek (+ URL sumber untuk harga berbayar) **wajib saat Ke review, Jadwalkan,
-atau Terbitkan** untuk artikel baru, draf yang mau diterbitkan, dan artikel yang pernah punya harga. Draf bebas.
-**Masa transisi**: 52 panduan yang sudah tayang tanpa harga tetap bisa diedit & disimpan (muncul peringatan "harga belum
-diisi"), sampai harganya dilengkapi. Daftar per artikel: `docs/data-harga-panduan-2026-11-27.csv`.
+Penegakan (keputusan Rizal 27 Nov: "Wajib harga langsung berlaku"): harga utama (atau Gratis) + tanggal cek (+ URL sumber
+untuk harga berbayar) **wajib saat Ke review, Jadwalkan, atau Terbitkan** untuk SEMUA panduan, termasuk 52 panduan lama.
+Tanpa itu simpan ditolak (API: HTTP 400 `errors.priceValue` / `priceCheckedAt` / `priceSourceUrl`). Tidak ada masa transisi.
+Simpan draf dan Arsipkan tidak dicek. Artikel lama yang tampil di situs tetap tayang apa adanya; harganya wajib dilengkapi
+saat berikutnya disunting. Daftar per artikel: `docs/data-harga-panduan-2026-11-27.csv`.
 
 ## 5b. Arsip & noindex (keputusan Rizal 27 Nov 2026)
 

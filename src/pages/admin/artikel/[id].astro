@@ -66,7 +66,7 @@ const saved = Astro.url.searchParams.get('tersimpan') === '1';
     <>
       <p class="admin-kicker"><a href="/admin/">Artikel</a></p>
       <h1 class="admin-title">Edit artikel</h1>
-      <EditorForm values={values} errors={errors} categories={categories} authors={authors} csrf={csrf} uploadEnabled={uploadEnabled} saved={saved && !Object.keys(errors).length} status={status} archivedAt={archivedAt} priceWarning={Astro.url.searchParams.get('harga') === '1'} />
+      <EditorForm values={values} errors={errors} categories={categories} authors={authors} csrf={csrf} uploadEnabled={uploadEnabled} saved={saved && !Object.keys(errors).length} status={status} archivedAt={archivedAt} />
     </>
   )}
 </AdminLayout>

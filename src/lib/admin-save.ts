@@ -21,22 +21,8 @@ async function readExtra(db: D1Database, id: number): Promise<(PriceRecord & { r
   }
 }
 
-/**
- * Harga wajib untuk panduan saat review/jadwal/terbit. Masa transisi: panduan yang SUDAH tayang
- * dan belum pernah punya harga boleh disimpan ulang (peringatan `priceValue`), supaya 52 artikel
- * lama tidak terkunci. Artikel baru, draf yang mau diterbitkan, dan artikel yang pernah punya
- * harga tetap ditolak bila harga utama kosong.
- */
-async function grandfatherPrice(db: D1Database, prepared: ReturnType<typeof parseArticleForm>, id?: number): Promise<Record<string, string>> {
-  if (!prepared.price.missing || !id) return {};
-  const stored = await readExtra(db, id);
-  const now = Math.floor(Date.now() / 1000);
-  const wasLive = stored && stored.status === 'published' && stored.published_at != null && stored.published_at <= now;
-  if (!wasLive || stored.price_value || Number(stored.price_free) === 1) return {};
-  const message = prepared.errors.priceValue;
-  delete prepared.errors.priceValue;
-  return { priceValue: `${message} (Artikel lama: tetap tersimpan selama masa transisi, mohon lengkapi harganya.)` };
-}
+/* Harga wajib untuk panduan saat review/jadwal/terbit, termasuk panduan lama (keputusan Rizal 27 Nov:
+ * "Wajib harga langsung berlaku", tanpa masa transisi). Validasinya di price.ts → errors.priceValue (HTTP 400 di API). */
 
 /** Kolom lokal belum ada (migrasi 0003 belum jalan) → null, bukan error, supaya /admin berita tetap jalan. */
 async function readLocal(db: D1Database, id: number): Promise<LocalRecord | null> {
@@ -89,7 +75,7 @@ export async function handleArticlePost(
   const prepared = parseArticleForm(form, env.MEDIA_BASE);
   await validateRemoteHeroSize(prepared.values, prepared.errors);
   const db = getDb();
-  const warnings = { ...(await enforceLengthRules(env, db, prepared, opts.id)), ...(await grandfatherPrice(db, prepared, opts.id)) };
+  const warnings = await enforceLengthRules(env, db, prepared, opts.id);
   if (Object.keys(prepared.errors).length) return { ok: false, errors: prepared.errors, values: prepared.values };
   const previousLocal = opts.id && prepared.local.write ? await readLocal(db, opts.id) : null;
   const saved = await saveArticle(db, prepared, opts.id);
@@ -142,7 +128,7 @@ export async function handleArticlePost(
   return {
     ok: true,
     id: saved.id,
-    redirect: `/admin/artikel/${saved.id}/?tersimpan=1${Object.keys(warnings).some((k) => k !== 'priceValue') ? '&panjang=1' : ''}${warnings.priceValue ? '&harga=1' : ''}`,
+    redirect: `/admin/artikel/${saved.id}/?tersimpan=1${Object.keys(warnings).length ? '&panjang=1' : ''}`,
     ...(hasWarnings ? { warnings } : {}),
   };
 }

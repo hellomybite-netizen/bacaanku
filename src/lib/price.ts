@@ -37,7 +37,7 @@ export type PreparedPrice = {
   sourceName: string | null;
   sourceUrl: string | null;
   extraJson: string | null;
-  /** true = artikel panduan tanpa harga utama (dipakai admin-save untuk masa transisi artikel lama). */
+  /** true = artikel panduan tanpa harga utama (ditolak saat review/jadwal/terbit). */
   missing: boolean;
 };
 
@@ -153,7 +153,7 @@ export function parsePrice(form: FormData, category: string, guide: boolean, str
   if (strict) {
     if (!hasMain) {
       missing = true;
-      errors.priceValue = errors.priceValue || 'Harga utama wajib untuk Hotel/Wisata/Kuliner: isi nominal rupiah yang sudah dicek, atau centang Gratis.';
+      errors.priceValue = errors.priceValue || 'Harga utama wajib untuk Hotel/Wisata/Kuliner (juga panduan lama): isi price_value berupa nominal rupiah yang sudah dicek, atau price_free=1 untuk tempat Gratis.';
     } else {
       if (!values.checkedAt) errors.priceCheckedAt = errors.priceCheckedAt || 'Tanggal cek harga wajib diisi.';
       if (!values.free && !values.sourceUrl) errors.priceSourceUrl = errors.priceSourceUrl || 'URL sumber harga wajib untuk harga berbayar (situs resmi, pengelola, atau media).';

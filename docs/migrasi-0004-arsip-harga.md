@@ -73,7 +73,8 @@ sedang live (kode lama tidak membaca kolom baru; arsip belum berefek sampai kode
 - **Panduan** (`hotel`/`wisata`/`kuliner`): mulai deploy, `action=publish|review|schedule` **ditolak (400, `errors.priceValue`
   / `priceCheckedAt` / `priceSourceUrl`) bila harga utama/Gratis + tanggal cek (+ URL sumber bila berbayar) tidak dikirim.**
   Skrip/prompt Jenny & Rere harus mengirim field `price_*` SEBELUM kode ini live, kalau tidak terbit pagi berikutnya gagal.
-  (Panduan lama yang sudah tayang tetap bisa diedit tanpa harga selama masa transisi — hanya peringatan.)
+  Berlaku juga untuk panduan lama yang disunting ulang (tidak ada masa transisi; keputusan Rizal 27 Nov). Simpan draf dan
+  Arsipkan tidak dicek.
 - **Sumber minimal 3** untuk panduan juga (sebelumnya 2): kirim ≥3 entri `sources`, kalau tidak ditolak `errors.sources`.
   Panduan id 269 dan 274 baru punya 2 sumber; perlu sumber ketiga saat disunting.
 - Gratis (`price_free=1`) cukup dengan `price_checked_at`; `price_source_url` boleh kosong.

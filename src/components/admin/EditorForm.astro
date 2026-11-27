@@ -17,10 +17,8 @@ interface Props {
   uploadEnabled?: boolean;
   /** Epoch arsip (migrasi 0004). Terisi = artikel tetap tayang di URL yang sama, tapi keluar dari daftar/feed/sitemap. */
   archivedAt?: number | null;
-  /** Tersimpan dengan peringatan harga (artikel lama tanpa harga, masa transisi). */
-  priceWarning?: boolean;
 }
-const { values, errors, categories, authors, csrf, saved = false, status, uploadEnabled = false, archivedAt = null, priceWarning = false } = Astro.props;
+const { values, errors, categories, authors, csrf, saved = false, status, uploadEnabled = false, archivedAt = null } = Astro.props;
 const price = values.price;
 const archivedLabel = archivedAt ? new Intl.DateTimeFormat('id-ID', { dateStyle: 'medium', timeStyle: 'short', timeZone: 'Asia/Jakarta' }).format(new Date(archivedAt * 1000)) + ' WIB' : '';
 const priceErr = (key: string) => errors[key] || '';
@@ -49,7 +47,6 @@ const bodyErrors = [errors.body, errors.bodyHeadings, errors.bodyFaq].filter(Boo
     Pakai <em>Simpan arsip</em> untuk menyimpan perubahan tanpa membatalkan arsip, atau <em>Terbitkan</em> untuk mengaktifkannya lagi.
   </p>
 )}
-{saved && priceWarning && <p class="admin-error" role="status">Tersimpan, tetapi harga utama belum diisi. Artikel lama tanpa harga masih boleh disimpan selama masa transisi; artikel baru ditolak tanpa harga.</p>}
 {saved && lengthWarn && <p class="admin-error" role="status">Tersimpan, tetapi isi belum memenuhi aturan panjang (lihat penghitung di bawah kolom Isi). Aturan ini akan ditegakkan.</p>}
 {errorList.length > 0 && (
   <div class="admin-error" role="alert">
